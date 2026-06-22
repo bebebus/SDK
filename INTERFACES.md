@@ -54,7 +54,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 ### POST `/merchant/pay/query` — 代收查单（密钥：pay）
 请求：`order_no` 或 `out_order_no`（**二选一，至少一个**）。
-响应 `data`：`order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(恒 null), paid_at(可空), notify_status(pending|success|failed)`。
+响应 `data`：`order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(可空), paid_at(可空), notify_status(pending|success|failed)`。
 
 ### POST `/merchant/pay-methods/query` — 可用支付方式（密钥：pay）
 请求：`country`（可选过滤）。
@@ -94,7 +94,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 ### POST `/merchant/payout/query` — 代付查单（密钥：payout）
 请求：`payout_no` 或 `out_payout_no`（二选一）。
-响应 `data`：`payout_no, out_payout_no, amount, currency, status, sub_state(处理中子态 accepted|reviewing|processing|verifying，终态为 null), channel_order_no(恒 null), finished_at(可空), failed_reason(可空), notify_status`。
+响应 `data`：`payout_no, out_payout_no, amount, currency, status, sub_state(处理中子态 accepted|reviewing|processing|verifying，终态为 null), channel_order_no(可空), finished_at(可空), failed_reason(可空), notify_status`。
 
 ### POST `/merchant/payout/banks/query` — 可用银行（密钥：payout）
 请求：`pay_method`(必填) + `country`(法币必填) + `currency`(可选)。
@@ -117,9 +117,9 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 平台在订单进入终态时 POST JSON 到 `notify_url`，体内含 `sign`。验签与应答见 SIGNING.md §六（**验签按"除 sign 外全部字段"通用计算，不要硬编码字段表**）。
 
-- **代收回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no, out_order_no, amount, actual_amount(可空), fee_amount(可空), net_amount(可空), currency, status, channel_order_no(null), paid_at(可空), sign`。
-- **代付回调**（密钥 `api_secret_payout`）常见字段：`merchant_no, payout_no, out_payout_no, amount, currency, status, fee_amount(可空), channel_order_no(null), finished_at(可空), failed_reason(可空), sign`。
-- **退款回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no(可空), out_order_no(可空), refund_no, out_refund_no, amount, currency, status, channel_order_no(null), finished_at(可空), failed_reason(可空), sign`。
+- **代收回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no, out_order_no, amount, actual_amount(可空), fee_amount(可空), net_amount(可空), currency, status, channel_order_no(可空), paid_at(可空), sign`。
+- **代付回调**（密钥 `api_secret_payout`）常见字段：`merchant_no, payout_no, out_payout_no, amount, currency, status, fee_amount(可空), channel_order_no(可空), finished_at(可空), failed_reason(可空), sign`。
+- **退款回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no(可空), out_order_no(可空), refund_no, out_refund_no, amount, currency, status, channel_order_no(可空), finished_at(可空), failed_reason(可空), sign`。
 
 > 字段集合可能随平台演进增删，故 SDK 验签器**只依赖"除 sign 外所有字段参与"这一规则**；业务处理按 `status` 分支并保持幂等。应答统一 HTTP 200 + 纯文本 `success`。
 
