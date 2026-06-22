@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  可选的 Maven 打包描述（供日后发布到 Maven 仓库使用）。
+  ⚠️ 本 SDK 零第三方依赖：<dependencies> 故意为空。
+  测试不依赖 Maven/JUnit —— 单测用 bash run-tests.sh（纯 JDK javac/java 跑断言 runner）。
+  仅当你想把 SDK 打成 jar 时才需要 Maven；否则把 src/main/java 直接加入你的工程源码即可。
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cloud.cniia.projectp</groupId>
+    <artifactId>projectp-merchant-sdk</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Project-P Merchant OpenAPI SDK</name>
+    <description>零依赖 Java SDK：商户支付 OpenAPI 客户端（HMAC-SHA256 签名 + 回调验签 + 全 11 端点）</description>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- 运行时与编译期均无第三方依赖（仅 JDK 标准库）。 -->
+    <dependencies/>
+
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+    </build>
+</project>

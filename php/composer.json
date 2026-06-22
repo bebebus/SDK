@@ -1,0 +1,16 @@
+{
+    "name": "project-p/sdk",
+    "description": "project-p 商户支付 OpenAPI 的 PHP 8 SDK（零第三方依赖，仅用标准库与 ext-curl）",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "ProjectP\\Sdk\\": "src/"
+        }
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@project-p/merchant-openapi-sdk",
+  "version": "1.0.0",
+  "description": "project-p 商户支付 OpenAPI Node.js SDK（零第三方依赖，ESM）",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "examples",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
