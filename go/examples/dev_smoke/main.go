@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	projectp "github.com/cniia/project-p-merchant-sdk-go"
+	projectp "github.com/bebebus/SDK/go"
 )
 
 var pass, fail int

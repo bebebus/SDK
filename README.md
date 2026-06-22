@@ -30,7 +30,7 @@ project-p-sdk/
 | Python | `pyproject.toml`（无 deps）；`from projectp_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer.json`（仅 PSR-4 autoload，无 require）；`require 'php/autoload.php'` | cURL 扩展 | `cd php && php tests/run.php` |
 | Java | 纯 JDK（`pom.xml` 仅供打包，无依赖）；`import cloud.cniia.projectp.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
-| Go | `go.mod`（无 require）；`import projectp "github.com/cniia/project-p-merchant-sdk-go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go.mod`（无 require）；`import projectp "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。
 

@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	projectp "github.com/cniia/project-p-merchant-sdk-go"
+	projectp "github.com/bebebus/SDK/go"
 )
 
 func main() {
