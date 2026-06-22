@@ -35,18 +35,27 @@ TWINE_USERNAME=__token__ TWINE_PASSWORD="$PYPI_TOKEN" python3 -m twine upload di
 ```
 验证：`pip index versions bebebus-merchant-openapi-sdk`（或访问 pypi.org/project/bebebus-merchant-openapi-sdk）
 
-## Packagist（PHP）— 需子树拆分
+## Packagist（PHP）— 经独立镜像仓（已建好）
 
-Packagist 只读仓库**根目录**的 `composer.json`，无法识别 monorepo 子目录。须把 `php/` 拆分到独立（只读镜像）仓库再提交：
+Packagist 只读仓库**根目录**的 `composer.json`，识别不了 monorepo 子目录。故 `php/` 已用 `git subtree split` 拆到独立只读镜像仓
+**`git@github.com:bebebus/merchant-openapi-sdk-php.git`**（`main` 分支 + tag `v1.0.0` 已推，根目录即 `php/composer.json` = `bebebus/merchant-openapi-sdk`）。
 
+**首次提交到 Packagist（一次性，需 Packagist 账号）**：
+1. 登录 packagist.org → https://packagist.org/packages/submit
+2. 填镜像仓 `https://github.com/bebebus/merchant-openapi-sdk-php` → Check → Submit
+3. 自动更新：包页 Settings 配 GitHub 集成 / webhook，之后镜像仓每次 push 自动同步
+
+**发新版本（每次 `php/` 改动后，在 monorepo 根）**：
 ```bash
-# 在 monorepo 根
 git subtree split --prefix=php -b php-split
-# 推到一个专用仓库（先在 GitHub 建好，例如 bebebus/merchant-openapi-sdk-php）
-git push git@github.com:bebebus/merchant-openapi-sdk-php.git php-split:main
+git push git@github.com:bebebus/merchant-openapi-sdk-php.git php-split:main   # 更新可加 --force
+# 打稳定版 tag（zsh 下 $split:ref 会被误解析，用字面 SHA 或 ${split} 大括号）
+split=$(git subtree split --prefix=php)
+git tag -a phpsplit-v1.0.1 "$split" -m v1.0.1
+git push git@github.com:bebebus/merchant-openapi-sdk-php.git phpsplit-v1.0.1:refs/tags/v1.0.1
+git tag -d phpsplit-v1.0.1
+git branch -D php-split
 ```
-然后到 https://packagist.org/packages/submit 提交该镜像仓 URL（一次性）；配置 GitHub webhook 后，之后每次推送自动更新。
-> 镜像仓的 `composer.json` 即 `php/composer.json`（已是 `bebebus/merchant-openapi-sdk`）。
 
 ## Go（pkg.go.dev）— 无需账号
 
