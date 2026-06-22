@@ -1,5 +1,5 @@
 {
-  "name": "merchant-openapi-sdk",
+  "name": "@bebebus/merchant-openapi-sdk",
   "version": "1.0.0",
   "description": "商户支付 OpenAPI Node.js SDK（零第三方依赖，ESM）",
   "type": "module",
@@ -10,7 +10,8 @@
   "files": [
     "src",
     "examples",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "test": "node --test"
@@ -18,5 +19,23 @@
   "engines": {
     "node": ">=18"
   },
-  "license": "UNLICENSED"
+  "license": "MIT",
+  "keywords": [
+    "payment",
+    "openapi",
+    "merchant",
+    "sdk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bebebus/SDK.git",
+    "directory": "nodejs"
+  },
+  "homepage": "https://github.com/bebebus/SDK/tree/main/nodejs#readme",
+  "bugs": {
+    "url": "https://github.com/bebebus/SDK/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

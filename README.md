@@ -24,13 +24,15 @@ SDK/
 
 ## 语言矩阵
 
-| 语言 | 包/引入方式 | HTTP（无第三方） | 测试命令 |
+发布到各语言包索引（scoped 到 `bebebus`，MIT，零运行时依赖）；发布命令见 [`PUBLISHING.md`](./PUBLISHING.md)。
+
+| 语言 | 安装 / 引入 | HTTP（无第三方） | 测试命令 |
 |------|-------------|------------------|----------|
-| Node.js | `package.json`（无 deps，ESM）；`import { Client } from './nodejs/src/index.js'` | `node:https` / `node:http` | `cd nodejs && node --test` |
-| Python | `pyproject.toml`（无 deps）；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
-| PHP | `composer.json`（仅 PSR-4 autoload，无 require）；`require 'php/autoload.php'` | cURL 扩展 | `cd php && php tests/run.php` |
-| Java | 纯 JDK（`pom.xml` 仅供打包，无依赖）；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
-| Go | `go.mod`（无 require）；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Node.js | `npm i @bebebus/merchant-openapi-sdk`；`import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
+| Python | `pip install bebebus-merchant-openapi-sdk`；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
+| PHP | `composer require bebebus/merchant-openapi-sdk`；命名空间 `Merchant\Openapi` | cURL 扩展 | `cd php && php tests/run.php` |
+| Go | `go get github.com/bebebus/SDK/go@v1.0.0`；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Java | 源码引入（未发 Maven Central）；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。
 

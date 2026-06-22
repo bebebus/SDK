@@ -3,17 +3,27 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openapi-sdk"
+name = "bebebus-merchant-openapi-sdk"
 version = "1.0.0"
 description = "商户支付 OpenAPI Python SDK（零第三方依赖）"
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "Proprietary" }
-authors = [{ name = "OpenAPI SDK" }]
-keywords = ["payment", "openapi", "merchant"]
+license = { text = "MIT" }
+authors = [{ name = "bebebus" }]
+keywords = ["payment", "openapi", "merchant", "sdk"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
 
 # 零第三方依赖：仅用标准库（urllib / json / hmac / hashlib / unittest）。
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/bebebus/SDK/tree/main/python"
+Repository = "https://github.com/bebebus/SDK"
+Issues = "https://github.com/bebebus/SDK/issues"
 
 [project.optional-dependencies]
 # 测试也只用标准库 unittest，无需任何额外安装。
