@@ -11,6 +11,21 @@
 
 > ⚠️ 发布到公共索引**不可撤销**（版本号永久占用）。令牌只用于发布、勿入库。每次发版先 bump 版本号。
 
+## 一键发版（推荐）：`release.sh`
+
+`./release.sh <version>` 一条命令完成：bump 版本 → 跑五套测试（不过即中止）→ 发布 npm + PyPI + Go tag + Packagist 镜像仓。令牌经环境变量注入、用完不留盘；各索引独立成败互不阻塞。
+
+```bash
+# 全部索引（npm/PyPI 需令牌；缺令牌则跳过对应项并告警）
+NPM_TOKEN=npm_xxx PYPI_TOKEN=pypi_xxx ./release.sh 1.0.1
+NPM_TOKEN=npm_xxx NPM_OTP=123456 PYPI_TOKEN=pypi_xxx ./release.sh 1.0.1   # 非 Automation 令牌补 2FA 码
+
+./release.sh 1.1.0 go packagist     # 只发指定子集（Go/Packagist 无需令牌）
+./release.sh 1.0.2 --dry-run        # 只跑测试 + 打印计划，不发布
+```
+
+下面各小节是**手动/原理说明**（脚本即按此执行）。
+
 ## npm（scoped 公开）
 
 前置：npm 账号须拥有 `@bebebus` scope（个人 scope=用户名 bebebus，或建同名组织）。
