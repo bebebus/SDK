@@ -15,7 +15,7 @@ import sys
 # 让示例脚本直接 import 源码包（无需安装）。
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from projectp_sdk import ApiError, Client, Config, Environment, TransportError
+from openapi_sdk import ApiError, Client, Config, Environment, TransportError
 
 
 def main() -> None:

@@ -1,4 +1,4 @@
-package cloud.cniia.projectp.sdk;
+package cloud.cniia.openapi.sdk;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

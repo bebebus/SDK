@@ -1,10 +1,10 @@
-# Project-P 商户支付 OpenAPI — Java SDK
+# 商户支付 OpenAPI — Java SDK
 
 零第三方依赖的 Java 客户端，覆盖商户支付 OpenAPI 全部 **11 个端点**，实现 HMAC-SHA256 请求签名与回调验签。
 
 - **JDK**：17+（用 `java.net.http.HttpClient`、`javax.crypto.Mac`、`MessageDigest.isEqual`，全为标准库）。
 - **依赖**：无。HTTP、JSON、HMAC、测试全部用 JDK 内建，**不引入任何包管理器拉取的库**（无 Jackson/Gson/OkHttp/JUnit）。
-- **包名**：`cloud.cniia.projectp.sdk`。
+- **包名**：`cloud.cniia.openapi.sdk`。
 
 签名算法与字段契约见仓库根目录的 [`SIGNING.md`](../SIGNING.md) 与 [`INTERFACES.md`](../INTERFACES.md)，签名标准答案见 [`test-vectors.json`](../test-vectors.json)。
 
@@ -13,7 +13,7 @@
 本 SDK 没有外部依赖，最简单的方式就是把源码目录直接纳入你的工程：
 
 ```
-src/main/java/cloud/cniia/projectp/sdk/*.java
+src/main/java/cloud/cniia/openapi/sdk/*.java
 ```
 
 把这 7 个源文件（`Signer / Config / Environment / Client / Json / ApiException / TransportException`，外加 `ApiResponse`）加入你的编译源即可。
@@ -24,7 +24,7 @@ src/main/java/cloud/cniia/projectp/sdk/*.java
 # 编译到 out/
 javac --release 17 -encoding UTF-8 -d out $(find src/main/java -name '*.java')
 # 打成 jar
-jar cf projectp-sdk.jar -C out .
+jar cf openapi-sdk.jar -C out .
 ```
 
 也提供了 [`pom.xml`](./pom.xml) 供日后用 Maven 打 jar（`<dependencies>` 故意为空）。**测试不依赖 Maven**。
@@ -32,7 +32,7 @@ jar cf projectp-sdk.jar -C out .
 ## 快速开始
 
 ```java
-import cloud.cniia.projectp.sdk.*;
+import cloud.cniia.openapi.sdk.*;
 import java.util.*;
 
 Config config = Config.builder()
@@ -91,16 +91,25 @@ System.out.println(resp.dataAsMap().get("order_no"));
 ### 双环境与自定义基址
 
 ```java
-// 预设环境
-Config.builder().environment(Environment.PRODUCTION) ...   // https://api.project-p-merchant.cniia.cloud/api/open/v1
-Config.builder().environment(Environment.SANDBOX) ...      // http://127.0.0.1:3090/api/open/v1
+// PRODUCTION 无内置基址：正式地址按上级代理专有域名派生，必须显式传 baseUrl
+Config.builder()
+      .environment(Environment.PRODUCTION)
+      .baseUrl("https://api.<agent_domain>/api/open/v1")        // 必填，否则 build() 抛错
+      .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
+      .build();
 
-// 自定义基址覆盖（代理专有域名 / 本地端口）；优先级高于 environment，尾斜杠会被去掉
+// SANDBOX 使用内置本地地址
+Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.0.1:3090/api/open/v1
+
+// 自定义基址覆盖：优先级高于 environment，尾斜杠会被去掉
 Config.builder()
       .baseUrl("https://api.<agent_domain>/api/open/v1")
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 ```
+
+> 选 `PRODUCTION` 而不传 `baseUrl` 时，`build()` 会抛 `IllegalArgumentException`
+> （`baseUrl is required: production base URL is provided per your agent domain ...`）。
 
 ### 回调验签（验签 + 处理片段，非常驻服务）
 

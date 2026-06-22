@@ -11,11 +11,11 @@ declare(strict_types=1);
 
 require __DIR__ . '/../autoload.php';
 
-use ProjectP\Sdk\Client;
-use ProjectP\Sdk\Config;
-use ProjectP\Sdk\Environment;
-use ProjectP\Sdk\Exception\ApiException;
-use ProjectP\Sdk\Exception\TransportException;
+use Merchant\Openapi\Client;
+use Merchant\Openapi\Config;
+use Merchant\Openapi\Environment;
+use Merchant\Openapi\Exception\ApiException;
+use Merchant\Openapi\Exception\TransportException;
 
 // 凭证从环境变量读取，避免硬编码
 $config = new Config(
@@ -23,8 +23,8 @@ $config = new Config(
     apiKey: getenv('PP_API_KEY') ?: 'ak_demo_key',
     apiSecretPay: getenv('PP_API_SECRET_PAY') ?: 'sk_test_pay',
     apiSecretPayout: getenv('PP_API_SECRET_PAYOUT') ?: 'sk_test_payout',
-    environment: Environment::SANDBOX, // 正式用 Environment::PRODUCTION
-    // baseUrl: 'https://api.<agent_domain>/api/open/v1', // 代理专有域名时显式覆盖
+    environment: Environment::SANDBOX, // 正式用 Environment::PRODUCTION + 显式 baseUrl
+    // baseUrl: 'https://api.<agent_domain>/api/open/v1', // 正式按上级代理专有域名显式传入
 );
 
 $client = new Client($config);

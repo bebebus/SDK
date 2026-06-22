@@ -1,9 +1,9 @@
-import cloud.cniia.projectp.sdk.ApiException;
-import cloud.cniia.projectp.sdk.ApiResponse;
-import cloud.cniia.projectp.sdk.Client;
-import cloud.cniia.projectp.sdk.Config;
-import cloud.cniia.projectp.sdk.Environment;
-import cloud.cniia.projectp.sdk.TransportException;
+import cloud.cniia.openapi.sdk.ApiException;
+import cloud.cniia.openapi.sdk.ApiResponse;
+import cloud.cniia.openapi.sdk.Client;
+import cloud.cniia.openapi.sdk.Config;
+import cloud.cniia.openapi.sdk.Environment;
+import cloud.cniia.openapi.sdk.TransportException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

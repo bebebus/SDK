@@ -6,10 +6,10 @@
 
 | 环境 | Base URL | 说明 |
 |------|----------|------|
-| 正式（production） | `https://api.project-p-merchant.cniia.cloud/api/open/v1` | 文档默认值；**真实正式地址按你的上级代理专有域名派生**（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供，SDK 须支持自定义覆盖 |
-| 测试/本地（sandbox） | `http://127.0.0.1:3090/api/open/v1` | 自建/联调；亦可用「正式基址 + 测试密钥」做沙箱（测试密钥下单标记 `is_test`，不动真钱，可调 `*/test/complete`） |
+| 正式（production） | **无内置默认值，必须显式传 baseUrl** | 真实正式地址按你的上级代理专有域名派生（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供 |
+| 测试/本地（sandbox） | `http://127.0.0.1:3090/api/open/v1` | 自建/联调；亦可用「正式 baseUrl + 测试密钥」做沙箱（测试密钥下单标记 `is_test`，不动真钱，可调 `*/test/complete`） |
 
-SDK 设计：提供 `Environment.PRODUCTION` / `Environment.SANDBOX` 两个预设基址，**并允许显式传入自定义 `baseUrl`** 覆盖（用于代理专有域名或本地端口）。所有请求 `POST`，`Content-Type: application/json`，请求体为 JSON。
+SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODUCTION`（默认）**不内置任何主机名**，必须显式传入 `baseUrl`（代理专有域名），否则构造时报错。所有请求 `POST`，`Content-Type: application/json`，请求体为 JSON。
 
 ## 二、鉴权与通用字段
 

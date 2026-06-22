@@ -14,13 +14,13 @@ import os
 import sys
 import unittest
 
-# 让 tests/ 能 import 到 projectp_sdk（无需安装）。
+# 让 tests/ 能 import 到 openapi_sdk（无需安装）。
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PKG_ROOT = os.path.dirname(_THIS_DIR)
 if _PKG_ROOT not in sys.path:
     sys.path.insert(0, _PKG_ROOT)
 
-from projectp_sdk import build_sign_base, sign, verify_callback  # noqa: E402
+from openapi_sdk import build_sign_base, sign, verify_callback  # noqa: E402
 
 # 权威向量位于 SDK 仓库根（python 目录的上一级）。
 _VECTORS_PATH = os.path.normpath(

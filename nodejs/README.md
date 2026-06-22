@@ -1,4 +1,4 @@
-# project-p 商户支付 OpenAPI —— Node.js SDK（ESM）
+# 商户支付 OpenAPI —— Node.js SDK（ESM）
 
 零第三方依赖：仅使用 Node 标准库（`node:http` / `node:https`、`node:crypto`、`node:test`）。
 签名、HTTP、JSON、测试框架全部用官方内建，**无需 `npm install`**。
@@ -19,7 +19,7 @@ import { Client, Config, Environment, ApiError, TransportError } from './src/ind
 如作为本地包引用，在你的 `package.json` 用文件路径依赖即可（本包自身 `dependencies` 为空）：
 
 ```json
-{ "dependencies": { "@project-p/merchant-openapi-sdk": "file:../project-p-sdk/nodejs" } }
+{ "dependencies": { "merchant-openapi-sdk": "file:../sdk/nodejs" } }
 ```
 
 本包是 ESM（`"type": "module"`），调用方需用 `import`（或在 CJS 中用动态 `import()`）。
@@ -34,7 +34,8 @@ const client = new Client(new Config({
   apiKey: 'ak_xxx',
   apiSecretPay: 'sk_pay_xxx',       // pay 类接口 / 代收·退款回调
   apiSecretPayout: 'sk_payout_xxx', // payout 类接口 / 代付回调
-  environment: Environment.PRODUCTION,
+  // PRODUCTION 无内置 URL，必须显式传入按代理专有域名派生的 baseUrl
+  baseUrl: 'https://api.<agent_domain>/api/open/v1',
 }));
 
 // 代收下单（金额是最小单位整数，10000 = 1 元）
@@ -56,8 +57,8 @@ console.log(data.pay_url, raw.code);
 ```js
 import { Config, Environment } from './src/index.js';
 
-// 预设：正式
-new Config({ /* ... */ environment: Environment.PRODUCTION });
+// 预设：正式（无内置 URL，必须显式传 baseUrl，否则抛错）
+new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<agent_domain>/api/open/v1' });
 // 预设：本地/沙箱
 new Config({ /* ... */ environment: Environment.SANDBOX });
 // 自定义（代理专有域名或自定义端口）—— baseUrl 优先于 environment
@@ -66,7 +67,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<agent_domain>/api/open/v1' });
 
 | 预设 | Base URL |
 |------|----------|
-| `Environment.PRODUCTION` | `https://api.project-p-merchant.cniia.cloud/api/open/v1` |
+| `Environment.PRODUCTION` | 无内置 URL，按代理专有域名派生 `https://api.<agent_domain>/api/open/v1`，必须显式传 `baseUrl` |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
 ## 全部 11 个端点

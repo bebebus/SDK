@@ -15,7 +15,7 @@ _PKG_ROOT = os.path.dirname(_THIS_DIR)
 if _PKG_ROOT not in sys.path:
     sys.path.insert(0, _PKG_ROOT)
 
-from projectp_sdk import (  # noqa: E402
+from openapi_sdk import (  # noqa: E402
     ApiError,
     Client,
     Config,
@@ -24,7 +24,7 @@ from projectp_sdk import (  # noqa: E402
     build_sign_base,
     signer,
 )
-from projectp_sdk import client as client_module  # noqa: E402
+from openapi_sdk import client as client_module  # noqa: E402
 
 
 def _make_client(timeout: float = 5.0) -> Client:
@@ -58,13 +58,24 @@ class _Capture:
 
 class TestEnvironmentAndConfig(unittest.TestCase):
     def test_presets(self):
-        self.assertEqual(
-            Environment.PRODUCTION.base_url,
-            "https://api.project-p-merchant.cniia.cloud/api/open/v1",
-        )
+        # PRODUCTION 无内置基址（按上级代理域名派生，需显式传 base_url）。
+        self.assertEqual(Environment.PRODUCTION.base_url, "")
+        # SANDBOX 仍为本地预设基址。
         self.assertEqual(
             Environment.SANDBOX.base_url, "http://127.0.0.1:3090/api/open/v1"
         )
+
+    def test_production_without_base_url_raises(self):
+        # 选 PRODUCTION 又不传 base_url：最终基址为空，必须抛清晰错误。
+        with self.assertRaises(ValueError) as ctx:
+            Config(
+                merchant_no="M1",
+                api_key="k",
+                api_secret_pay="p",
+                api_secret_payout="o",
+                environment=Environment.PRODUCTION,
+            )
+        self.assertIn("baseUrl is required", str(ctx.exception))
 
     def test_custom_base_url_overrides_and_strips_slash(self):
         cfg = Config(
@@ -77,12 +88,24 @@ class TestEnvironmentAndConfig(unittest.TestCase):
         )
         self.assertEqual(cfg.base_url, "https://api.agent.example.com/api/open/v1")
 
-    def test_default_environment_is_production(self):
+    def test_sandbox_preset_base_url(self):
         cfg = Config(
             merchant_no="M1",
             api_key="k",
             api_secret_pay="p",
             api_secret_payout="o",
+            environment=Environment.SANDBOX,
+        )
+        self.assertEqual(cfg.base_url, "http://127.0.0.1:3090/api/open/v1")
+
+    def test_default_environment_is_production(self):
+        # 默认环境仍是 PRODUCTION（于是默认就要求显式传 base_url）。
+        cfg = Config(
+            merchant_no="M1",
+            api_key="k",
+            api_secret_pay="p",
+            api_secret_payout="o",
+            base_url="https://api.agent.example.com/api/open/v1",
         )
         self.assertEqual(cfg.environment, Environment.PRODUCTION)
 

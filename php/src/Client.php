@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ProjectP\Sdk;
+namespace Merchant\Openapi;
 
-use ProjectP\Sdk\Exception\ApiException;
-use ProjectP\Sdk\Exception\TransportException;
+use Merchant\Openapi\Exception\ApiException;
+use Merchant\Openapi\Exception\TransportException;
 
 /**
  * 商户支付 OpenAPI 客户端，覆盖全部 11 个端点。
@@ -338,7 +338,7 @@ final class Client
                 'Content-Type: application/json',
                 'Accept: application/json',
                 // 自识别 User-Agent：避免被 WAF/CDN（如 Cloudflare）按默认 UA 拦成 403。
-                'User-Agent: projectp-sdk-php/1.0.0',
+                'User-Agent: merchant-openapi-sdk-php/1.0.0',
             ],
             CURLOPT_TIMEOUT => $timeoutSeconds,
             CURLOPT_CONNECTTIMEOUT => $timeoutSeconds,

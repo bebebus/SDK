@@ -1,4 +1,4 @@
-package cloud.cniia.projectp.sdk;
+package cloud.cniia.openapi.sdk;
 
 /**
  * 传输异常：HTTP/网络错误、超时、非 2xx 状态、响应体非 JSON 等。

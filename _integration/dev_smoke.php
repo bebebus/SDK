@@ -5,11 +5,11 @@ declare(strict_types=1);
 
 require __DIR__ . '/../php/autoload.php';
 
-use ProjectP\Sdk\Client;
-use ProjectP\Sdk\Config;
-use ProjectP\Sdk\Environment;
-use ProjectP\Sdk\Signer;
-use ProjectP\Sdk\Exception\ApiException;
+use Merchant\Openapi\Client;
+use Merchant\Openapi\Config;
+use Merchant\Openapi\Environment;
+use Merchant\Openapi\Signer;
+use Merchant\Openapi\Exception\ApiException;
 
 $mno = getenv('PP_MNO');
 $key = getenv('PP_KEY');

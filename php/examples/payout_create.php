@@ -10,11 +10,11 @@ declare(strict_types=1);
 
 require __DIR__ . '/../autoload.php';
 
-use ProjectP\Sdk\Client;
-use ProjectP\Sdk\Config;
-use ProjectP\Sdk\Environment;
-use ProjectP\Sdk\Exception\ApiException;
-use ProjectP\Sdk\Exception\TransportException;
+use Merchant\Openapi\Client;
+use Merchant\Openapi\Config;
+use Merchant\Openapi\Environment;
+use Merchant\Openapi\Exception\ApiException;
+use Merchant\Openapi\Exception\TransportException;
 
 $config = new Config(
     merchantNo: getenv('PP_MERCHANT_NO') ?: 'M00000001',

@@ -19,7 +19,7 @@ from typing import Tuple
 # 让示例脚本直接 import 源码包（无需安装）。
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from projectp_sdk import verify_callback
+from openapi_sdk import verify_callback
 
 # 你的两套回调密钥（与下单时用的同源）：
 API_SECRET_PAY = "sk_pay_demo"  # 代收/退款回调
@@ -82,7 +82,7 @@ def handle_payout_callback(raw_body: bytes) -> Tuple[int, str, str]:
 
 def _demo() -> None:
     """本地自演示：用 SDK 自己造一条带正确签名的回调，再走验签处理。"""
-    from projectp_sdk import sign
+    from openapi_sdk import sign
 
     # 代收回调
     deposit = {

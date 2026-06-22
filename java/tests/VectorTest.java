@@ -1,8 +1,8 @@
-import cloud.cniia.projectp.sdk.Json;
-import cloud.cniia.projectp.sdk.Signer;
-import cloud.cniia.projectp.sdk.Config;
-import cloud.cniia.projectp.sdk.Client;
-import cloud.cniia.projectp.sdk.Environment;
+import cloud.cniia.openapi.sdk.Json;
+import cloud.cniia.openapi.sdk.Signer;
+import cloud.cniia.openapi.sdk.Config;
+import cloud.cniia.openapi.sdk.Client;
+import cloud.cniia.openapi.sdk.Environment;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -183,15 +183,27 @@ public class VectorTest {
         assertEquals("inline \"1\"→1", 1L, Client.normalizeInline("1"));
         assertEquals("inline 0→0", 0L, Client.normalizeInline(0));
 
-        // Environment 预设基址
-        assertEquals("PRODUCTION 基址",
-                "https://api.project-p-merchant.cniia.cloud/api/open/v1",
-                Environment.PRODUCTION.baseUrl());
+        // PRODUCTION 无内置基址（按代理专有域名派生，必须显式传 baseUrl）
+        assertTrue("PRODUCTION 无内置基址", Environment.PRODUCTION.baseUrl() == null);
         assertEquals("SANDBOX 基址",
                 "http://127.0.0.1:3090/api/open/v1",
                 Environment.SANDBOX.baseUrl());
 
-        // 自定义 baseUrl 覆盖 + 去尾斜杠
+        // 选 PRODUCTION 又不传 baseUrl → 抛清晰错误
+        boolean threw = false;
+        try {
+            Config.builder()
+                    .environment(Environment.PRODUCTION)
+                    .merchantNo("M1").apiKey("k").apiSecretPay("p")
+                    .build();
+        } catch (IllegalArgumentException e) {
+            threw = true;
+            assertTrue("PRODUCTION 缺 baseUrl 错误含 baseUrl is required",
+                    e.getMessage() != null && e.getMessage().contains("baseUrl is required"));
+        }
+        assertTrue("PRODUCTION 缺 baseUrl 抛异常", threw);
+
+        // 自定义 baseUrl 覆盖 + 去尾斜杠（PRODUCTION + 显式 baseUrl 生效）
         Config custom = Config.builder()
                 .environment(Environment.PRODUCTION)
                 .baseUrl("https://api.agent.example.com/api/open/v1/")
@@ -199,6 +211,14 @@ public class VectorTest {
                 .build();
         assertEquals("自定义基址覆盖且去尾斜杠",
                 "https://api.agent.example.com/api/open/v1", custom.baseUrl());
+
+        // 仅传 baseUrl（不选 environment）也能生效
+        Config baseOnly = Config.builder()
+                .baseUrl("https://api.agent.example.com/api/open/v1")
+                .merchantNo("M1").apiKey("k").apiSecretPay("p")
+                .build();
+        assertEquals("仅 baseUrl 生效",
+                "https://api.agent.example.com/api/open/v1", baseOnly.baseUrl());
 
         // null 字段过滤（对齐向量 null_skipped 行为）
         Map<String, Object> np = new LinkedHashMap<>();

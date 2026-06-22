@@ -1,6 +1,6 @@
-# project-p 商户 OpenAPI 多语言 SDK
+# 商户支付 OpenAPI 多语言 SDK
 
-为 project-p 商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
+为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
 设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），**全部 11 个接口**，
 **测试 + 正式双环境**，**跨语言签名逐字节一致**（同一份标准答案向量五套都绿）。
@@ -8,7 +8,7 @@
 ## 目录结构
 
 ```
-project-p-sdk/
+SDK/
 ├── README.md            # 本文件
 ├── SIGNING.md           # 签名算法权威说明 + 逐语言序列化坑（实现/排错必读）
 ├── INTERFACES.md        # 11 端点字段级请求/响应、回调字段、错误码
@@ -27,10 +27,10 @@ project-p-sdk/
 | 语言 | 包/引入方式 | HTTP（无第三方） | 测试命令 |
 |------|-------------|------------------|----------|
 | Node.js | `package.json`（无 deps，ESM）；`import { Client } from './nodejs/src/index.js'` | `node:https` / `node:http` | `cd nodejs && node --test` |
-| Python | `pyproject.toml`（无 deps）；`from projectp_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
+| Python | `pyproject.toml`（无 deps）；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer.json`（仅 PSR-4 autoload，无 require）；`require 'php/autoload.php'` | cURL 扩展 | `cd php && php tests/run.php` |
-| Java | 纯 JDK（`pom.xml` 仅供打包，无依赖）；`import cloud.cniia.projectp.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
-| Go | `go.mod`（无 require）；`import projectp "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Java | 纯 JDK（`pom.xml` 仅供打包，无依赖）；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
+| Go | `go.mod`（无 require）；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。
 
@@ -48,11 +48,11 @@ project-p-sdk/
 
 | 预设 | 基址 |
 |------|------|
-| `PRODUCTION`（正式） | `https://api.project-p-merchant.cniia.cloud/api/open/v1` |
+| `PRODUCTION`（正式） | **无内置默认值，必须显式传 baseUrl** |
 | `SANDBOX`（测试/本地） | `http://127.0.0.1:3090/api/open/v1` |
 
-> 正式环境真实地址通常按你**上级代理的专有域名**派生（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供——这时用「自定义 baseUrl」传入即可。
-> 「测试密钥沙箱」也可直接用正式基址 + 测试密钥（测试单标记 `is_test`，不动真钱，可调 `*/test/complete`）。
+> 正式环境真实地址按你**上级代理的专有域名**派生（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供。SDK **不内置任何正式主机名**：选 `PRODUCTION`（默认）时必须通过 `baseUrl` 显式传入，否则构造时报错。
+> 「测试密钥沙箱」可用上述正式 baseUrl + 测试密钥（测试单标记 `is_test`，不动真钱，可调 `*/test/complete`）。
 
 ## 快速开始（以 Node.js 为例，其余语言见各自 README）
 
@@ -64,8 +64,9 @@ const client = new Client(new Config({
   apiKey: process.env.API_KEY,
   apiSecretPay: process.env.API_SECRET_PAY,
   apiSecretPayout: process.env.API_SECRET_PAYOUT,
-  environment: Environment.PRODUCTION,            // 或 SANDBOX
-  // baseUrl: 'https://api.your-agent-domain/api/open/v1', // 可选：自定义覆盖
+  // 正式环境必须显式传 baseUrl（按上级代理专有域名：https://api.<agent_domain>/api/open/v1）
+  baseUrl: process.env.API_BASE_URL,
+  // 本地联调可改用：environment: Environment.SANDBOX,
 }));
 
 // 代收下单（金额为最小单位整数，10000 = 1 元）

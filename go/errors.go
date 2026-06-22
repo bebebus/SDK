@@ -1,4 +1,4 @@
-package projectp
+package openapi
 
 import "fmt"
 
@@ -12,7 +12,7 @@ type APIError struct {
 }
 
 func (e *APIError) Error() string {
-	return fmt.Sprintf("project-p api error: code=%d message=%s", e.Code, e.Message)
+	return fmt.Sprintf("openapi api error: code=%d message=%s", e.Code, e.Message)
 }
 
 // TransportError 表示 HTTP/网络/解析层错误（非业务失败）：连接失败、超时、非 JSON 响应、
@@ -26,9 +26,9 @@ type TransportError struct {
 
 func (e *TransportError) Error() string {
 	if e.StatusCode != 0 {
-		return fmt.Sprintf("project-p transport error: op=%s status=%d: %v", e.Op, e.StatusCode, e.Err)
+		return fmt.Sprintf("openapi transport error: op=%s status=%d: %v", e.Op, e.StatusCode, e.Err)
 	}
-	return fmt.Sprintf("project-p transport error: op=%s: %v", e.Op, e.Err)
+	return fmt.Sprintf("openapi transport error: op=%s: %v", e.Op, e.Err)
 }
 
 func (e *TransportError) Unwrap() error { return e.Err }

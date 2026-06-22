@@ -1,4 +1,4 @@
-package cloud.cniia.projectp.sdk;
+package cloud.cniia.openapi.sdk;
 
 import java.io.IOException;
 import java.net.URI;
@@ -188,7 +188,7 @@ public final class Client {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 // 自识别 User-Agent：避免被 WAF/CDN（如 Cloudflare）按默认 UA 拦成 403。
-                .header("User-Agent", "projectp-sdk-java/1.0.0")
+                .header("User-Agent", "openapi-sdk-java/1.0.0")
                 .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
                 .build();
 

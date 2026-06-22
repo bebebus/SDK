@@ -1,5 +1,5 @@
 {
-  "_comment": "跨语言签名标准答案向量。由 project-p-sdk/_tooling/generate-vectors.mjs 经三处权威实现交叉校验后生成。各语言 SDK 单测须对每个向量复现 base 与 sign（HMAC-SHA256 hex 小写）。",
+  "_comment": "跨语言签名标准答案向量。由 _tooling/generate-vectors.mjs 生成（算法即服务端权威签名算法，见 SIGNING.md）。各语言 SDK 单测须对每个向量复现 base 与 sign（HMAC-SHA256 hex 小写）。",
   "algorithm": {
     "filter": "排除 key===\"sign\"，且跳过值为 null/undefined 的字段",
     "sort": "key 按 ASCII/码点升序",

@@ -1,4 +1,4 @@
-# project-p 商户支付 OpenAPI — PHP 8 SDK
+# 商户支付 OpenAPI — PHP 8 SDK
 
 零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 11 个端点 + HMAC-SHA256 签名 + 回调验签。
 仅使用 PHP 标准库与核心扩展（`ext-curl`、`ext-json`），**不依赖 composer 安装任何包**（如 Guzzle/PHPUnit 等一概不用）。
@@ -19,19 +19,19 @@
 ```php
 require __DIR__ . '/path/to/php/autoload.php';
 
-use ProjectP\Sdk\Client;
-use ProjectP\Sdk\Config;
-use ProjectP\Sdk\Environment;
+use Merchant\Openapi\Client;
+use Merchant\Openapi\Config;
+use Merchant\Openapi\Environment;
 ```
 
 ### 方式二：composer PSR-4（仅注册 autoload，无 require 第三方包）
 
-`composer.json` 只声明 `ProjectP\Sdk\` → `src/` 的 PSR-4 映射，`require` 段仅有 PHP 版本与核心扩展。
+`composer.json` 只声明 `Merchant\Openapi\` → `src/` 的 PSR-4 映射，`require` 段仅有 PHP 版本与核心扩展。
 若你已有 composer 工程，可把本目录作为 path 仓库或合并其 `autoload` 段：
 
 ```json
 {
-  "autoload": { "psr-4": { "ProjectP\\Sdk\\": "src/" } }
+  "autoload": { "psr-4": { "Merchant\\Openapi\\": "src/" } }
 }
 ```
 
@@ -42,11 +42,11 @@ use ProjectP\Sdk\Environment;
 ```php
 require __DIR__ . '/php/autoload.php';
 
-use ProjectP\Sdk\Client;
-use ProjectP\Sdk\Config;
-use ProjectP\Sdk\Environment;
-use ProjectP\Sdk\Exception\ApiException;
-use ProjectP\Sdk\Exception\TransportException;
+use Merchant\Openapi\Client;
+use Merchant\Openapi\Config;
+use Merchant\Openapi\Environment;
+use Merchant\Openapi\Exception\ApiException;
+use Merchant\Openapi\Exception\TransportException;
 
 $config = new Config(
     merchantNo: 'M00000001',
@@ -54,6 +54,7 @@ $config = new Config(
     apiSecretPay: 'sk_pay_xxx',       // 代收类与代收/退款回调用
     apiSecretPayout: 'sk_payout_xxx', // 代付类与代付回调用
     environment: Environment::PRODUCTION,
+    baseUrl: 'https://api.<agent_domain>/api/open/v1', // 正式必传：按上级代理专有域名派生
 );
 
 $client = new Client($config);
@@ -79,8 +80,8 @@ try {
 ## 双环境与自定义基址
 
 ```php
-// 预设：正式
-new Config(..., environment: Environment::PRODUCTION);
+// 预设：正式（无内置地址，必须显式传 baseUrl，否则构造时抛错）
+new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<agent_domain>/api/open/v1');
 // 预设：本地/沙箱（http://127.0.0.1:3090/api/open/v1）
 new Config(..., environment: Environment::SANDBOX);
 
@@ -88,7 +89,7 @@ new Config(..., environment: Environment::SANDBOX);
 new Config(..., baseUrl: 'https://api.<agent_domain>/api/open/v1');
 ```
 
-> 正式真实地址通常按上级代理专有域名派生（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供，用 `baseUrl` 覆盖即可。
+> `PRODUCTION` **不内置任何正式地址**：正式真实地址按上级代理专有域名派生（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供，必须用 `baseUrl` 显式传入。选 `PRODUCTION` 而不传 `baseUrl` 会在构造 `Config` 时抛 `InvalidArgumentException`。
 
 ## 端点方法（全 11 个）
 
@@ -118,7 +119,7 @@ new Config(..., baseUrl: 'https://api.<agent_domain>/api/open/v1');
 ## 签名与回调验签
 
 ```php
-use ProjectP\Sdk\Signer;
+use Merchant\Openapi\Signer;
 
 // 计算签名（pay 用 api_secret_pay，payout 用 api_secret_payout）
 $sign = Signer::sign($payload, $secret);

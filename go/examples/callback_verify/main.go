@@ -17,7 +17,7 @@ import (
 	"io"
 	"net/http"
 
-	projectp "github.com/bebebus/SDK/go"
+	"github.com/bebebus/SDK/go"
 )
 
 const (
@@ -26,7 +26,7 @@ const (
 )
 
 func main() {
-	client := projectp.NewClient(projectp.Config{
+	client := openapi.NewClient(openapi.Config{
 		MerchantNo:   "M00000001",
 		APIKey:       "ak_demo_key",
 		SecretPay:    secretPay,
@@ -111,7 +111,7 @@ func processCallback(verify func(map[string]any) bool, rawBody []byte) (int, str
 
 // 真实接入的 HTTP 处理器写法（按需挂到路由）：
 //
-//	func payCallbackHandler(client *projectp.Client) http.HandlerFunc {
+//	func payCallbackHandler(client *openapi.Client) http.HandlerFunc {
 //	    return func(w http.ResponseWriter, r *http.Request) {
 //	        raw, _ := io.ReadAll(r.Body)
 //	        status, reply := processCallback(client.VerifyPayCallback, raw)
@@ -141,7 +141,7 @@ func signedCallbackBody(fields map[string]any, secret string) []byte {
 		}
 		signable[k] = v
 	}
-	fields["sign"] = projectp.Sign(signable, secret)
+	fields["sign"] = openapi.Sign(signable, secret)
 
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)

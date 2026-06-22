@@ -1,8 +1,8 @@
-import cloud.cniia.projectp.sdk.Client;
-import cloud.cniia.projectp.sdk.Config;
-import cloud.cniia.projectp.sdk.Environment;
-import cloud.cniia.projectp.sdk.Json;
-import cloud.cniia.projectp.sdk.Signer;
+import cloud.cniia.openapi.sdk.Client;
+import cloud.cniia.openapi.sdk.Config;
+import cloud.cniia.openapi.sdk.Environment;
+import cloud.cniia.openapi.sdk.Json;
+import cloud.cniia.openapi.sdk.Signer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,6 +38,8 @@ public class CallbackVerifyExample {
     public static void main(String[] args) {
         Config config = Config.builder()
                 .environment(Environment.PRODUCTION)
+                // PRODUCTION 无内置基址：正式地址按上级代理专有域名派生，必须显式提供
+                .baseUrl("https://api.<agent_domain>/api/open/v1")
                 .merchantNo("M00000001")
                 .apiKey("ak_demo_key")
                 .apiSecretPay(API_SECRET_PAY)

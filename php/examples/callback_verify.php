@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/../autoload.php';
 
-use ProjectP\Sdk\Config;
-use ProjectP\Sdk\Environment;
-use ProjectP\Sdk\Signer;
+use Merchant\Openapi\Config;
+use Merchant\Openapi\Environment;
+use Merchant\Openapi\Signer;
 
 // 实际部署里用真实密钥（建议从环境变量/密钥管理读取）
 $config = new Config(
@@ -23,7 +23,8 @@ $config = new Config(
     apiKey: getenv('PP_API_KEY') ?: 'ak_demo_key',
     apiSecretPay: getenv('PP_API_SECRET_PAY') ?: 'sk_test_pay_secret',
     apiSecretPayout: getenv('PP_API_SECRET_PAYOUT') ?: 'sk_test_payout_secret',
-    environment: Environment::PRODUCTION,
+    // 回调验签不发请求，基址仅占位；正式按上级代理专有域名传 baseUrl 覆盖。
+    environment: Environment::SANDBOX,
 );
 
 /**

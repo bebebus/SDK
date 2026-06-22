@@ -31,7 +31,7 @@ _JSON_HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
     # 显式 User-Agent：urllib 默认 UA（Python-urllib/x.y）常被 WAF/CDN（如 Cloudflare）拦成 403。
-    "User-Agent": "projectp-sdk-python/1.0.0",
+    "User-Agent": "openapi-sdk-python/1.0.0",
 }
 
 
@@ -40,7 +40,7 @@ class Client:
 
     用法::
 
-        from projectp_sdk import Client, Config, Environment
+        from openapi_sdk import Client, Config, Environment
         cfg = Config(
             merchant_no="M00000001", api_key="ak_xxx",
             api_secret_pay="sk_pay_xxx", api_secret_payout="sk_payout_xxx",

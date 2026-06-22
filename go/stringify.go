@@ -1,4 +1,4 @@
-package projectp
+package openapi
 
 import (
 	"encoding/json"

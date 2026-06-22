@@ -1,7 +1,7 @@
 {
-  "name": "@project-p/merchant-openapi-sdk",
+  "name": "merchant-openapi-sdk",
   "version": "1.0.0",
-  "description": "project-p 商户支付 OpenAPI Node.js SDK（零第三方依赖，ESM）",
+  "description": "商户支付 OpenAPI Node.js SDK（零第三方依赖，ESM）",
   "type": "module",
   "main": "src/index.js",
   "exports": {

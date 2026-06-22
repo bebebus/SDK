@@ -2,21 +2,22 @@
 
 declare(strict_types=1);
 
-namespace ProjectP\Sdk;
+namespace Merchant\Openapi;
 
 /**
  * 环境基址预设。
  *
- * PRODUCTION 为文档默认正式地址（真实正式地址按上级代理专有域名派生，可用自定义 baseUrl 覆盖）。
+ * PRODUCTION 无内置 URL：正式真实地址按上级代理专有域名派生（形如
+ * https://api.<agent_domain>/api/open/v1），必须由调用方通过自定义 baseUrl 显式提供。
  * SANDBOX 为本地/联调地址。
  */
 enum Environment: string
 {
-    case PRODUCTION = 'https://api.project-p-merchant.cniia.cloud/api/open/v1';
+    case PRODUCTION = '';
     case SANDBOX = 'http://127.0.0.1:3090/api/open/v1';
 
     /**
-     * 该环境的基址 URL。
+     * 该环境的内置基址 URL（PRODUCTION 为空串，表示需显式传 baseUrl）。
      */
     public function baseUrl(): string
     {

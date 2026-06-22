@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	projectp "github.com/bebebus/SDK/go"
+	"github.com/bebebus/SDK/go"
 )
 
 var pass, fail int
@@ -32,7 +32,7 @@ func ok(name string, cond bool, extra string) {
 
 // apiCode 从 error 中提取业务码（*APIError），无则返回 -1 与错误文本。
 func apiCode(err error) (int, string) {
-	var ae *projectp.APIError
+	var ae *openapi.APIError
 	if errors.As(err, &ae) {
 		return ae.Code, ae.Message
 	}
@@ -41,7 +41,7 @@ func apiCode(err error) (int, string) {
 
 func main() {
 	mno, key, pay, pout, base := os.Getenv("PP_MNO"), os.Getenv("PP_KEY"), os.Getenv("PP_PAY"), os.Getenv("PP_POUT"), os.Getenv("PP_BASE")
-	client := projectp.NewClient(projectp.Config{MerchantNo: mno, APIKey: key, SecretPay: pay, SecretPayout: pout, BaseURL: base})
+	client := openapi.NewClient(openapi.Config{MerchantNo: mno, APIKey: key, SecretPay: pay, SecretPayout: pout, BaseURL: base})
 	ctx := context.Background()
 	tag := fmt.Sprintf("go-%d-%d", time.Now().Unix(), rand.Intn(9000)+1000)
 	fmt.Printf("[Go] base=%s merchant=%s tag=%s\n", base, mno, tag)
@@ -145,7 +145,7 @@ func main() {
 	}
 
 	// 8. 负例：错误密钥签名应被服务端拒（code 100104）
-	bad := projectp.NewClient(projectp.Config{MerchantNo: mno, APIKey: key, SecretPay: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", SecretPayout: pout, BaseURL: base})
+	bad := openapi.NewClient(openapi.Config{MerchantNo: mno, APIKey: key, SecretPay: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", SecretPayout: pout, BaseURL: base})
 	if _, err := bad.PayQuery(ctx, map[string]any{"out_order_no": outOrderNo}); err == nil {
 		ok("负例:错误签名被拒", false, "未返错误（异常）")
 	} else {
@@ -158,7 +158,7 @@ func main() {
 		orderNo = "P_demo"
 	}
 	cb := map[string]any{"merchant_no": mno, "order_no": orderNo, "out_order_no": outOrderNo, "amount": 10000, "currency": "PHP", "status": "success", "paid_at": "2026-06-23T08:00:00+08:00"}
-	cb["sign"] = projectp.Sign(cb, pay)
+	cb["sign"] = openapi.Sign(cb, pay)
 	ok("回调验签 正例", client.VerifyPayCallback(cb), "")
 	tampered := map[string]any{}
 	for k, v := range cb {

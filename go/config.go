@@ -1,8 +1,9 @@
-package projectp
+package openapi
 
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"time"
 )
 
@@ -10,25 +11,27 @@ import (
 type Environment int
 
 const (
-	// Production 正式环境（文档默认地址；真实正式地址按上级代理专有域名派生，
-	// 形如 https://api.<agent_domain>/api/open/v1，用 Config.BaseURL 覆盖）。
+	// Production 正式环境。无内置 URL：正式基址按上级代理专有域名派生，
+	// 形如 https://api.<agent_domain>/api/open/v1，必须用 Config.BaseURL 显式提供。
 	Production Environment = iota
 	// Sandbox 本地/联调环境。
 	Sandbox
 )
 
 const (
-	productionBaseURL = "https://api.project-p-merchant.cniia.cloud/api/open/v1"
-	sandboxBaseURL    = "http://127.0.0.1:3090/api/open/v1"
+	sandboxBaseURL = "http://127.0.0.1:3090/api/open/v1"
 )
 
-// BaseURL 返回环境对应的预设基址。
+// ErrBaseURLRequired 表示选用 Production 但未提供 BaseURL。
+var ErrBaseURLRequired = errors.New("baseUrl is required: production base URL is provided per your agent domain (e.g. https://api.<agent_domain>/api/open/v1)")
+
+// BaseURL 返回环境对应的预设基址。Production 无内置基址，返回空串。
 func (e Environment) BaseURL() string {
 	switch e {
 	case Sandbox:
 		return sandboxBaseURL
 	default:
-		return productionBaseURL
+		return ""
 	}
 }
 
@@ -53,11 +56,16 @@ type Config struct {
 }
 
 // resolveBaseURL 决定最终基址：BaseURL 非空优先，否则取 Environment 预设。
-func (c Config) resolveBaseURL() string {
+// 最终基址为空（选了 Production 又未传 BaseURL）时返回 ErrBaseURLRequired。
+func (c Config) resolveBaseURL() (string, error) {
 	if c.BaseURL != "" {
-		return c.BaseURL
+		return c.BaseURL, nil
 	}
-	return c.Environment.BaseURL()
+	base := c.Environment.BaseURL()
+	if base == "" {
+		return "", ErrBaseURLRequired
+	}
+	return base, nil
 }
 
 // resolveTimeout 决定最终超时：Timeout > 0 优先，否则 30s 默认。

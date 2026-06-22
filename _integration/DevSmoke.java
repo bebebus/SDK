@@ -1,10 +1,10 @@
 // Java SDK × dev 环境联调。凭据从环境变量读取（PP_MNO/PP_KEY/PP_PAY/PP_POUT/PP_BASE）。
 // 序列与其余语言 dev_smoke 一致。编译运行见 run-dev-smoke.sh / 报告中的命令。
-import cloud.cniia.projectp.sdk.ApiException;
-import cloud.cniia.projectp.sdk.ApiResponse;
-import cloud.cniia.projectp.sdk.Client;
-import cloud.cniia.projectp.sdk.Config;
-import cloud.cniia.projectp.sdk.Signer;
+import cloud.cniia.openapi.sdk.ApiException;
+import cloud.cniia.openapi.sdk.ApiResponse;
+import cloud.cniia.openapi.sdk.Client;
+import cloud.cniia.openapi.sdk.Config;
+import cloud.cniia.openapi.sdk.Signer;
 
 import java.util.HashMap;
 import java.util.List;

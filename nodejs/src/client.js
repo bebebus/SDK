@@ -67,7 +67,7 @@ export class Client {
             'Content-Length': Buffer.byteLength(payload),
             Accept: 'application/json',
             // 自识别 User-Agent：避免被 WAF/CDN（如 Cloudflare）按默认/空 UA 拦成 403。
-            'User-Agent': 'projectp-sdk-nodejs/1.0.0',
+            'User-Agent': 'openapi-sdk-nodejs/1.0.0',
           },
           timeout: this.config.timeout,
         },

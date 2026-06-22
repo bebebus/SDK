@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ProjectP\Sdk\Exception;
+namespace Merchant\Openapi\Exception;
 
 /**
  * 传输异常：网络/cURL 错误、非 2xx HTTP 状态、响应非合法 JSON 信封等。

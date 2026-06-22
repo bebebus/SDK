@@ -1,7 +1,7 @@
 # 签名规范（所有语言 SDK 的单一事实源）
 
 商户 OpenAPI 的请求与回调都用 **HMAC-SHA256** 签名，输出 **十六进制小写**。本文件定义的算法
-与服务端 `web-shared/src/openapi/sign.ts`、`project-p-test/sign.js` **逐字节一致**；五套 SDK
+与服务端签名实现**逐字节一致**；五套 SDK
 的签名器都必须能复现 [`test-vectors.json`](./test-vectors.json) 里的 `base` 与 `sign`，否则即视为不合格。
 
 > 签名是整套 SDK 唯一「一个字节都不能错」的部分。多数跨语言失败都出在**嵌套 JSON 序列化**与

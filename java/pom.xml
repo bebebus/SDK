@@ -10,12 +10,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cloud.cniia.projectp</groupId>
-    <artifactId>projectp-merchant-sdk</artifactId>
+    <groupId>cloud.cniia.openapi</groupId>
+    <artifactId>merchant-openapi-sdk</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Project-P Merchant OpenAPI SDK</name>
+    <name>Merchant OpenAPI SDK</name>
     <description>零依赖 Java SDK：商户支付 OpenAPI 客户端（HMAC-SHA256 签名 + 回调验签 + 全 11 端点）</description>
 
     <properties>

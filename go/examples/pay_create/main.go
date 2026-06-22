@@ -10,16 +10,16 @@ import (
 	"fmt"
 	"time"
 
-	projectp "github.com/bebebus/SDK/go"
+	"github.com/bebebus/SDK/go"
 )
 
 func main() {
-	client := projectp.NewClient(projectp.Config{
+	client := openapi.NewClient(openapi.Config{
 		MerchantNo:   "M00000001",
 		APIKey:       "ak_demo_key",
 		SecretPay:    "sk_test_pay_xxxxxxxxxxxxxxxxxxxxxxxx",
 		SecretPayout: "sk_test_payout_xxxxxxxxxxxxxxxxxxxxxxxx",
-		Environment:  projectp.Sandbox, // 或 projectp.Production；用 BaseURL 覆盖为代理专有域名。
+		Environment:  openapi.Sandbox, // 或 openapi.Production；用 BaseURL 覆盖为代理专有域名。
 		Timeout:      30 * time.Second,
 	})
 
@@ -43,7 +43,7 @@ func main() {
 		},
 	})
 	if err != nil {
-		var apiErr *projectp.APIError
+		var apiErr *openapi.APIError
 		if errors.As(err, &apiErr) {
 			fmt.Printf("业务失败 code=%d message=%s data=%v\n", apiErr.Code, apiErr.Message, apiErr.Data)
 			return

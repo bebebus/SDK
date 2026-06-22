@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace ProjectP\Sdk;
+namespace Merchant\Openapi;
 
 /**
  * 客户端配置：商户凭证 + 双密钥 + 基址 + 超时。
  *
  * 基址解析优先级：自定义 baseUrl > Environment 预设。两者都给时以 baseUrl 为准。
+ * PRODUCTION 无内置 URL，因此选 PRODUCTION 时必须显式传 baseUrl，否则抛错。
  */
 final class Config
 {
@@ -32,7 +33,15 @@ final class Config
         public readonly int $timeoutSeconds = 30,
     ) {
         $resolved = $baseUrl !== null ? $baseUrl : $environment->baseUrl();
-        // 去掉末尾斜杠，拼接端点时统一不重复
-        $this->baseUrl = rtrim($resolved, '/');
+        $resolved = rtrim($resolved, '/');
+        if ($resolved === '') {
+            // 选了 PRODUCTION（或显式空串）又没传 baseUrl：正式无内置地址，必须显式提供。
+            throw new \InvalidArgumentException(
+                'baseUrl is required: production base URL is provided per your agent domain '
+                . '(e.g. https://api.<agent_domain>/api/open/v1)'
+            );
+        }
+        // 已去掉末尾斜杠，拼接端点时统一不重复
+        $this->baseUrl = $resolved;
     }
 }

@@ -8,16 +8,16 @@ import (
 	"errors"
 	"fmt"
 
-	projectp "github.com/bebebus/SDK/go"
+	"github.com/bebebus/SDK/go"
 )
 
 func main() {
-	client := projectp.NewClient(projectp.Config{
+	client := openapi.NewClient(openapi.Config{
 		MerchantNo:   "M00000001",
 		APIKey:       "ak_demo_key",
 		SecretPay:    "sk_test_pay_xxxxxxxxxxxxxxxxxxxxxxxx",
 		SecretPayout: "sk_test_payout_xxxxxxxxxxxxxxxxxxxxxxxx",
-		Environment:  projectp.Sandbox,
+		Environment:  openapi.Sandbox,
 	})
 
 	ctx := context.Background()
@@ -43,7 +43,7 @@ func main() {
 		"bank_code":     "BDO", // 银行类必填；钱包类（gcash）可不传。
 	})
 	if err != nil {
-		var apiErr *projectp.APIError
+		var apiErr *openapi.APIError
 		if errors.As(err, &apiErr) {
 			fmt.Printf("代付受理失败 code=%d message=%s\n", apiErr.Code, apiErr.Message)
 			return

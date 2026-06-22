@@ -16,12 +16,12 @@ declare(strict_types=1);
 
 require __DIR__ . '/../autoload.php';
 
-use ProjectP\Sdk\Client;
-use ProjectP\Sdk\Config;
-use ProjectP\Sdk\Environment;
-use ProjectP\Sdk\Exception\ApiException;
-use ProjectP\Sdk\Exception\TransportException;
-use ProjectP\Sdk\Signer;
+use Merchant\Openapi\Client;
+use Merchant\Openapi\Config;
+use Merchant\Openapi\Environment;
+use Merchant\Openapi\Exception\ApiException;
+use Merchant\Openapi\Exception\TransportException;
+use Merchant\Openapi\Signer;
 
 /* ---------------------------- 轻量断言框架 ---------------------------- */
 
@@ -195,13 +195,21 @@ check(
     Signer::buildSignBase(['m' => (object) ['a' => new \stdClass(), 'b' => []]], 's')
 );
 
-// 自定义 baseUrl 覆盖 Environment
+// 自定义 baseUrl 覆盖 Environment（即使选 PRODUCTION，传了 baseUrl 即生效并去尾斜杠）
 $cfgCustom = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'https://api.agent.example.com/api/open/v1/');
 check('自定义 baseUrl 覆盖（去尾斜杠）', 'https://api.agent.example.com/api/open/v1', $cfgCustom->baseUrl);
 
-// Environment 预设
-$cfgProd = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION);
-check('PRODUCTION 基址', 'https://api.project-p-merchant.cniia.cloud/api/open/v1', $cfgProd->baseUrl);
+// PRODUCTION 无内置地址：不传 baseUrl 必须抛清晰错误（正式地址按上级代理专有域名派生）
+$prodThrew = false;
+try {
+    new Config('M', 'k', 'p', 'q', Environment::PRODUCTION);
+} catch (\InvalidArgumentException $e) {
+    $prodThrew = true;
+    checkTrue('PRODUCTION 缺 baseUrl 错误含提示', str_contains($e->getMessage(), 'baseUrl is required'));
+}
+checkTrue('PRODUCTION 缺 baseUrl 抛 InvalidArgumentException', $prodThrew);
+
+// SANDBOX 预设仍内置本地基址
 $cfgSand = new Config('M', 'k', 'p', 'q', Environment::SANDBOX);
 check('SANDBOX 基址', 'http://127.0.0.1:3090/api/open/v1', $cfgSand->baseUrl);
 

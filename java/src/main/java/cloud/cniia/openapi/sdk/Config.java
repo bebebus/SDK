@@ -1,4 +1,4 @@
-package cloud.cniia.projectp.sdk;
+package cloud.cniia.openapi.sdk;
 
 import java.time.Duration;
 
@@ -32,11 +32,13 @@ public final class Config {
     private final Duration timeout;
 
     private Config(Builder b) {
-        // baseUrl 优先级：显式自定义 > 环境预设
-        String resolved = b.baseUrl != null ? b.baseUrl
+        // baseUrl 优先级：显式自定义 > 环境预设；PRODUCTION 无内置基址，必须显式传 baseUrl
+        String resolved = (b.baseUrl != null && !b.baseUrl.isEmpty()) ? b.baseUrl
                 : (b.environment != null ? b.environment.baseUrl() : null);
-        if (resolved == null) {
-            throw new IllegalArgumentException("必须设置 environment 或 baseUrl 之一");
+        if (resolved == null || resolved.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "baseUrl is required: production base URL is provided per your agent domain "
+                            + "(e.g. https://api.<agent_domain>/api/open/v1)");
         }
         // 去掉尾部斜杠，统一后续拼接
         while (resolved.endsWith("/")) {

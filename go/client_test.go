@@ -1,9 +1,10 @@
-package projectp
+package openapi
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,23 +13,52 @@ import (
 )
 
 // TestEnvironmentBaseURL 校验预设基址与自定义覆盖。
+//
+// 新语义：Production 无内置 URL；Sandbox 仍为本地 127.0.0.1。
 func TestEnvironmentBaseURL(t *testing.T) {
-	if got := Production.BaseURL(); got != productionBaseURL {
-		t.Errorf("production 基址错误: %s", got)
+	// Production 无内置基址。
+	if got := Production.BaseURL(); got != "" {
+		t.Errorf("production 应无内置基址，实际: %s", got)
+	}
+	// Sandbox 预设仍为本地端口 127.0.0.1。
+	if sandboxBaseURL != "http://127.0.0.1:3090/api/open/v1" {
+		t.Errorf("sandbox 预设常量被改动: %s", sandboxBaseURL)
 	}
 	if got := Sandbox.BaseURL(); got != sandboxBaseURL {
 		t.Errorf("sandbox 基址错误: %s", got)
 	}
 
+	// Sandbox 客户端取预设基址。
 	c := NewClient(Config{Environment: Sandbox})
 	if c.baseURL != sandboxBaseURL {
 		t.Errorf("sandbox client 基址错误: %s", c.baseURL)
 	}
+	if c.baseURLErr != nil {
+		t.Errorf("sandbox 不应有基址解析错误: %v", c.baseURLErr)
+	}
 
-	custom := "https://api.agent.example.com/api/open/v1"
-	c2 := NewClient(Config{Environment: Production, BaseURL: custom})
-	if c2.baseURL != custom {
-		t.Errorf("自定义基址未覆盖预设: %s", c2.baseURL)
+	// 自定义 BaseURL 覆盖预设，并去掉尾斜杠。
+	c2 := NewClient(Config{Environment: Production, BaseURL: "https://api.agent.example.com/api/open/v1/"})
+	if c2.baseURL != "https://api.agent.example.com/api/open/v1" {
+		t.Errorf("自定义基址未覆盖预设或未去尾斜杠: %s", c2.baseURL)
+	}
+	if c2.baseURLErr != nil {
+		t.Errorf("传了自定义基址不应报错: %v", c2.baseURLErr)
+	}
+}
+
+// TestProductionWithoutBaseURLErrors 校验：选 Production 且不传 BaseURL，
+// 构造不 panic，但首个请求返回 ErrBaseURLRequired。
+func TestProductionWithoutBaseURLErrors(t *testing.T) {
+	c := NewClient(Config{Environment: Production, SecretPay: "s"})
+	if c.baseURLErr == nil || !errors.Is(c.baseURLErr, ErrBaseURLRequired) {
+		t.Fatalf("缺 BaseURL 的 Production 应记录 ErrBaseURLRequired，实际: %v", c.baseURLErr)
+	}
+
+	// 首个请求应返回该清晰错误。
+	_, err := c.PayCreate(context.Background(), map[string]any{"out_order_no": "x"})
+	if err == nil || !errors.Is(err, ErrBaseURLRequired) {
+		t.Fatalf("Production 缺 BaseURL 首个请求应返回 ErrBaseURLRequired，实际: %v", err)
 	}
 }
 

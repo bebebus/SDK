@@ -44,9 +44,32 @@ function makeClient(baseUrl) {
   );
 }
 
-test('Environment 预设基址正确', () => {
-  assert.equal(Environment.PRODUCTION, 'https://api.project-p-merchant.cniia.cloud/api/open/v1');
+test('Environment 预设：PRODUCTION 无内置 URL，SANDBOX 为本地基址', () => {
+  assert.equal(Environment.PRODUCTION, null);
   assert.equal(Environment.SANDBOX, 'http://127.0.0.1:3090/api/open/v1');
+});
+
+test('选 PRODUCTION 且不传 baseUrl 抛清晰错误', () => {
+  assert.throws(
+    () => new Config({ merchantNo: 'M', apiKey: 'k', environment: Environment.PRODUCTION }),
+    (err) => {
+      assert.ok(err instanceof TypeError);
+      assert.match(err.message, /baseUrl is required/);
+      assert.match(err.message, /agent domain/);
+      return true;
+    },
+  );
+});
+
+test('默认 environment 即 PRODUCTION：不传 baseUrl 同样抛错', () => {
+  assert.throws(
+    () => new Config({ merchantNo: 'M', apiKey: 'k' }),
+    (err) => {
+      assert.ok(err instanceof TypeError);
+      assert.match(err.message, /baseUrl is required/);
+      return true;
+    },
+  );
 });
 
 test('Config baseUrl 覆盖优先于 environment 且去除末尾斜杠', () => {
@@ -57,6 +80,15 @@ test('Config baseUrl 覆盖优先于 environment 且去除末尾斜杠', () => {
     baseUrl: 'https://api.custom.example/api/open/v1/',
   });
   assert.equal(c.baseUrl, 'https://api.custom.example/api/open/v1');
+});
+
+test('SANDBOX 预设基址仍为 127.0.0.1', () => {
+  const c = new Config({
+    merchantNo: 'M',
+    apiKey: 'k',
+    environment: Environment.SANDBOX,
+  });
+  assert.equal(c.baseUrl, 'http://127.0.0.1:3090/api/open/v1');
 });
 
 test('payCreate：注入通用字段/timestamp/nonce，过滤 null，签名用 pay 密钥，命中正确 path', async () => {

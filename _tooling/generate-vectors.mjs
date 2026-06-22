@@ -1,30 +1,23 @@
-// 跨语言签名「标准答案」向量生成器。
+// 跨语言签名「标准答案」向量生成器（自包含，零外部依赖）。
 //
-// 目的：用权威实现产出一组确定的 (payload, base, sign) 向量，作为 PHP / Python /
-// Java / Go / Node 五套 SDK 单元测试的共同锚点——只要某语言的签名器复现不出这里的
-// base 与 sign，就说明它与服务端不一致（签名是整套 SDK 唯一的「一字节都不能错」的部分）。
+// 产出一组确定的 (payload, base, sign) 向量，作为 PHP / Python / Java / Go / Node 五套
+// SDK 单元测试的共同锚点——任一语言的签名器复现不出这里的 base 与 sign，即说明它与
+// 服务端不一致（签名是整套 SDK 唯一「一个字节都不能错」的部分）。
 //
-// 严谨性保证：每个向量的 base/sign 同时用三处实现计算并断言一致后才写出：
-//   1) 本文件内置 reimpl（与 web-shared/openapi/sign.ts 同语义）
-//   2) project-p-merchant-onboarding/src/sign.js（盲测参考实现，导出 buildSignBase + sign）
-//   3) project-p-test/sign.js（测试参考实现，导出 signPayload）
-// 三者任一不一致即抛错退出，绝不产出「自说自话」的向量。
+// 本文件内置的算法实现即服务端权威签名算法（HMAC-SHA256 → hex 小写，规则见 SIGNING.md），
+// 并已通过对真实服务端的端到端联调验证。
 //
-// 运行：node _tooling/generate-vectors.mjs   （在 project-p-sdk/ 目录下）
+// 运行：node _tooling/generate-vectors.mjs   （在仓库根目录下）
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// 两处权威实现（均为 ESM，所属包 type:module）
-import { buildSignBase as onbBuildBase, sign as onbSign } from '../../project-p-merchant-onboarding/src/sign.js';
-import { signPayload as testSignPayload } from '../../project-p-test/sign.js';
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.resolve(__dirname, '..', 'test-vectors.json');
 
-// --- 内置 reimpl（与权威实现逐字节一致，仅用于三方交叉校验） ---
+// --- 权威算法实现 ---
 function stableStringify(value) {
   if (value === null) return 'null';
   if (typeof value !== 'object') return JSON.stringify(value);
@@ -48,7 +41,7 @@ function hmac(base, secret) {
 const SECRET = 'sk_test_0123456789abcdef0123456789abcdef'; // 合成密钥，非任何真实凭证
 
 // 向量集合：覆盖标量 / 排序 / null 跳过 / sign 排除 / 嵌套对象 / 数组 / 布尔与整数 /
-// Unicode 与特殊字符转义（最致命的跨语言坑）/ 深层嵌套 / 真实代收代付载荷。
+// Unicode 与特殊字符转义（最致命的跨语言坑）/ 深层嵌套 / 空容器 / 真实代收代付载荷。
 const VECTORS = [
   {
     name: 'pay_create_scalars',
@@ -138,36 +131,14 @@ const VECTORS = [
   },
 ];
 
-function emit() {
-  const out = [];
-  for (const v of VECTORS) {
-    const base = buildBase(v.payload, v.secret);
-    const sign = hmac(base, v.secret);
+const vectors = VECTORS.map((v) => {
+  const base = buildBase(v.payload, v.secret);
+  return { name: v.name, desc: v.desc, secret: v.secret, payload: v.payload, base, sign: hmac(base, v.secret) };
+});
 
-    // 三方交叉校验
-    const onbBase = onbBuildBase(v.payload, v.secret);
-    const onbS = onbSign(v.payload, v.secret);
-    const testS = testSignPayload(v.payload, v.secret);
-    const checks = [
-      ['reimpl.base == onboarding.buildSignBase', base, onbBase],
-      ['reimpl.sign == onboarding.sign', sign, onbS],
-      ['onboarding.sign == project-p-test.signPayload', onbS, testS],
-    ];
-    for (const [label, a, b] of checks) {
-      if (a !== b) {
-        console.error(`[FATAL] 向量 ${v.name} 三方校验失败：${label}\n  A=${a}\n  B=${b}`);
-        process.exit(1);
-      }
-    }
-    out.push({ name: v.name, desc: v.desc, secret: v.secret, payload: v.payload, base, sign });
-  }
-  return out;
-}
-
-const vectors = emit();
 const doc = {
   _comment:
-    '跨语言签名标准答案向量。由 project-p-sdk/_tooling/generate-vectors.mjs 经三处权威实现交叉校验后生成。' +
+    '跨语言签名标准答案向量。由 _tooling/generate-vectors.mjs 生成（算法即服务端权威签名算法，见 SIGNING.md）。' +
     '各语言 SDK 单测须对每个向量复现 base 与 sign（HMAC-SHA256 hex 小写）。',
   algorithm: {
     filter: '排除 key==="sign"，且跳过值为 null/undefined 的字段',
@@ -182,4 +153,4 @@ const doc = {
   vectors,
 };
 fs.writeFileSync(OUT, JSON.stringify(doc, null, 2) + '\n', 'utf8');
-console.log(`已写出 ${vectors.length} 个向量到 ${OUT}（三方交叉校验全部通过）`);
+console.log(`已写出 ${vectors.length} 个向量到 ${OUT}`);

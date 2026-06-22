@@ -1,4 +1,4 @@
-package projectp
+package openapi
 
 import (
 	"bytes"
@@ -30,14 +30,21 @@ type Response struct {
 type Client struct {
 	cfg        Config
 	baseURL    string
+	baseURLErr error // 基址解析错误（如选 Production 未传 BaseURL），首个请求时返回。
 	httpClient *http.Client
 }
 
 // NewClient 用给定配置构造客户端。BaseURL 非空时覆盖 Environment 预设。
+//
+// 注意：Production 没有内置 URL。若选用 Production 又未提供 BaseURL，构造不会
+// panic，但首个请求会返回 ErrBaseURLRequired（正式基址按上级代理专有域名派生，
+// 形如 https://api.<agent_domain>/api/open/v1）。
 func NewClient(cfg Config) *Client {
+	base, err := cfg.resolveBaseURL()
 	return &Client{
 		cfg:        cfg,
-		baseURL:    strings.TrimRight(cfg.resolveBaseURL(), "/"),
+		baseURL:    strings.TrimRight(base, "/"),
+		baseURLErr: err,
 		httpClient: &http.Client{Timeout: cfg.resolveTimeout()},
 	}
 }
@@ -138,6 +145,10 @@ func (c *Client) secretFor(kind secretKind) string {
 
 // call 构建请求体（注入通用字段 + nonce + timestamp + sign），POST 并解析统一信封。
 func (c *Client) call(ctx context.Context, path string, params map[string]any, kind secretKind) (*Response, error) {
+	// 基址解析失败（如选 Production 未传 BaseURL）：首个请求即清晰报错。
+	if c.baseURLErr != nil {
+		return nil, c.baseURLErr
+	}
 	secret := c.secretFor(kind)
 	body := c.buildBody(params, secret)
 
@@ -201,7 +212,7 @@ func (c *Client) do(ctx context.Context, path string, body map[string]any) ([]by
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	// 自识别 User-Agent：避免被 WAF/CDN（如 Cloudflare）按默认 UA 拦成 403。
-	req.Header.Set("User-Agent", "projectp-sdk-go/1.0.0")
+	req.Header.Set("User-Agent", "openapi-sdk-go/1.0.0")
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {

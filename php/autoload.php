@@ -7,12 +7,12 @@ declare(strict_types=1);
  *
  * 不需要 composer 安装即可使用 SDK：
  *   require __DIR__ . '/autoload.php';
- *   use ProjectP\Sdk\Client;
+ *   use Merchant\Openapi\Client;
  *
- * 命名空间 ProjectP\Sdk\ 映射到 src/，与 composer.json 的 PSR-4 配置一致。
+ * 命名空间 Merchant\Openapi\ 映射到 src/，与 composer.json 的 PSR-4 配置一致。
  */
 spl_autoload_register(static function (string $class): void {
-    $prefix = 'ProjectP\\Sdk\\';
+    $prefix = 'Merchant\\Openapi\\';
     $baseDir = __DIR__ . '/src/';
 
     $len = strlen($prefix);

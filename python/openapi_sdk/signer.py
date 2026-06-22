@@ -1,6 +1,6 @@
 """签名器：HMAC-SHA256 -> 十六进制小写。
 
-与服务端 ``web-shared/src/openapi/sign.ts``、``project-p-test/sign.js`` 逐字节一致。
+与服务端签名实现逐字节一致。
 算法权威定义见 ../SIGNING.md，可复现 ../test-vectors.json 的 base 与 sign。
 
 仅用 Python 标准库：json / hmac / hashlib。

@@ -1,8 +1,8 @@
-// Package projectp 是 project-p 商户支付 OpenAPI 的零依赖 Go SDK。
+// Package openapi 是商户支付 OpenAPI 的零依赖 Go SDK。
 //
-// signer.go 实现签名算法（HMAC-SHA256 → hex 小写），逐字节对齐服务端
-// web-shared/src/openapi/sign.ts。算法规范见仓库根的 SIGNING.md。
-package projectp
+// signer.go 实现签名算法（HMAC-SHA256 → hex 小写），与服务端签名实现逐字节一致。
+// 算法规范见仓库根的 SIGNING.md。
+package openapi
 
 import (
 	"crypto/hmac"

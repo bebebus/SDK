@@ -6,7 +6,7 @@ import time
 import random
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "python"))
-from projectp_sdk import Client, Config, sign, verify_callback, ApiError, TransportError  # noqa: E402
+from openapi_sdk import Client, Config, sign, verify_callback, ApiError, TransportError  # noqa: E402
 
 mno, key, pay, pout, base = (os.environ[k] for k in ("PP_MNO", "PP_KEY", "PP_PAY", "PP_POUT", "PP_BASE"))
 client = Client(Config(mno, key, pay, pout, base_url=base))

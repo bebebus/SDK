@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ProjectP\Sdk;
+namespace Merchant\Openapi;
 
 /**
- * HMAC-SHA256 签名器（与服务端 web-shared/src/openapi/sign.ts、project-p-test/sign.js 逐字节一致）。
+ * HMAC-SHA256 签名器（与服务端签名实现逐字节一致）。
  *
  * 算法步骤见 SIGNING.md：
  *  1. 过滤掉 key === "sign" 以及值为 null 的字段；

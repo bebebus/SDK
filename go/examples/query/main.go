@@ -8,16 +8,16 @@ import (
 	"errors"
 	"fmt"
 
-	projectp "github.com/bebebus/SDK/go"
+	"github.com/bebebus/SDK/go"
 )
 
 func main() {
-	client := projectp.NewClient(projectp.Config{
+	client := openapi.NewClient(openapi.Config{
 		MerchantNo:   "M00000001",
 		APIKey:       "ak_demo_key",
 		SecretPay:    "sk_test_pay_xxxxxxxxxxxxxxxxxxxxxxxx",
 		SecretPayout: "sk_test_payout_xxxxxxxxxxxxxxxxxxxxxxxx",
-		Environment:  projectp.Sandbox,
+		Environment:  openapi.Sandbox,
 	})
 	ctx := context.Background()
 
@@ -48,9 +48,9 @@ func main() {
 	printResult("payout/test/complete", resp, err)
 }
 
-func printResult(name string, resp *projectp.Response, err error) {
+func printResult(name string, resp *openapi.Response, err error) {
 	if err != nil {
-		var apiErr *projectp.APIError
+		var apiErr *openapi.APIError
 		if errors.As(err, &apiErr) {
 			fmt.Printf("[%s] 业务错误 code=%d message=%s\n", name, apiErr.Code, apiErr.Message)
 			return

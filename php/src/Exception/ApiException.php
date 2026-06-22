@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ProjectP\Sdk\Exception;
+namespace Merchant\Openapi\Exception;
 
 /**
  * 业务异常：统一信封 {code,message,data} 中 code !== 0 时抛出。
