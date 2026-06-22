@@ -1,5 +1,7 @@
 # 商户支付 OpenAPI · Go SDK
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 11 个端点（代收 5 + 代付 6），含
 HMAC-SHA256 签名、双环境配置、回调时序安全验签。仅用 Go 标准库（`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`），**无任何 `require`**。

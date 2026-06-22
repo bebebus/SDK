@@ -1,5 +1,7 @@
 # 商户支付 OpenAPI — PHP 8 SDK
 
+[![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 11 个端点 + HMAC-SHA256 签名 + 回调验签。
 仅使用 PHP 标准库与核心扩展（`ext-curl`、`ext-json`），**不依赖 composer 安装任何包**（如 Guzzle/PHPUnit 等一概不用）。
 

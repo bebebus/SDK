@@ -1,5 +1,7 @@
 # 商户支付 OpenAPI — Python SDK
 
+[![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 **零第三方依赖**的 Python 3 SDK：HTTP 用 `urllib.request`，签名用 `hmac`/`hashlib`，测试用标准库 `unittest`。无需 `pip install` 任何运行时依赖。
 
 签名算法与服务端签名实现逐字节一致，单测对 [`../test-vectors.json`](../test-vectors.json) 全量复现 `base` 与 `sign`。

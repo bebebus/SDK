@@ -1,5 +1,7 @@
 # 商户支付 OpenAPI —— Node.js SDK（ESM）
 
+[![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 零第三方依赖：仅使用 Node 标准库（`node:http` / `node:https`、`node:crypto`、`node:test`）。
 签名、HTTP、JSON、测试框架全部用官方内建，**无需 `npm install`**。
 
