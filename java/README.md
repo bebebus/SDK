@@ -1,3 +1,5 @@
+> 中文 | [English](./README.en.md)
+
 # 商户支付 OpenAPI — Java SDK
 
 零第三方依赖的 Java 客户端，覆盖商户支付 OpenAPI 全部 **11 个端点**，实现 HMAC-SHA256 请求签名与回调验签。

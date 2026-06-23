@@ -1,3 +1,5 @@
+> 中文 | [English](./INTERFACES.en.md)
+
 # 接口契约（所有语言 SDK 的单一事实源）
 
 签名见 [`SIGNING.md`](./SIGNING.md)。本文件定义环境地址、鉴权、全部端点的请求/响应字段、回调与错误码。

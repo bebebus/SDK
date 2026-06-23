@@ -1,5 +1,7 @@
 # 商户支付 OpenAPI · Go SDK
 
+> 中文 | [English](./README.en.md)
+
 [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 11 个端点（代收 5 + 代付 6），含
