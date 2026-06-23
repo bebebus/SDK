@@ -45,7 +45,14 @@ func NewClient(cfg Config) *Client {
 		cfg:        cfg,
 		baseURL:    strings.TrimRight(base, "/"),
 		baseURLErr: err,
-		httpClient: &http.Client{Timeout: cfg.resolveTimeout()},
+		httpClient: &http.Client{
+			Timeout: cfg.resolveTimeout(),
+			// [LOW 重定向] OpenAPI 是固定 POST 端点，任何重定向都不合法（可能把 POST body
+			// 跟随到非预期主机或被降级）。禁止自动跟随：返回最后一次响应交由上层判状态码。
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
 	}
 }
 

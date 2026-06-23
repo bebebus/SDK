@@ -327,7 +327,10 @@ class Client:
     ) -> Dict[str, Any]:
         payload = self._build_payload(body, secret)
         url = self._config.base_url + path
-        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        # allow_nan=False：NaN/Infinity 非法且与签名 base 分叉，序列化阶段即拒绝。
+        data = json.dumps(
+            payload, ensure_ascii=False, allow_nan=False
+        ).encode("utf-8")
         request = urllib.request.Request(
             url, data=data, headers=dict(_JSON_HEADERS), method="POST"
         )

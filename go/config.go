@@ -4,6 +4,9 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -24,6 +27,9 @@ const (
 
 // ErrBaseURLRequired 表示选用 Production 但未提供 BaseURL。
 var ErrBaseURLRequired = errors.New("baseUrl is required: production base URL is provided per your agent domain (e.g. https://api.<agent_domain>/api/open/v1)")
+
+// ErrInsecureBaseURL 表示非本地的 baseUrl 用了非 https（明文传输密钥/签名，拒绝）。
+var ErrInsecureBaseURL = errors.New("baseUrl must use https:// for non-local hosts (refuse to transmit credentials over plaintext)")
 
 // BaseURL 返回环境对应的预设基址。Production 无内置基址，返回空串。
 func (e Environment) BaseURL() string {
@@ -57,8 +63,14 @@ type Config struct {
 
 // resolveBaseURL 决定最终基址：BaseURL 非空优先，否则取 Environment 预设。
 // 最终基址为空（选了 Production 又未传 BaseURL）时返回 ErrBaseURLRequired。
+//
+// [D] 传输安全：自定义 BaseURL 若指向非本地主机（非 localhost/127.0.0.1/[::1]）却用
+// 非 https，明文承载密钥/签名，直接拒绝（ErrInsecureBaseURL）。本地联调放行 http。
 func (c Config) resolveBaseURL() (string, error) {
 	if c.BaseURL != "" {
+		if err := validateTransportSecurity(c.BaseURL); err != nil {
+			return "", err
+		}
 		return c.BaseURL, nil
 	}
 	base := c.Environment.BaseURL()
@@ -66,6 +78,33 @@ func (c Config) resolveBaseURL() (string, error) {
 		return "", ErrBaseURLRequired
 	}
 	return base, nil
+}
+
+// validateTransportSecurity 校验 baseUrl 的传输安全：非本地主机必须 https。
+// https 一律放行；http 仅当主机是 localhost/127.0.0.1/[::1] 时放行（本地联调）。
+func validateTransportSecurity(raw string) error {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("%w: 无法解析 baseUrl %q: %v", ErrInsecureBaseURL, raw, err)
+	}
+	scheme := strings.ToLower(u.Scheme)
+	if scheme == "https" {
+		return nil
+	}
+	if scheme == "http" && isLocalHost(u.Hostname()) {
+		return nil // 本地联调放行 http。
+	}
+	return fmt.Errorf("%w: %q", ErrInsecureBaseURL, raw)
+}
+
+// isLocalHost 判定主机名是否为本地环回地址（放行 http 的唯一例外）。
+func isLocalHost(host string) bool {
+	switch strings.ToLower(host) {
+	case "localhost", "127.0.0.1", "::1":
+		return true
+	default:
+		return false
+	}
 }
 
 // resolveTimeout 决定最终超时：Timeout > 0 优先，否则 30s 默认。

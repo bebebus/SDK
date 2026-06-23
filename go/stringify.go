@@ -2,9 +2,11 @@ package openapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 // jsonNumber 别名，便于 signer.go 内类型分派时引用。
@@ -33,9 +35,10 @@ func stableStringify(sb *strings.Builder, v any) {
 		uint, uint8, uint16, uint32, uint64:
 		sb.WriteString(scalarToString(x))
 	case float32:
-		sb.WriteString(formatFloat(float64(x)))
+		// [C] 嵌套浮点同样走整数校验：拒绝 NaN/Infinity/非整数，-0→"0"。
+		sb.WriteString(integerFloatToString(float64(x)))
 	case float64:
-		sb.WriteString(formatFloat(x))
+		sb.WriteString(integerFloatToString(x))
 	case []any:
 		sb.WriteByte('[')
 		for i, e := range x {
@@ -62,8 +65,14 @@ func stableStringify(sb *strings.Builder, v any) {
 		}
 		sb.WriteByte('}')
 	default:
-		// 未知类型兜底为 JSON null，避免 panic。
-		sb.WriteString("null")
+		// [MED1] 嵌套层的具体类型容器（map[string]string、[]string、struct、指针等）
+		// 同样用反射归一后递归序列化，避免被静默签成 null。
+		if normalized, isContainer := normalizeContainer(v); isContainer {
+			stableStringify(sb, normalized)
+			return
+		}
+		// 仍无法识别：fail-fast，不再静默写 "null" 造成签名豁免。
+		panic(fmt.Sprintf("openapi: 无法签名的嵌套字段类型 %T", v))
 	}
 }
 
@@ -71,8 +80,15 @@ func stableStringify(sb *strings.Builder, v any) {
 //
 // 转义：" \ \b \f \n \r \t，其余 U+0000–U+001F 控制字符 → \u00XX（小写四位）。
 // 不转义：/ （正斜杠）、< > & （不做 HTML 转义）、所有非 ASCII（原样 UTF-8）。
+//
+// [LOW UTF-8] fail-closed：先校验 UTF-8 合法性。非法字节序列或孤立代理会让 Go 的
+// range 产出 U+FFFD 替换符，与 JS（要求 well-formed）转义结果分叉；为避免跨语言签名
+// 静默分叉，遇非法 UTF-8 直接 panic（验签路径会 recover 为 false）。
 func writeJSONString(sb *strings.Builder, s string) {
 	const hexDigits = "0123456789abcdef"
+	if !utf8.ValidString(s) {
+		panic("openapi: 待签名字符串含非法 UTF-8（拒绝以免跨语言签名分叉）")
+	}
 	sb.WriteByte('"')
 	for _, r := range s {
 		switch r {
@@ -103,10 +119,4 @@ func writeJSONString(sb *strings.Builder, s string) {
 		}
 	}
 	sb.WriteByte('"')
-}
-
-// formatFloat 以与 JS Number→string 接近的最短表示格式化浮点。
-// 注意：金额一律用整数，浮点仅作兜底（API 不使用浮点金额）。
-func formatFloat(f float64) string {
-	return strconv.FormatFloat(f, 'g', -1, 64)
 }

@@ -12,8 +12,14 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Optional
+from urllib.parse import urlparse
 
 __all__ = ["Environment", "Config"]
+
+
+def _host_is_local(host: Optional[str]) -> bool:
+    """是否本地回环 host（放行 http 以兼容本地联调）。"""
+    return host in ("localhost", "127.0.0.1", "::1")
 
 
 class Environment(Enum):
@@ -55,6 +61,12 @@ class Config:
             raise ValueError("merchant_no 不能为空")
         if not api_key:
             raise ValueError("api_key 不能为空")
+        # [LOW Config fail-fast] 双密钥非空校验：空密钥会让对应 pay/payout 路径
+        # 在签名/验签时才 fail-closed，提前在构造期暴露配置缺失。
+        if not isinstance(api_secret_pay, str) or api_secret_pay.strip() == "":
+            raise ValueError("api_secret_pay 不能为空（代收/退款路径需要）")
+        if not isinstance(api_secret_payout, str) or api_secret_payout.strip() == "":
+            raise ValueError("api_secret_payout 不能为空（代付路径需要）")
 
         self.merchant_no = merchant_no
         self.api_key = api_key
@@ -67,5 +79,20 @@ class Config:
                 "baseUrl is required: production base URL is provided per your "
                 "agent domain (e.g. https://api.<agent_domain>/api/open/v1)"
             )
-        self.base_url = resolved.rstrip("/")
+        resolved = resolved.rstrip("/")
+        # [D] 传输层 fail-closed：
+        # - 仅允许 http/https scheme（拒绝 file:// 等，规避 urllib FileHandler 风险）。
+        # - 非本地回环 host 强制 https（localhost/127.0.0.1/::1 放行 http 便于本地联调）。
+        parsed = urlparse(resolved)
+        scheme = parsed.scheme.lower()
+        if scheme not in ("http", "https"):
+            raise ValueError(
+                f"base_url 仅支持 http/https，拒绝 scheme={scheme!r}: {resolved}"
+            )
+        if scheme == "http" and not _host_is_local(parsed.hostname):
+            raise ValueError(
+                "base_url 非本地地址必须使用 https://（仅 localhost/127.0.0.1 放行 http）："
+                f" {resolved}"
+            )
+        self.base_url = resolved
         self.timeout = timeout

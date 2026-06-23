@@ -44,6 +44,8 @@ public final class Config {
         while (resolved.endsWith("/")) {
             resolved = resolved.substring(0, resolved.length() - 1);
         }
+        // 传输安全：非 SANDBOX 且非 localhost/127.0.0.1 的基址必须是 https://（本地联调放行 http）。
+        requireHttpsUnlessLocal(resolved, b.environment);
         if (b.merchantNo == null || b.merchantNo.isEmpty()) {
             throw new IllegalArgumentException("merchantNo 必填");
         }
@@ -56,6 +58,54 @@ public final class Config {
         this.apiSecretPay = b.apiSecretPay;
         this.apiSecretPayout = b.apiSecretPayout;
         this.timeout = b.timeout != null ? b.timeout : Duration.ofSeconds(30);
+    }
+
+    /**
+     * 传输安全校验：除 SANDBOX 环境与本地回环地址外，基址必须是 https://，否则拒绝构造。
+     *
+     * <p>放行 http 的情形：
+     * <ul>
+     *   <li>{@code environment == SANDBOX}（内置本地联调地址）；</li>
+     *   <li>主机名为 localhost / 127.0.0.1 / ::1（本地联调）。</li>
+     * </ul>
+     * 其余一律要求 https，防止凭证/签名经明文传输被窃取或篡改。
+     */
+    private static void requireHttpsUnlessLocal(String url, Environment environment) {
+        String lower = url.toLowerCase();
+        if (lower.startsWith("https://")) {
+            return; // https 始终放行
+        }
+        if (environment == Environment.SANDBOX) {
+            return; // 沙箱内置本地地址放行
+        }
+        if (isLocalHttp(lower)) {
+            return; // 本地回环放行 http，兼容本地联调
+        }
+        throw new IllegalArgumentException(
+                "baseUrl 必须使用 https://（仅 localhost/127.0.0.1 或 SANDBOX 环境允许 http），收到: " + url);
+    }
+
+    /** 判断是否为本地回环的 http 地址（localhost / 127.0.0.1 / ::1）。 */
+    private static boolean isLocalHttp(String lowerUrl) {
+        if (!lowerUrl.startsWith("http://")) {
+            return false;
+        }
+        // 取 http:// 之后到下一个 '/'、':'、'?'、'#' 之前的主机部分
+        String rest = lowerUrl.substring("http://".length());
+        int end = rest.length();
+        for (int i = 0; i < rest.length(); i++) {
+            char c = rest.charAt(i);
+            if (c == '/' || c == ':' || c == '?' || c == '#') {
+                end = i;
+                break;
+            }
+        }
+        String host = rest.substring(0, end);
+        // 处理 IPv6 字面量括号 [::1]
+        if (host.startsWith("[") && host.endsWith("]")) {
+            host = host.substring(1, host.length() - 1);
+        }
+        return host.equals("localhost") || host.equals("127.0.0.1") || host.equals("::1");
     }
 
     public String baseUrl() { return baseUrl; }

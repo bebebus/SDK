@@ -52,10 +52,17 @@ final class Signer
     /**
      * 计算请求体签名（HMAC-SHA256 十六进制小写）。
      *
+     * 空密钥 fail-closed：secret 为空串/全空白一律拒绝签名（从根上禁止用空密钥产出签名，
+     * 否则攻击者用空密钥即可伪造任意签名）。合法非空密钥的签名结果与服务端逐字节一致。
+     *
      * @param array<string,mixed> $payload
      */
     public static function sign(array $payload, string $secret): string
     {
+        if (!self::isUsableSecret($secret)) {
+            throw new \InvalidArgumentException('secret 不能为空：禁止使用空密钥签名');
+        }
+
         $base = self::buildSignBase($payload, $secret);
 
         return hash_hmac('sha256', $base, $secret);
@@ -71,15 +78,63 @@ final class Signer
      */
     public static function verifyCallback(array $payload, string $secret): bool
     {
-        if (!isset($payload['sign']) || !is_string($payload['sign'])) {
+        // 空密钥 fail-closed：secret 为空串/全空白/非可用 → 在算任何 HMAC 之前直接判失败，
+        // 绝不继续走 sign() 比较（杜绝"空密钥也能验过"的伪造入口）。
+        if (!self::isUsableSecret($secret)) {
             return false;
         }
 
+        // 攻击者可控的非法 sign（缺失/非字符串/含非十六进制字符/长度异常）一律判失败。
+        // 服务端签名固定为 64 个小写十六进制字符（HMAC-SHA256 hex）。
+        if (!isset($payload['sign']) || !is_string($payload['sign'])) {
+            return false;
+        }
         $received = $payload['sign'];
-        $expected = self::sign($payload, $secret);
+        if (preg_match('/\A[0-9a-f]{64}\z/', $received) !== 1) {
+            return false;
+        }
+
+        // 验签全程不抛异常冒泡：非法载荷（数值越界/非整数浮点等）只判失败，不打断回调处理。
+        try {
+            $expected = self::sign($payload, $secret);
+        } catch (\Throwable $e) {
+            return false;
+        }
 
         // 时序安全比较，杜绝按字符逐位提前返回的时序侧信道
         return hash_equals($expected, $received);
+    }
+
+    /**
+     * 大整数安全的回调验签便捷方法：先用 JSON_BIGINT_AS_STRING 解析原始回调体，
+     * 把超出 PHP 整数范围的大整数保留为字符串再验签，避免精度丢失导致签名分叉。
+     *
+     * 回调验签**建议优先使用本方法**（而非先 json_decode 再 verifyCallback），尤其当回调可能
+     * 携带大整数（如 64 位订单号/金额）时。原始体非合法 JSON 对象 → 直接返回 false（不抛）。
+     *
+     * @param string $rawBody 回调请求的原始 body（未经任何解析）
+     * @param string $secret  代收/退款回调用 api_secret_pay；代付回调用 api_secret_payout
+     */
+    public static function verifyCallbackRaw(string $rawBody, string $secret): bool
+    {
+        // 保大整数为字符串：JSON_BIGINT_AS_STRING 使超范围整数解析为 string 而非丢精度的 float。
+        $decoded = json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING);
+        if (!is_array($decoded)) {
+            // 非对象/非合法 JSON（含顶层标量、null、解析失败）→ 验签失败，绝不抛异常冒泡。
+            return false;
+        }
+
+        return self::verifyCallback($decoded, $secret);
+    }
+
+    /**
+     * 判断 secret 是否可用于签名：必须是去除首尾空白后非空的字符串。
+     *
+     * 类型由声明保证为 string；这里只拦空串与全空白串（fail-closed 根因）。
+     */
+    private static function isUsableSecret(string $secret): bool
+    {
+        return trim($secret) !== '';
     }
 
     /**
@@ -105,6 +160,9 @@ final class Signer
      * 关键坑：PHP (string)true == "1"、(string)false == ""，必须特判成 "true"/"false"。
      * 整数 (string)10000 == "10000" 正确；浮点不应承载金额（金额是最小单位整数）。
      *
+     * 浮点一律拒绝（fail-fast）：金额按合约本就是整数最小单位，float 经 json_encode 大额会产生
+     * 科学计数法（如 1.0E+20），与其它语言 Number→string 口径分叉，故直接抛错而非冒险序列化。
+     *
      * @param mixed $value
      */
     private static function scalarToString(mixed $value): string
@@ -117,8 +175,11 @@ final class Signer
             return 'null';
         }
         if (is_float($value)) {
-            // 与 JSON.stringify 数字字面量对齐：整数值的 float 不带小数点
-            return self::jsonNumber($value);
+            self::rejectFloat($value);
+        }
+        if (is_int($value)) {
+            // -0 在 PHP 整数中不存在；整数直接强转即正确（含 0）
+            return (string) $value;
         }
 
         return (string) $value;
@@ -155,7 +216,8 @@ final class Signer
         }
 
         if (is_float($value)) {
-            return self::jsonNumber($value);
+            // 嵌套浮点同样拒绝：大额浮点 json_encode 会产科学计数法，跨语言序列化分叉。
+            self::rejectFloat($value);
         }
 
         if (is_string($value)) {
@@ -221,15 +283,26 @@ final class Signer
     }
 
     /**
-     * 数字字面量（无引号），对齐 JS JSON.stringify 的 number。
+     * 拒绝参与签名的浮点值（fail-fast）。
+     *
+     * - NaN / Infinity：非法数值，无确定字符串表示，必拒；
+     * - 其余浮点（含整数值的 float 如 1.0、大额浮点）：合约要求金额用整数最小单位，
+     *   float 经 json_encode 大额会产科学计数法（1.0E+20）与其它语言分叉，一律拒绝。
+     *
+     * 提示调用方改用整数（最小单位）。
      */
-    private static function jsonNumber(float $value): string
+    private static function rejectFloat(float $value): never
     {
-        $encoded = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        if ($encoded === false) {
-            throw new \RuntimeException('签名序列化失败：无法 JSON 编码数字 (' . json_last_error_msg() . ')');
+        if (is_nan($value)) {
+            throw new \InvalidArgumentException('签名数值非法：不允许 NaN，请使用整数（最小单位）');
+        }
+        if (is_infinite($value)) {
+            throw new \InvalidArgumentException('签名数值非法：不允许 Infinity，请使用整数（最小单位）');
         }
 
-        return $encoded;
+        throw new \InvalidArgumentException(sprintf(
+            '签名数值非法：不允许浮点数 (%s)，金额等数值请使用整数最小单位（如 10000 表示 1 元）',
+            var_export($value, true)
+        ));
     }
 }

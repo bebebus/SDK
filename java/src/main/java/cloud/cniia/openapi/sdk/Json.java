@@ -72,13 +72,9 @@ public final class Json {
         } else if (value instanceof BigDecimal) {
             sb.append(((BigDecimal) value).toPlainString());
         } else if (value instanceof Double || value instanceof Float) {
-            // 数字字面量（API 不用浮点金额，但为完整性保留）。整数值的 double 去掉 .0。
-            double d = ((Number) value).doubleValue();
-            if (d == Math.rint(d) && !Double.isInfinite(d) && !Double.isNaN(d)) {
-                sb.append(Long.toString((long) d));
-            } else {
-                sb.append(Double.toString(d));
-            }
+            // 数字字面量（API 不用浮点金额，但为完整性保留）。
+            // 与签名器共用同一套数值规范：NaN/Infinity、非整数、超 2^53 一律拒绝（fail-fast），-0 归一为 "0"。
+            sb.append(Signer.doubleForSign(((Number) value).doubleValue()));
         } else {
             // 兜底：当字符串处理
             writeJsonString(sb, value.toString());
@@ -365,13 +361,23 @@ public final class Json {
                 }
             }
             String num = s.substring(start, pos);
+            // 畸形数字（如 "-"、"1.2.3"、"1e"、空段）统一收敛为 JsonException（fail-closed），
+            // 不让 BigDecimal/Long/BigInteger 的原生异常冒泡出解析层。
             if (isFloat) {
-                return new BigDecimal(num);
+                try {
+                    return new BigDecimal(num);
+                } catch (NumberFormatException ex) {
+                    throw new JsonException("非法数字字面量 '" + num + "'，位置 " + start);
+                }
             }
             try {
                 return Long.parseLong(num);
             } catch (NumberFormatException ex) {
-                return new BigInteger(num);
+                try {
+                    return new BigInteger(num);
+                } catch (NumberFormatException ex2) {
+                    throw new JsonException("非法整数字面量 '" + num + "'，位置 " + start);
+                }
             }
         }
 

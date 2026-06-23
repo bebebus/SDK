@@ -1,6 +1,7 @@
 package cloud.cniia.openapi.sdk;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -32,6 +33,8 @@ public final class Client {
 
     public Client(Config config) {
         this.config = config;
+        // HttpClient 默认 Redirect.NEVER（不自动跟随重定向），避免被 3xx 重定向到非 https
+        // 或跨域端点泄露签名/凭证；此处不改变默认即为安全行为。
         this.http = HttpClient.newBuilder()
                 .connectTimeout(config.timeout())
                 .build();
@@ -248,16 +251,34 @@ public final class Client {
         Map<String, Object> env = (Map<String, Object>) parsed;
         Object codeObj = env.get("code");
         long code;
-        if (codeObj instanceof Number) {
-            code = ((Number) codeObj).longValue();
-        } else if (codeObj == null) {
+        if (codeObj == null) {
             // 缺 code 视为传输异常
             throw new TransportException("响应缺少 code 字段: " + truncate(raw), -1, raw);
+        } else if (codeObj instanceof Number) {
+            // code 仅接受整数：有小数部分按非法信封 fail-closed，杜绝 0.5→0 截断误判成功。
+            Number n = (Number) codeObj;
+            if (n instanceof BigDecimal) {
+                BigDecimal bd = (BigDecimal) n;
+                if (bd.stripTrailingZeros().scale() > 0) {
+                    throw new TransportException("响应 code 非整数: " + codeObj, -1, raw);
+                }
+                code = bd.longValueExact();
+            } else if (n instanceof Double || n instanceof Float) {
+                double d = n.doubleValue();
+                if (d != Math.rint(d) || Double.isNaN(d) || Double.isInfinite(d)) {
+                    throw new TransportException("响应 code 非整数: " + codeObj, -1, raw);
+                }
+                code = (long) d;
+            } else {
+                // Long / Integer / BigInteger 等整数类型直接取整数值
+                code = n.longValue();
+            }
         } else {
+            // 字符串等其他形态：必须是合法整数文本，否则非法信封。
             try {
-                code = Long.parseLong(codeObj.toString());
+                code = Long.parseLong(codeObj.toString().trim());
             } catch (NumberFormatException nfe) {
-                throw new TransportException("响应 code 非数字: " + codeObj, -1, raw);
+                throw new TransportException("响应 code 非整数: " + codeObj, -1, raw);
             }
         }
         Object msgObj = env.get("message");

@@ -132,13 +132,25 @@ $base = Signer::buildSignBase($payload, $secret);
 // 回调验签（时序安全比较，除 sign 外所有字段参与，不硬编码字段表）
 $ok = Signer::verifyCallback($callbackPayload, $secret);
 
+// 推荐：大整数安全的便捷验签——直接传原始 body，内部用 JSON_BIGINT_AS_STRING 解析，
+// 把超出 PHP 整数范围的大整数（如 64 位订单号）保留为字符串后再验签，避免精度丢失致签名分叉。
+$ok = Signer::verifyCallbackRaw($rawBody, $secret);
+
 // 便捷方法（密钥取自 Config）
 $client->verifyPayCallback($payload);    // 代收/退款回调，用 api_secret_pay
 $client->verifyPayoutCallback($payload); // 代付回调，用 api_secret_payout
 ```
 
-回调处理范式（见 `examples/callback_verify.php`）：拿原始 body → `json_decode` → `verifyCallback` →
+回调处理范式（见 `examples/callback_verify.php`）：拿原始 body → 优先用 `verifyCallbackRaw($rawBody, $secret)`
+（或 `json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING)` 后再 `verifyCallback`，保大整数为字符串）→
 按 `status`（success/failed）**幂等**处理 → 回 **HTTP 200 + 纯文本 `success`**。验签失败不要回成功，让平台重试。
+
+**安全约束**（fail-closed，仅拦非法输入，不影响合法签名结果）：
+
+- **空密钥拒绝**：`secret` 为空串/全空白时，`sign()` 抛 `InvalidArgumentException`、`verifyCallback()/verifyCallbackRaw()` 直接返回 `false`（不会用空密钥算出任何签名）。
+- **验签异常归 false**：回调体非对象、`sign` 非字符串/非 64 位小写十六进制/长度异常 → `verifyCallback*()` 返回 `false`，绝不抛异常冒泡。
+- **数值必须整数**：参与签名的数值不允许 `float`（含 `NaN`/`Infinity`/`1.0`）——金额请用整数最小单位（`10000` = 1 元），传 float 会抛 `InvalidArgumentException`。
+- **传输 https**：`Config` 的 `baseUrl` 非 `localhost`/`127.0.0.1` 时强制 `https://`，否则拒绝构造；cURL 钉死证书校验（`SSL_VERIFYPEER`/`SSL_VERIFYHOST`）、限协议为 https|http、关闭重定向跟随。
 
 ## 示例
 

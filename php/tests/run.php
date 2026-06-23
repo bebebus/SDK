@@ -328,6 +328,98 @@ checkTrue('非法 JSON 抛 TransportException', $caughtJ instanceof TransportExc
 // 原始响应保留途径
 checkTrue('lastRawResponse 可取', is_array($stubClient->lastRawResponse()));
 
+/* ---------------------------- (d) fail-closed 守卫 ---------------------------- */
+
+// [A] 空/空白 secret：sign 抛错、verifyCallback 直接 false（算 HMAC 前就拒绝）
+$guardPayload = ['amount' => 10000, 'api_key' => 'ak_demo_key'];
+$guardSign = Signer::sign($guardPayload, $paySecret);
+$guardCallback = $guardPayload + ['sign' => $guardSign];
+
+$emptySignThrew = false;
+try {
+    Signer::sign($guardPayload, '');
+} catch (\InvalidArgumentException $e) {
+    $emptySignThrew = true;
+}
+checkTrue('[A] 空 secret sign 抛 InvalidArgumentException', $emptySignThrew);
+
+$blankSignThrew = false;
+try {
+    Signer::sign($guardPayload, "  \t ");
+} catch (\InvalidArgumentException $e) {
+    $blankSignThrew = true;
+}
+checkTrue('[A] 全空白 secret sign 抛错', $blankSignThrew);
+
+checkFalse('[A] 空 secret verifyCallback=false', Signer::verifyCallback($guardCallback, ''));
+checkFalse('[A] 全空白 secret verifyCallback=false', Signer::verifyCallback($guardCallback, "\n\t "));
+checkTrue('[A] 合法 secret verifyCallback=true', Signer::verifyCallback($guardCallback, $paySecret));
+
+// [B] 攻击者可控的非法 sign（非字符串/非hex/长度异常/大写）一律 false，绝不抛
+$nonStr = $guardCallback;
+$nonStr['sign'] = 12345;
+checkFalse('[B] sign 非字符串=false', Signer::verifyCallback($nonStr, $paySecret));
+$nonHex = $guardCallback;
+$nonHex['sign'] = str_repeat('z', 64);
+checkFalse('[B] sign 非hex=false', Signer::verifyCallback($nonHex, $paySecret));
+$badLen = $guardCallback;
+$badLen['sign'] = str_repeat('a', 63);
+checkFalse('[B] sign 长度异常=false', Signer::verifyCallback($badLen, $paySecret));
+$upper = $guardCallback;
+$upper['sign'] = strtoupper($guardSign);
+checkFalse('[B] sign 大写hex=false（服务端固定小写）', Signer::verifyCallback($upper, $paySecret));
+
+// [C] 浮点拒绝（NaN/Infinity/非整数/整数值float/-0.0），整数仍正常
+foreach (['NaN' => NAN, 'Infinity' => INF, '-Infinity' => -INF, '1.5' => 1.5, '1.0' => 1.0, '-0.0' => -0.0] as $label => $fv) {
+    $threw = false;
+    try {
+        Signer::buildSignBase(['amount' => $fv], 's');
+    } catch (\InvalidArgumentException $e) {
+        $threw = true;
+    }
+    checkTrue("[C] 浮点 $label 拒绝", $threw);
+}
+$nestedFloatThrew = false;
+try {
+    Signer::buildSignBase(['extra' => ['x' => 1.5]], 's');
+} catch (\InvalidArgumentException $e) {
+    $nestedFloatThrew = true;
+}
+checkTrue('[C] 嵌套浮点拒绝', $nestedFloatThrew);
+check('[C] 整数 0 仍正常 → "0"', 'count=0&secret=s', Signer::buildSignBase(['count' => 0], 's'));
+
+// 大整数安全验签便捷方法 verifyCallbackRaw
+$rawOk = json_encode($guardCallback, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+checkTrue('verifyCallbackRaw 正例', Signer::verifyCallbackRaw($rawOk, $paySecret));
+checkFalse('verifyCallbackRaw 非JSON=false', Signer::verifyCallbackRaw('not json', $paySecret));
+checkFalse('verifyCallbackRaw 顶层标量=false', Signer::verifyCallbackRaw('123', $paySecret));
+checkFalse('verifyCallbackRaw null=false', Signer::verifyCallbackRaw('null', $paySecret));
+checkFalse('verifyCallbackRaw 空secret=false', Signer::verifyCallbackRaw($rawOk, ''));
+
+// [D] Config 传输安全：非 localhost http 拒绝；https/本地回环放行
+$httpDomainThrew = false;
+try {
+    new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'http://api.example.com/api/open/v1');
+} catch (\InvalidArgumentException $e) {
+    $httpDomainThrew = true;
+}
+checkTrue('[D] http 非本地域名拒绝', $httpDomainThrew);
+
+$ftpThrew = false;
+try {
+    new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'ftp://x/api');
+} catch (\InvalidArgumentException $e) {
+    $ftpThrew = true;
+}
+checkTrue('[D] 非 http(s) 协议拒绝', $ftpThrew);
+
+$cfgHttps = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'https://api.example.com/api/open/v1');
+check('[D] https 通过', 'https://api.example.com/api/open/v1', $cfgHttps->baseUrl);
+$cfgLocal = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'http://localhost:3090/api/open/v1');
+check('[D] http localhost 放行', 'http://localhost:3090/api/open/v1', $cfgLocal->baseUrl);
+$cfgLoop = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'http://127.0.0.1:3090/api/open/v1');
+check('[D] http 127.0.0.1 放行', 'http://127.0.0.1:3090/api/open/v1', $cfgLoop->baseUrl);
+
 /* ---------------------------- 汇总 ---------------------------- */
 
 echo "\n";

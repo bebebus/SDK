@@ -342,6 +342,15 @@ final class Client
             ],
             CURLOPT_TIMEOUT => $timeoutSeconds,
             CURLOPT_CONNECTTIMEOUT => $timeoutSeconds,
+            // —— 传输安全钉死 ——
+            // 强制校验对端证书与主机名（默认即 true/2，这里显式写死防被全局配置/ini 弱化）。
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            // 只允许 https 与 http（localhost 联调走 http）；屏蔽 file://、ftp:// 等危险协议，
+            // 杜绝被恶意 baseUrl 诱导走非预期协议。
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
+            // 不自动跟随重定向：避免 302 把请求（含签名载荷）转发到第三方域名造成凭据外泄。
+            CURLOPT_FOLLOWLOCATION => false,
         ]);
 
         $body = curl_exec($ch);
