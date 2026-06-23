@@ -45,7 +45,7 @@ done
 VER="${VERSION#v}"
 TAG="v${VER}"
 if ! [[ "$VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?$ ]]; then
-  echo "版本号格式不对: $VERSION（应形如 1.0.1）"; exit 2
+  echo "版本号格式不对: ${VERSION}（应形如 1.0.1）"; exit 2
 fi
 
 want() { for r in "${REGS[@]}"; do [ "$r" = "$1" ] && return 0; done; return 1; }
@@ -130,7 +130,7 @@ if want go; then
   echo "──── Go ────"
   GOTAG="go/$TAG"
   if git ls-remote --tags origin "refs/tags/$GOTAG" 2>/dev/null | grep -q "$GOTAG"; then
-    echo "  ⏭ 远程已存在 tag $GOTAG，跳过"; record "Go: 跳过(tag 已存在)"
+    echo "  ⏭ 远程已存在 tag ${GOTAG}，跳过"; record "Go: 跳过(tag 已存在)"
   else
     git tag "$GOTAG" && git push origin "$GOTAG" >/dev/null 2>&1 \
       && { GOPROXY=https://proxy.golang.org go list -m "github.com/bebebus/SDK/go@$TAG" >/dev/null 2>&1 || true; record "Go: ✅ github.com/bebebus/SDK/go@$TAG"; echo "  ✅ 已推 $GOTAG"; } \
