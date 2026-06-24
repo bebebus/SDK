@@ -27,11 +27,24 @@ from .exceptions import ApiError, TransportError
 
 __all__ = ["Client"]
 
+# [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
+# 不再硬编码；源码直跑（未安装）取不到则兜底 '1.1.0'。
+try:
+    from importlib.metadata import PackageNotFoundError, version as _pkg_version
+
+    try:
+        _SDK_VERSION = _pkg_version("bebebus-merchant-openapi-sdk")
+    except PackageNotFoundError:
+        _SDK_VERSION = "1.1.0"
+except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
+    _SDK_VERSION = "1.1.0"
+
 _JSON_HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",
     # 显式 User-Agent：urllib 默认 UA（Python-urllib/x.y）常被 WAF/CDN（如 Cloudflare）拦成 403。
-    "User-Agent": "openapi-sdk-python/1.0.0",
+    # 版本号从包元数据单一派生（见 _SDK_VERSION）。
+    "User-Agent": f"openapi-sdk-python/{_SDK_VERSION}",
 }
 
 
@@ -273,10 +286,12 @@ class Client:
     # =====================================================================
 
     def _call_pay(self, path: str, body: Mapping[str, Any]) -> Dict[str, Any]:
-        return self._call(path, body, self._config.api_secret_pay)
+        # [L14] 调用代收类端点时才校验 pay 密钥，缺失即 fail-closed。
+        return self._call(path, body, self._config.require_secret_pay())
 
     def _call_payout(self, path: str, body: Mapping[str, Any]) -> Dict[str, Any]:
-        return self._call(path, body, self._config.api_secret_payout)
+        # [L14] 调用代付类端点时才校验 payout 密钥，缺失即 fail-closed。
+        return self._call(path, body, self._config.require_secret_payout())
 
     def call_raw(
         self, path: str, body: Mapping[str, Any], secret: str

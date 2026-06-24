@@ -1,0 +1,71 @@
+# [L25] 跨语言契约护栏：每次 push / PR 跑五语言的 test-vectors 测试。
+# 把「跨语言签名逐字节一致」从发版人工门槛升级为每次提交自动回归。
+# 各语言测试步骤镜像 release.sh 中 run() 的命令（保持单一事实源一致）。
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Node.js —— node --test（与 release.sh 的 "Node" 步骤一致）
+  nodejs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: node --test
+        working-directory: nodejs
+        run: node --test
+
+  # Python —— unittest discover（与 release.sh 的 "Python" 步骤一致）
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: python -m unittest
+        working-directory: python
+        run: python3 -m unittest discover -s tests
+
+  # PHP —— 自写零依赖 runner（与 release.sh 的 "PHP" 步骤一致）
+  php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: curl, json
+      - name: php tests/run.php
+        working-directory: php
+        run: php tests/run.php
+
+  # Java —— 自写断言 runner（与 release.sh 的 "Java" 步骤一致，不依赖 Maven）
+  java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: bash run-tests.sh
+        working-directory: java
+        run: bash run-tests.sh
+
+  # Go —— go test（与 release.sh 的 "Go" 步骤一致；-count=1 绕开缓存读外部向量）
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: go test
+        working-directory: go
+        run: go test -count=1 ./...

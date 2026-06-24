@@ -6,7 +6,7 @@
 
 Provides five SDKs in **PHP / Python / Java / Go / Node.js** for the merchant payment open API (collection / payout / callback).
 
-Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 11 endpoints**, **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
+Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 11 signed business endpoints** (plus non-signed endpoints such as `/version`; 13 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
 
 ## Directory Structure
 
@@ -14,7 +14,7 @@ Design principles: **zero third-party dependencies** (only each language's stand
 SDK/
 ├── README.md            # This file
 ├── SIGNING.md           # Authoritative signing algorithm description + per-language serialization pitfalls (required reading for implementation/debugging)
-├── INTERFACES.md        # Field-level request/response for the 11 endpoints, callback fields, error codes
+├── INTERFACES.md        # Field-level request/response for the 11 signed business endpoints, callback fields, error codes
 ├── test-vectors.json    # Cross-language signing test vectors (11 entries; asserted by all five test suites)
 ├── _tooling/
 │   └── generate-vectors.mjs   # Vector generator (produced after cross-validation against three authoritative implementations)
@@ -27,15 +27,16 @@ SDK/
 
 ## Language Matrix
 
-Published to each language's package index (scoped to `bebebus`, MIT, zero runtime dependencies); publishing commands are in [`PUBLISHING.md`](./PUBLISHING.md).
+npm / PyPI / Packagist / Go are published to their respective package indexes (scoped to `bebebus`, MIT, zero runtime dependencies);
+**Java is NOT published to Maven — source import only** (add `java/src/main/java` to your project, or build a jar yourself via `pom.xml`). Publishing commands are in [`PUBLISHING.md`](./PUBLISHING.md).
 
 | Language | Install / Import | HTTP (no third-party) | Test command |
 |------|-------------|------------------|----------|
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`; `import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`; `from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`; namespace `Merchant\Openapi` | cURL extension | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go@v1.0.0`; `import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
-| Java | Source import (not published to Maven Central); `import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
+| Go | `go get github.com/bebebus/SDK/go@v1.1.0` (min Go 1.21); `import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Java | **Source import (NOT published to Maven)**; `import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > The Go tests read the external `test-vectors.json`, and `go test`'s cache does not track that file, so **after changing the vectors use `-count=1`** to force a re-run.
 

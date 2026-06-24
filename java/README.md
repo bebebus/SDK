@@ -10,7 +10,9 @@
 
 签名算法与字段契约见仓库根目录的 [`SIGNING.md`](../SIGNING.md) 与 [`INTERFACES.md`](../INTERFACES.md)，签名标准答案见 [`test-vectors.json`](../test-vectors.json)。
 
-## 如何引入（无需安装依赖）
+## 如何引入（源码引入，**不发 Maven**）
+
+> 本 Java SDK **不上架 Maven Central**，仅以源码方式引入（与 npm/PyPI/Packagist/Go 的上架口径区分）。`release.sh` 的发布闭环不含 Java。
 
 本 SDK 没有外部依赖，最简单的方式就是把源码目录直接纳入你的工程：
 
@@ -29,7 +31,7 @@ javac --release 17 -encoding UTF-8 -d out $(find src/main/java -name '*.java')
 jar cf openapi-sdk.jar -C out .
 ```
 
-也提供了 [`pom.xml`](./pom.xml) 供日后用 Maven 打 jar（`<dependencies>` 故意为空）。**测试不依赖 Maven**。
+也提供了 [`pom.xml`](./pom.xml) 供你**在本地**用 Maven 打 jar（`<dependencies>` 故意为空）——仅供自行构建，**不用于发布到 Maven Central**。**测试不依赖 Maven**。
 
 ## 快速开始
 

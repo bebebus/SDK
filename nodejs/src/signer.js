@@ -138,6 +138,10 @@ export function verifyCallback(payload, secret) {
   const provided = payload.sign;
   // [B] 提供的 sign 非字符串/空串 → 判否（攻击者可控字段不抛异常）。
   if (typeof provided !== 'string' || provided.length === 0) return false;
+  // [B] hex 预校验：平台 sign 恒为小写 64 位十六进制（HMAC-SHA256），
+  // 非此格式（含大小写混写/非 hex 字符/长度异常）一律提前判否，不进 HMAC 计算。
+  // 与 python/php/java/go 验签器对齐。合法回调 sign 必为小写 hex，故 11 标准向量不受影响。
+  if (!/^[0-9a-f]{64}$/.test(provided)) return false;
 
   // [B] 计算期望签名时任何异常（如载荷含非法数值触发数值规范守卫）一律归 false，绝不冒泡。
   let expected;

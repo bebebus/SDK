@@ -19,6 +19,12 @@ use Merchant\Openapi\Exception\TransportException;
  */
 final class Client
 {
+    /**
+     * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
+     * release.sh 发版时按此常量 sed 同步（与 composer.json 一致）。
+     */
+    public const VERSION = '1.1.0';
+
     /** @var callable(string,string,int):array{status:int,body:string} 注入的 HTTP 执行器（默认 cURL） */
     private $httpExecutor;
 
@@ -338,7 +344,8 @@ final class Client
                 'Content-Type: application/json',
                 'Accept: application/json',
                 // 自识别 User-Agent：避免被 WAF/CDN（如 Cloudflare）按默认 UA 拦成 403。
-                'User-Agent: merchant-openapi-sdk-php/1.0.0',
+                // 版本号从 self::VERSION 单一派生。
+                'User-Agent: merchant-openapi-sdk-php/' . self::VERSION,
             ],
             CURLOPT_TIMEOUT => $timeoutSeconds,
             CURLOPT_CONNECTTIMEOUT => $timeoutSeconds,

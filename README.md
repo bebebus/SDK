@@ -6,7 +6,8 @@
 
 为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
-设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），**全部 11 个接口**，
+设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），
+**全部 11 个签名业务端点**（另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
 **测试 + 正式双环境**，**跨语言签名逐字节一致**（同一份标准答案向量五套都绿）。
 
 ## 目录结构
@@ -15,7 +16,7 @@
 SDK/
 ├── README.md            # 本文件
 ├── SIGNING.md           # 签名算法权威说明 + 逐语言序列化坑（实现/排错必读）
-├── INTERFACES.md        # 11 端点字段级请求/响应、回调字段、错误码
+├── INTERFACES.md        # 11 个签名业务端点字段级请求/响应、回调字段、错误码
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
 ├── _tooling/
 │   └── generate-vectors.mjs   # 向量生成器（经三处权威实现交叉校验后产出）
@@ -28,15 +29,16 @@ SDK/
 
 ## 语言矩阵
 
-发布到各语言包索引（scoped 到 `bebebus`，MIT，零运行时依赖）；发布命令见 [`PUBLISHING.md`](./PUBLISHING.md)。
+npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`，MIT，零运行时依赖）；
+**Java 不发 Maven，仅源码引入**（把 `java/src/main/java` 直接加入你的工程，或用 `pom.xml` 自行打 jar）。发布命令见 [`PUBLISHING.md`](./PUBLISHING.md)。
 
 | 语言 | 安装 / 引入 | HTTP（无第三方） | 测试命令 |
 |------|-------------|------------------|----------|
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`；`import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`；命名空间 `Merchant\Openapi` | cURL 扩展 | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go@v1.0.0`；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
-| Java | 源码引入（未发 Maven Central）；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
+| Go | `go get github.com/bebebus/SDK/go@v1.1.0`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Java | **源码引入（不发 Maven）**；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。
 

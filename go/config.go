@@ -122,8 +122,9 @@ var nowUnix = func() int64 { return time.Now().Unix() }
 var newNonce = func() string {
 	buf := make([]byte, 16)
 	if _, err := rand.Read(buf); err != nil {
-		// crypto/rand 在受支持平台几乎不会失败；兜底用时间戳纳秒。
-		return hex.EncodeToString([]byte(time.Now().Format("20060102150405.000000000")))
+		// [L21] 支付场景宁失败不弱化随机性：crypto/rand 失败即 panic，
+		// 绝不退化为可预测的时间戳串（防重放 nonce 一旦可预测即失去意义）。
+		panic("openapi: 生成 nonce 失败——加密随机源不可用，拒绝用可预测值兜底: " + err.Error())
 	}
 	return hex.EncodeToString(buf)
 }

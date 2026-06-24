@@ -1,13 +1,16 @@
 # 发布到包索引
 
-五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，版本 `1.0.0`。
+五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `1.1.0`。
+
+**仅以下 4 套上架公共包索引；Java 不发 Maven，只做源码引入**（把 `java/src/main/java` 加入工程或自行 `pom.xml` 打 jar）。故 `release.sh` 的发布闭环**不含 Java**。
 
 | 索引 | 包名 | 安装方式 |
 |------|------|----------|
 | npm | `@bebebus/merchant-openapi-sdk` | `npm i @bebebus/merchant-openapi-sdk` |
 | PyPI | `bebebus-merchant-openapi-sdk`（import 名仍 `openapi_sdk`） | `pip install bebebus-merchant-openapi-sdk` |
 | Packagist | `bebebus/merchant-openapi-sdk` | `composer require bebebus/merchant-openapi-sdk` |
-| Go (pkg.go.dev) | `github.com/bebebus/SDK/go` | `go get github.com/bebebus/SDK/go@v1.0.0` |
+| Go (pkg.go.dev) | `github.com/bebebus/SDK/go` | `go get github.com/bebebus/SDK/go@v1.1.0` |
+| Java | —（不发 Maven） | 源码引入：把 `java/src/main/java` 加入工程，或 `cd java && mvn package` 自行打 jar |
 
 > ⚠️ 发布到公共索引**不可撤销**（版本号永久占用）。令牌只用于发布、勿入库。每次发版先 bump 版本号。
 

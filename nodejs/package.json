@@ -4,8 +4,12 @@
   "description": "商户支付 OpenAPI Node.js SDK（零第三方依赖，ESM）",
   "type": "module",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "exports": {
-    ".": "./src/index.js"
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    }
   },
   "files": [
     "src",

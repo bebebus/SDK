@@ -51,8 +51,8 @@ class Config:
         self,
         merchant_no: str,
         api_key: str,
-        api_secret_pay: str,
-        api_secret_payout: str,
+        api_secret_pay: str = "",
+        api_secret_payout: str = "",
         environment: Environment = Environment.PRODUCTION,
         base_url: Optional[str] = None,
         timeout: float = 30.0,
@@ -61,17 +61,15 @@ class Config:
             raise ValueError("merchant_no 不能为空")
         if not api_key:
             raise ValueError("api_key 不能为空")
-        # [LOW Config fail-fast] 双密钥非空校验：空密钥会让对应 pay/payout 路径
-        # 在签名/验签时才 fail-closed，提前在构造期暴露配置缺失。
-        if not isinstance(api_secret_pay, str) or api_secret_pay.strip() == "":
-            raise ValueError("api_secret_pay 不能为空（代收/退款路径需要）")
-        if not isinstance(api_secret_payout, str) or api_secret_payout.strip() == "":
-            raise ValueError("api_secret_payout 不能为空（代付路径需要）")
-
+        # [L14] 按需校验（对齐 java/go 的 requireSecret* 模式）：构造期允许只配
+        # 一套密钥（只跑代收或只跑代付）；缺哪套密钥要到调用对应业务方法时才
+        # fail-closed（见 require_secret_pay / require_secret_payout）。绝不空密钥签名。
         self.merchant_no = merchant_no
         self.api_key = api_key
-        self.api_secret_pay = api_secret_pay
-        self.api_secret_payout = api_secret_payout
+        self.api_secret_pay = api_secret_pay if isinstance(api_secret_pay, str) else ""
+        self.api_secret_payout = (
+            api_secret_payout if isinstance(api_secret_payout, str) else ""
+        )
         self.environment = environment
         resolved = base_url if base_url else environment.base_url
         if not resolved:
@@ -96,3 +94,19 @@ class Config:
             )
         self.base_url = resolved
         self.timeout = timeout
+
+    # [L14] 按需取密钥：调用对应业务方法时才校验，缺失即 fail-closed（绝不空密钥签名）。
+    def require_secret_pay(self) -> str:
+        """取代收/退款密钥（pay 类）。未配置则抛 ValueError。"""
+        if not isinstance(self.api_secret_pay, str) or self.api_secret_pay.strip() == "":
+            raise ValueError("未配置 api_secret_pay，无法调用 pay 类接口或验签代收回调")
+        return self.api_secret_pay
+
+    def require_secret_payout(self) -> str:
+        """取代付密钥（payout 类）。未配置则抛 ValueError。"""
+        if (
+            not isinstance(self.api_secret_payout, str)
+            or self.api_secret_payout.strip() == ""
+        ):
+            raise ValueError("未配置 api_secret_payout，无法调用 payout 类接口或验签代付回调")
+        return self.api_secret_payout

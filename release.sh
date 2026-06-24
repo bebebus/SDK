@@ -82,12 +82,23 @@ fi
 echo "──── bump 版本到 $VER ────"
 node -e "const f='$ROOT/nodejs/package.json';const fs=require('fs');const p=JSON.parse(fs.readFileSync(f));p.version='$VER';fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n')" && echo "  nodejs/package.json ✓"
 perl -0pi -e 's/^version = "[^"]*"/version = "'"$VER"'"/m' "$ROOT/python/pyproject.toml" && echo "  python/pyproject.toml ✓"
+# [L19] 同步 php/java/go 的 VERSION 常量与 java pom（UA 由这些常量单一派生）。
+perl -0pi -e "s/(const VERSION = ')[^']*(';)/\${1}$VER\${2}/" "$ROOT/php/src/Client.php" && echo "  php/src/Client.php VERSION ✓"
+perl -0pi -e "s/(public static final String VERSION = \")[^\"]*(\";)/\${1}$VER\${2}/" "$ROOT/java/src/main/java/cloud/cniia/openapi/sdk/Client.java" && echo "  java Client.VERSION ✓"
+perl -0pi -e "s|(<artifactId>merchant-openapi-sdk</artifactId>\s*<version>)[^<]*(</version>)|\${1}$VER\${2}|s" "$ROOT/java/pom.xml" && echo "  java/pom.xml ✓"
+perl -0pi -e "s/(const Version = \")[^\"]*(\")/\${1}$VER\${2}/" "$ROOT/go/client.go" && echo "  go client.go Version ✓"
 
 # ---------- 3. 提交 bump 到 monorepo 并推送（tag 要指向 bump 后的提交）----------
 if ! git diff --quiet; then
   git add -A
   git commit -q -m "release: $TAG"
-  git push origin main >/dev/null 2>&1 && echo "  monorepo 已提交并推送 ($TAG)"
+  # [L26] set -e 未开，push 失败必须显式判返回码并中止：
+  # 否则 tag 会指向未推送的 bump 提交，导致各索引发布与远端历史不一致。
+  if git push origin main >/dev/null 2>&1; then
+    echo "  monorepo 已提交并推送 ($TAG)"
+  else
+    echo "  ⛔ 推送 main 失败，发布中止（已本地提交 bump，请手动排查后重试）。"; exit 1
+  fi
 else
   echo "  无版本变更（版本号未变），跳过提交"
 fi

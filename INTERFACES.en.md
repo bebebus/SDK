@@ -130,15 +130,21 @@ When an order reaches a terminal state, the platform POSTs JSON to `notify_url`,
 | code | Meaning |
 |------|------|
 | 0 | Success |
-| 100000 | Authentication failed (invalid/disabled/nonexistent credential, etc.) |
-| 100001 | Payload validation failed (message is the specific field error, e.g. `"amount" must be a number`) |
+| 100000 | Generic business failure / unified auth-failure code (invalid/disabled/nonexistent credential, etc.) |
+| 100001 | Parameter validation failed (message is the specific field error, e.g. `"amount" must be a number`) |
 | 100101 | Request expired (timestamp outside ±300s) |
 | 100102 | IP not in the allowlist |
+| 100103 | Replay / duplicate request (nonce or signature fingerprint repeated within 300s) |
 | 100104 | Signature error |
 | 100105 | IP in the blocklist |
+| 100106 | Too many auth failures (rate limited; same merchant_no + IP fails auth 60 times within 60s) |
+| 200002 | Agent disabled |
+| 210002 | Merchant disabled |
+| 300101 | Collection idempotency conflict (out_order_no exists with mismatched params) |
 | 300201 | Payout order idempotency conflict |
 | 300301 | Order does not exist |
-| 300402 | Channel configuration unavailable |
+| 300401 | Channel unavailable / missing |
+| 300402 | Upstream config unavailable |
 | 300403 | Fee rate not configured |
 | 300404 | No available pay-method channel |
 | 300405 | Missing required additional info (`data.missing_fields`) |
@@ -147,6 +153,7 @@ When an order reaches a terminal state, the platform POSTs JSON to `notify_url`,
 | 300408 | Channel does not support proof query |
 | 300409 | No proof found upstream / out of query window |
 | 300410 | Order not in a success state (proof/receipt not queryable) |
+| 300411 | Receipt generation failed |
 | 300501 | Insufficient balance |
 
 > Error codes are authoritative on the server side and may be added; SDK exceptions should carry the raw `code`/`message`/`data` for the caller to judge, do not exhaustively hard-code branches.

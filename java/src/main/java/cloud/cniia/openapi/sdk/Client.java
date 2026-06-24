@@ -27,6 +27,12 @@ public final class Client {
     /** 密钥归属：决定用 pay 还是 payout 密钥签名。 */
     private enum Secret { PAY, PAYOUT }
 
+    /**
+     * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
+     * release.sh 发版时按此常量 sed 同步（与 pom.xml &lt;version&gt; 一致）。
+     */
+    public static final String VERSION = "1.1.0";
+
     private final Config config;
     private final HttpClient http;
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -191,7 +197,8 @@ public final class Client {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 // 自识别 User-Agent：避免被 WAF/CDN（如 Cloudflare）按默认 UA 拦成 403。
-                .header("User-Agent", "openapi-sdk-java/1.0.0")
+                // 版本号从 VERSION 常量单一派生。
+                .header("User-Agent", "openapi-sdk-java/" + VERSION)
                 .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
                 .build();
 

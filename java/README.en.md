@@ -10,7 +10,9 @@ A Java client with zero third-party dependencies, covering all **11 endpoints** 
 
 For the signing algorithm and field contracts, see [`SIGNING.md`](../SIGNING.en.md) and [`INTERFACES.md`](../INTERFACES.en.md) in the repository root; for the canonical signature answers, see [`test-vectors.json`](../test-vectors.json).
 
-## How to include (no dependency installation needed)
+## How to include (source import, **NOT published to Maven**)
+
+> This Java SDK is **not published to Maven Central**; it is consumed as source only (distinct from the npm/PyPI/Packagist/Go indexes). The `release.sh` publishing loop excludes Java.
 
 This SDK has no external dependencies. The simplest approach is to bring the source directory directly into your project:
 
@@ -29,7 +31,7 @@ javac --release 17 -encoding UTF-8 -d out $(find src/main/java -name '*.java')
 jar cf openapi-sdk.jar -C out .
 ```
 
-A [`pom.xml`](./pom.xml) is also provided for building a jar with Maven later (`<dependencies>` is intentionally empty). **Tests do not depend on Maven.**
+A [`pom.xml`](./pom.xml) is also provided for building a jar with Maven **locally** (`<dependencies>` is intentionally empty) — for your own build only, **not for publishing to Maven Central**. **Tests do not depend on Maven.**
 
 ## Quick start
 
