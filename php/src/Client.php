@@ -23,7 +23,7 @@ final class Client
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 composer.json 一致）。
      */
-    public const VERSION = '1.1.0';
+    public const VERSION = '1.1.1';
 
     /** @var callable(string,string,int):array{status:int,body:string} 注入的 HTTP 执行器（默认 cURL） */
     private $httpExecutor;

@@ -1,6 +1,6 @@
 {
   "name": "@bebebus/merchant-openapi-sdk",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "商户支付 OpenAPI Node.js SDK（零第三方依赖，ESM）",
   "type": "module",
   "main": "src/index.js",
