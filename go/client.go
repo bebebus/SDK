@@ -12,7 +12,7 @@ import (
 
 // Version 是 SDK 版本号单一事实源：UA 由它派生（不再硬编码）。
 // release.sh 发版打 tag go/vX.Y.Z 时，同步 sed 此常量保持一致。
-const Version = "1.1.1"
+const Version = "1.1.2"
 
 // secretKind 标记某端点该用哪把密钥。
 type secretKind int

@@ -31,7 +31,7 @@ public final class Client {
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 pom.xml &lt;version&gt; 一致）。
      */
-    public static final String VERSION = "1.1.1";
+    public static final String VERSION = "1.1.2";
 
     private final Config config;
     private final HttpClient http;
