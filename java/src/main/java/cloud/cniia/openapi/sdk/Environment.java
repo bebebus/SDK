@@ -4,9 +4,9 @@ package cloud.cniia.openapi.sdk;
  * 预设环境。
  *
  * <ul>
- *   <li>{@link #PRODUCTION} — 正式环境，<b>无内置基址</b>。正式地址按上级代理专有域名派生，
+ *   <li>{@link #PRODUCTION} — 正式环境，<b>无内置基址</b>。正式地址请向服务商获取，
  *       必须通过 {@link Config.Builder#baseUrl(String)} 显式提供
- *       （形如 {@code https://api.<agent_domain>/api/open/v1}）。</li>
+ *       （形如 {@code https://api.<service_domain>/api/open/v1}）。</li>
  *   <li>{@link #SANDBOX} — 本地/联调地址。</li>
  * </ul>
  *

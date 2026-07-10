@@ -77,18 +77,18 @@ func demoHandle(verify func(map[string]any) bool, rawBody []byte) {
 // processCallback 是可直接复用的核心逻辑：返回应答状态码与文本。
 //
 //	verify  —— 代收用 client.VerifyPayCallback，代付用 client.VerifyPayoutCallback；
-//	rawBody —— 平台 POST 的原始请求体。
+//	rawBody —— 收到的原始回调请求体。
 func processCallback(verify func(map[string]any) bool, rawBody []byte) (int, string) {
 	// 1. 解析（UseNumber 保留整数文本形态，避免大整数被 float64 污染）。
 	payload, err := parseJSONObject(rawBody)
 	if err != nil {
-		// 解析失败：返回非成功，平台会重试。
+		// 解析失败：返回非成功；同一订单可能再次收到回调。
 		return http.StatusBadRequest, "bad request"
 	}
 
 	// 2. 时序安全验签（字段无关：除 sign 外全部参与）。
 	if !verify(payload) {
-		// 验签失败：拒绝处理、不回成功，让平台重试。
+		// 验签失败：拒绝处理、不回成功；同一订单可能再次收到回调。
 		return http.StatusForbidden, "invalid sign"
 	}
 
@@ -105,7 +105,7 @@ func processCallback(verify func(map[string]any) bool, rawBody []byte) (int, str
 		fmt.Printf("  -> 其他状态 %q：按业务处理\n", status)
 	}
 
-	// 4. 正确应答：HTTP 200 + 纯文本 success（平台据此判定无需重试）。
+	// 4. 正确应答：HTTP 200 + 纯文本 success。
 	return http.StatusOK, "success"
 }
 
@@ -131,7 +131,7 @@ func parseJSONObject(raw []byte) (map[string]any, error) {
 	return m, nil
 }
 
-// signedCallbackBody 仅用于本示例：构造带正确 sign 的回调体（模拟平台发来的报文）。
+// signedCallbackBody 仅用于本示例：构造带正确 sign 的回调体（模拟收到的报文）。
 func signedCallbackBody(fields map[string]any, secret string) []byte {
 	// 过滤 nil 后计算 sign（与 SDK 口径一致）。
 	signable := map[string]any{}

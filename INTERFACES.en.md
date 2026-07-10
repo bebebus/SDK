@@ -8,10 +8,10 @@ For signing, see [`SIGNING.md`](./SIGNING.en.md). This file defines the environm
 
 | Environment | Base URL | Description |
 |------|----------|------|
-| Production | **No built-in default; baseUrl must be passed explicitly** | The real production address is derived from your upstream agent's dedicated domain (in the form `https://api.<agent_domain>/api/open/v1`), provided by the platform/agent |
+| Production | **No built-in default; baseUrl must be passed explicitly** | Obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v1`) |
 | Sandbox (test/local) | `http://127.0.0.1:3090/api/open/v1` | Self-hosted / integration testing; you can also use "production baseUrl + test key" as a sandbox (orders created with a test key are flagged `is_test`, do not touch real money, and can call `*/test/complete`) |
 
-SDK design: `Environment.SANDBOX` embeds the local preset base URL; `Environment.PRODUCTION` (the default) **embeds no host name** and requires `baseUrl` (the agent's dedicated domain) to be passed explicitly, otherwise construction throws an error. All requests are `POST`, `Content-Type: application/json`, with a JSON request body.
+SDK design: `Environment.SANDBOX` embeds the local preset base URL; `Environment.PRODUCTION` (the default) **embeds no host name** and requires `baseUrl` (obtain it from your service provider) to be passed explicitly, otherwise construction throws an error. All requests are `POST`, `Content-Type: application/json`, with a JSON request body.
 
 ## 2. Authentication and Common Fields
 
@@ -56,7 +56,7 @@ Response `data`: `order_no, out_order_no, amount(int), currency, pay_url(nullabl
 
 ### POST `/merchant/pay/query` — query a collection order (key: pay)
 Request: `order_no` or `out_order_no` (**either one, at least one**).
-Response `data`: `order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(nullable), paid_at(nullable), notify_status(pending|success|failed)`.
+Response `data`: `order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(always null; use order_no or out_order_no for order queries and correlation), paid_at(nullable), notify_status(pending|success|failed)`.
 
 ### POST `/merchant/pay-methods/query` — available pay methods (key: pay)
 Request: `country` (optional filter).
@@ -96,16 +96,16 @@ Response `data`: `payout_no, out_payout_no, amount, currency, status, review_sta
 
 ### POST `/merchant/payout/query` — query a payout order (key: payout)
 Request: `payout_no` or `out_payout_no` (either one).
-Response `data`: `payout_no, out_payout_no, amount, currency, status, sub_state(in-progress sub-state accepted|reviewing|processing|verifying, null in a terminal state), channel_order_no(nullable), finished_at(nullable), failed_reason(nullable), notify_status`.
+Response `data`: `payout_no, out_payout_no, amount, currency, status, sub_state(in-progress sub-state accepted|reviewing|processing|verifying, null in a terminal state), channel_order_no(always null; use payout_no or out_payout_no for order queries and correlation), finished_at(nullable), failed_reason(nullable), notify_status`.
 
 ### POST `/merchant/payout/banks/query` — available banks (key: payout)
 Request: `pay_method`(required) + `country`(required for fiat) + `currency`(optional).
-Response `data.banks[]`: `{code, name}` (empty array for wallet types or upstreams with no bank type). The `bank_code` for ordering is taken from this `code`.
+Response `data.banks[]`: `{code, name}` (empty array for wallet types or payment methods with no available bank). Use this `code` as `bank_code` when creating the payout.
 
 ### POST `/merchant/payout/proof/query` — payout proof query (key: payout)
 Request: `payout_no` or `out_payout_no` (either one). Only queryable when `status=success`.
 Response `data`: `payout_no, out_payout_no, proof_url, expires_in(seconds, nullable)`. The proof has a time limit, use it as soon as you obtain it.
-Errors: `300408` (channel does not support) / `300409` (not found upstream / out of window) / `300410` (not in a success state).
+Errors: `300408` (payment method does not support proof queries) / `300409` (proof not found or outside the query window) / `300410` (order is not in a successful state).
 
 ### POST `/merchant/payout/receipt/query` — payout receipt (key: payout)
 Request: `payout_no` or `out_payout_no` (either one) + `lang`(`en`|`zh-CN`|`zh-TW`, optional) + `inline`(optional).
@@ -117,13 +117,13 @@ Request: `payout_no` or `out_payout_no` (either one) + `result`(`success`|`faile
 
 ## 5. Callback (Notify)
 
-When an order reaches a terminal state, the platform POSTs JSON to `notify_url`, with `sign` in the body. For signature verification and the response, see SIGNING.md §6 (**verify generically over "all fields except sign", do not hard-code the field table**).
+When an order reaches a terminal state, the service sends a JSON callback to `notify_url`, with `sign` in the body. For signature verification and the response, see SIGNING.md §6 (**verify generically over "all fields except sign", do not hard-code the field table**).
 
-- **Collection callback** (key `api_secret_pay`) common fields: `merchant_no, order_no, out_order_no, amount, actual_amount(nullable), fee_amount(nullable), net_amount(nullable), currency, status, channel_order_no(nullable), paid_at(nullable), sign`.
-- **Payout callback** (key `api_secret_payout`) common fields: `merchant_no, payout_no, out_payout_no, amount, currency, status, fee_amount(nullable), channel_order_no(nullable), finished_at(nullable), failed_reason(nullable), sign`.
-- **Refund callback** (key `api_secret_pay`) common fields: `merchant_no, order_no(nullable), out_order_no(nullable), refund_no, out_refund_no, amount, currency, status, channel_order_no(nullable), finished_at(nullable), failed_reason(nullable), sign`.
+- **Collection callback** (key `api_secret_pay`) common fields: `merchant_no, order_no, out_order_no, amount, actual_amount(nullable), fee_amount(nullable), net_amount(nullable), currency, status, channel_order_no(always null; use order_no or out_order_no for order correlation), paid_at(nullable), sign`.
+- **Payout callback** (key `api_secret_payout`) common fields: `merchant_no, payout_no, out_payout_no, amount, currency, status, fee_amount(nullable), channel_order_no(always null; use payout_no or out_payout_no for order correlation), finished_at(nullable), failed_reason(nullable), sign`.
+- **Refund callback** (key `api_secret_pay`) common fields: `merchant_no, order_no(nullable), out_order_no(nullable), refund_no, out_refund_no, amount, currency, status, channel_order_no(always null; use refund_no or out_refund_no for refund correlation), finished_at(nullable), failed_reason(nullable), sign`.
 
-> The field set may grow or shrink as the platform evolves, so the SDK's signature verifier **relies only on the rule "all fields except sign participate"**; business processing branches on `status` and stays idempotent. The response is uniformly HTTP 200 + plain text `success`.
+> Callback fields may be added or removed in future versions, so the SDK's signature verifier **relies only on the rule "all fields except sign participate"**; business processing branches on `status` and stays idempotent. The response is uniformly HTTP 200 + plain text `success`.
 
 ## 6. Error Codes
 
@@ -138,20 +138,20 @@ When an order reaches a terminal state, the platform POSTs JSON to `notify_url`,
 | 100104 | Signature error |
 | 100105 | IP in the blocklist |
 | 100106 | Too many auth failures (rate limited; same merchant_no + IP fails auth 60 times within 60s) |
-| 200002 | Agent disabled |
+| 200002 | Service account disabled |
 | 210002 | Merchant disabled |
 | 300101 | Collection idempotency conflict (out_order_no exists with mismatched params) |
 | 300201 | Payout order idempotency conflict |
 | 300301 | Order does not exist |
-| 300401 | Channel unavailable / missing |
-| 300402 | Upstream config unavailable |
+| 300401 | Payment method unavailable / missing |
+| 300402 | Payment method configuration unavailable |
 | 300403 | Fee rate not configured |
-| 300404 | No available pay-method channel |
+| 300404 | No payment method is available for the request |
 | 300405 | Missing required additional info (`data.missing_fields`) |
 | 300406 | Missing required order parameters (`data.missing_fields`) |
 | 300407 | Invalid bank code |
-| 300408 | Channel does not support proof query |
-| 300409 | No proof found upstream / out of query window |
+| 300408 | The payment method does not support proof queries |
+| 300409 | Proof not found / outside the query window |
 | 300410 | Order not in a success state (proof/receipt not queryable) |
 | 300411 | Receipt generation failed |
 | 300501 | Insufficient balance |

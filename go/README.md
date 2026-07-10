@@ -91,15 +91,15 @@ func main() {
 
 ```go
 // 预设：正式（无内置 URL，必须显式传 BaseURL）
-openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<agent_domain>/api/open/v1", /* ... */})
+openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 // 预设：本地沙箱（http://127.0.0.1:3090/api/open/v1）
 openapi.NewClient(openapi.Config{Environment: openapi.Sandbox, /* ... */})
-// 自定义基址覆盖（代理专有域名或其它端口）——优先于 Environment
-openapi.NewClient(openapi.Config{BaseURL: "https://api.<agent_domain>/api/open/v1", /* ... */})
+// 自定义基址覆盖（服务商提供的地址或其它端口）——优先于 Environment
+openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 ```
 
-- `Production` → **无内置 URL**。正式基址按上级代理专有域名派生，形如
-  `https://api.<agent_domain>/api/open/v1`，必须用 `Config.BaseURL` 显式提供。
+- `Production` → **无内置 URL**。正式基址请向服务商获取，形如
+  `https://api.<service_domain>/api/open/v1`，必须用 `Config.BaseURL` 显式提供。
   若选 `Production` 又不传 `BaseURL`，`NewClient` 不 panic，但首个请求返回
   `ErrBaseURLRequired`（清晰报错）。
 - `Sandbox` → `http://127.0.0.1:3090/api/open/v1`
@@ -107,7 +107,7 @@ openapi.NewClient(openapi.Config{BaseURL: "https://api.<agent_domain>/api/open/v
 
 ## 回调验签与应答
 
-回调按「除 `sign` 外所有字段参与签名」通用计算（字段无关，平台可增删字段），比较使用
+回调按「除 `sign` 外所有字段参与签名」通用计算（字段无关，回调字段可能新增或减少），比较使用
 `hmac.Equal` 时序安全。代收/退款回调用 `VerifyPayCallback`，代付回调用 `VerifyPayoutCallback`。
 
 ```go
@@ -119,7 +119,7 @@ var payload map[string]any
 _ = dec.Decode(&payload)
 
 if !client.VerifyPayCallback(payload) { // 代付回调改用 VerifyPayoutCallback
-    w.WriteHeader(http.StatusForbidden) // 验签失败：不回成功，让平台重试
+    w.WriteHeader(http.StatusForbidden) // 验签失败：不回成功，同一订单可能再次回调
     return
 }
 

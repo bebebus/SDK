@@ -2,10 +2,10 @@
 //
 // 这是「验签 + 处理」代码片段，不是常驻 HTTP 服务。文件包含两部分：
 //   1) handlePayCallback / handlePayoutCallback：纯逻辑（拿原始 body 文本 -> 解析 -> 验签 -> 按 status 幂等处理）
-//   2) 文件末尾用平台密钥构造一条"合法回调"自演示一次，直接 node examples/callback_verify.js 即可看到输出
+//   2) 文件末尾用示例密钥构造一条"合法回调"自演示一次，直接 node examples/callback_verify.js 即可看到输出
 //
 // 接入真实 HTTP 框架时，把 handle* 的入参换成请求原始 body，把返回的 { httpStatus, text }
-// 写回响应即可：平台判定成功的应答是 HTTP 200 + 纯文本 success。
+// 写回响应即可：成功应答为 HTTP 200 + 纯文本 success。
 import { Client, Config, Environment, sign } from '../src/index.js';
 
 const SECRET_PAY = process.env.PP_API_SECRET_PAY || 'sk_test_pay';
@@ -27,7 +27,7 @@ const processedPayouts = new Set();
 
 // 标准成功应答：HTTP 200 + 纯文本 success。
 const ACK_SUCCESS = { httpStatus: 200, text: 'success' };
-// 验签失败/异常时不返回成功，让平台重试（返回非 success 文本即可）。
+// 验签失败/异常时不返回成功；同一订单可能再次收到回调（返回非 success 文本即可）。
 const ACK_REJECT = { httpStatus: 400, text: 'invalid signature' };
 
 // 代收回调处理（密钥 api_secret_pay）。rawBody：HTTP 请求原始 body 文本。
@@ -46,7 +46,7 @@ export function handlePayCallback(rawBody) {
 
   // 幂等：同一订单可能被多次回调。
   if (processedOrders.has(payload.out_order_no)) {
-    return ACK_SUCCESS; // 已处理过，照样回成功避免平台继续重试
+    return ACK_SUCCESS; // 已处理过，照样回成功避免重复处理
   }
 
   switch (payload.status) {
@@ -97,7 +97,7 @@ export function handlePayoutCallback(rawBody) {
   return ACK_SUCCESS;
 }
 
-// ---- 自演示：用平台密钥构造合法回调，跑一次看输出 ----
+// ---- 自演示：用示例密钥构造合法回调，跑一次看输出 ----
 function demo() {
   // 代收成功回调（密钥 api_secret_pay）
   const payBody = {

@@ -23,7 +23,7 @@ $config = new Config(
     apiKey: getenv('PP_API_KEY') ?: 'ak_demo_key',
     apiSecretPay: getenv('PP_API_SECRET_PAY') ?: 'sk_test_pay_secret',
     apiSecretPayout: getenv('PP_API_SECRET_PAYOUT') ?: 'sk_test_payout_secret',
-    // 回调验签不发请求，基址仅占位；正式按上级代理专有域名传 baseUrl 覆盖。
+    // 回调验签不发请求，基址仅占位；正式地址请向服务商获取后传入 baseUrl。
     environment: Environment::SANDBOX,
 );
 
@@ -37,13 +37,13 @@ function handlePayCallback(string $rawBody, Config $config): array
 {
     $payload = json_decode($rawBody, true);
     if (!is_array($payload)) {
-        // 非法 JSON：拒绝，让平台重试
+        // 非法 JSON：拒绝；同一订单可能再次收到回调
         return ['status' => 400, 'body' => 'invalid json'];
     }
 
     // 验签：除 sign 外所有字段参与，时序安全比较；代收/退款用 api_secret_pay
     if (!Signer::verifyCallback($payload, $config->apiSecretPay)) {
-        // 验签失败 → 不要回成功，让平台重试
+        // 验签失败 → 不要回成功；同一订单可能再次收到回调
         return ['status' => 401, 'body' => 'invalid sign'];
     }
 
@@ -69,7 +69,7 @@ function handlePayCallback(string $rawBody, Config $config): array
             fwrite(STDOUT, "代收回调其它状态: order=$orderNo status=$status\n");
     }
 
-    // 应答：HTTP 200 + 纯文本 success（平台据此判定无需重试）
+    // 应答：HTTP 200 + 纯文本 success
     return ['status' => 200, 'body' => 'success'];
 }
 

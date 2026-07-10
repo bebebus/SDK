@@ -55,7 +55,7 @@ test('选 PRODUCTION 且不传 baseUrl 抛清晰错误', () => {
     (err) => {
       assert.ok(err instanceof TypeError);
       assert.match(err.message, /baseUrl is required/);
-      assert.match(err.message, /agent domain/);
+      assert.match(err.message, /service provider/);
       return true;
     },
   );

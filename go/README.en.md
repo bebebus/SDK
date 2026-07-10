@@ -91,15 +91,15 @@ is passed as a standalone boolean parameter, and the SDK automatically sends it 
 
 ```go
 // Preset: production (no built-in URL; BaseURL must be passed explicitly)
-openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<agent_domain>/api/open/v1", /* ... */})
+openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 // Preset: local sandbox (http://127.0.0.1:3090/api/open/v1)
 openapi.NewClient(openapi.Config{Environment: openapi.Sandbox, /* ... */})
-// Custom base URL override (agent's dedicated domain or another port) — takes precedence over Environment
-openapi.NewClient(openapi.Config{BaseURL: "https://api.<agent_domain>/api/open/v1", /* ... */})
+// Custom base URL override (service-provider URL or another port) — takes precedence over Environment
+openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 ```
 
-- `Production` → **no built-in URL**. The production base URL is derived from your parent agent's dedicated domain, in the form
-  `https://api.<agent_domain>/api/open/v1`, and must be provided explicitly via `Config.BaseURL`.
+- `Production` → **no built-in URL**. Obtain the production base URL from your service provider, in the form
+  `https://api.<service_domain>/api/open/v1`, and provide it explicitly via `Config.BaseURL`.
   If you choose `Production` but do not pass `BaseURL`, `NewClient` does not panic, but the first request returns
   `ErrBaseURLRequired` (a clear error).
 - `Sandbox` → `http://127.0.0.1:3090/api/open/v1`
@@ -107,7 +107,7 @@ openapi.NewClient(openapi.Config{BaseURL: "https://api.<agent_domain>/api/open/v
 
 ## Callback Signature Verification and Acknowledgement
 
-Callbacks are computed generically as "every field except `sign` participates in signing" (field-agnostic, so the platform may add or remove fields); the comparison uses
+Callbacks are computed generically as "every field except `sign` participates in signing" (field-agnostic, so callback fields may be added or removed); the comparison uses
 `hmac.Equal` and is timing-safe. Use `VerifyPayCallback` for collection/refund callbacks, and `VerifyPayoutCallback` for payout callbacks.
 
 ```go
@@ -119,7 +119,7 @@ var payload map[string]any
 _ = dec.Decode(&payload)
 
 if !client.VerifyPayCallback(payload) { // for payout callbacks use VerifyPayoutCallback
-    w.WriteHeader(http.StatusForbidden) // verification failed: do not reply success, let the platform retry
+    w.WriteHeader(http.StatusForbidden) // verification failed: do not reply success; the same order may be sent again
     return
 }
 

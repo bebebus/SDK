@@ -82,7 +82,7 @@ func isBlankSecret(secret string) bool {
 // VerifyCallback 校验回调签名（时序安全比较，字段无关）。
 //
 // 规则：取回调表里除 sign 外的所有字段参与签名，与回调携带的 sign 比对。
-// 不硬编码字段清单——平台可能增删字段，只依赖「除 sign 外全部参与」这一规则。
+// 不硬编码字段清单——回调字段可能新增或减少，只依赖「除 sign 外全部参与」这一规则。
 // 代收/退款回调用 api_secret_pay，代付回调用 api_secret_payout。
 func VerifyCallback(payload Payload, secret string) (ok bool) {
 	// [A] fail-closed：空/全空白密钥在算任何 HMAC 之前直接拒绝，绝不继续比对。

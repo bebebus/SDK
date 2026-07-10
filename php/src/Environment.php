@@ -7,8 +7,8 @@ namespace Merchant\Openapi;
 /**
  * 环境基址预设。
  *
- * PRODUCTION 无内置 URL：正式真实地址按上级代理专有域名派生（形如
- * https://api.<agent_domain>/api/open/v1），必须由调用方通过自定义 baseUrl 显式提供。
+ * PRODUCTION 无内置 URL：正式地址请向服务商获取（形如
+ * https://api.<domain>/api/open/v1），必须由调用方通过自定义 baseUrl 显式提供。
  * SANDBOX 为本地/联调地址。
  */
 enum Environment: string

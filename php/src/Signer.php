@@ -71,7 +71,7 @@ final class Signer
     /**
      * 回调验签：按"除 sign 外所有字段参与"通用计算，时序安全比较。
      *
-     * 不硬编码字段表——平台可能增删字段，只要"除 sign 外全参与"即与服务端自洽。
+     * 不硬编码字段表——回调字段可能新增或减少，只要"除 sign 外全参与"即可保持兼容。
      *
      * @param array<string,mixed> $payload 回调 JSON 解析后的键值表（含 sign）
      * @param string              $secret  代收/退款回调用 api_secret_pay；代付回调用 api_secret_payout

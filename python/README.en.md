@@ -61,13 +61,13 @@ except TransportError as e:  # HTTP / network / timeout
 | `Environment.PRODUCTION` | No built-in base URL; **`base_url` must be passed explicitly** |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
-The real production address is derived from the upstream agent-specific domain (`https://api.<agent_domain>/api/open/v1`) and passed explicitly via `base_url=`. Choosing `PRODUCTION` without passing `base_url` raises a `ValueError` (with the message `baseUrl is required`):
+Obtain the production address from your service provider (`https://api.<service_domain>/api/open/v1`) and pass it explicitly via `base_url=`. Choosing `PRODUCTION` without passing `base_url` raises a `ValueError` (with the message `baseUrl is required`):
 
 ```python
 config = Config(
     merchant_no="M00000001", api_key="ak_xxx",
     api_secret_pay="...", api_secret_payout="...",
-    base_url="https://api.agent.example.com/api/open/v1",  # required in production
+    base_url="https://api.service.example.com/api/open/v1",  # required in production
 )
 ```
 
@@ -115,7 +115,7 @@ ok   = verify_callback(callback, secret)  # timing-safe (hmac.compare_digest), f
 
 ## Callback signature verification + processing
 
-See [`examples/callback_verify.py`](examples/callback_verify.py): parse the raw body → `verify_callback` (timing-safe) → process idempotently by `status` (success/failed) → acknowledge with **HTTP 200 + plain text `success`**. Collection callbacks use `api_secret_pay` and payout callbacks use `api_secret_payout`; the example demonstrates each once. On signature verification failure, do not return success, so the platform retries; the processing must be idempotent (the same order may be called back multiple times).
+See [`examples/callback_verify.py`](examples/callback_verify.py): parse the raw body → `verify_callback` (timing-safe) → process idempotently by `status` (success/failed) → acknowledge with **HTTP 200 + plain text `success`**. Collection callbacks use `api_secret_pay` and payout callbacks use `api_secret_payout`; the example demonstrates each once. On signature verification failure, do not return success; the same order may be sent again. The processing must be idempotent (the same order may be called back multiple times).
 
 ## Examples
 

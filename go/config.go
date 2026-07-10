@@ -14,8 +14,8 @@ import (
 type Environment int
 
 const (
-	// Production 正式环境。无内置 URL：正式基址按上级代理专有域名派生，
-	// 形如 https://api.<agent_domain>/api/open/v1，必须用 Config.BaseURL 显式提供。
+    // Production 正式环境。无内置 URL：正式基址请向服务商获取，
+    // 形如 https://api.<domain>/api/open/v1，必须用 Config.BaseURL 显式提供。
 	Production Environment = iota
 	// Sandbox 本地/联调环境。
 	Sandbox
@@ -26,7 +26,7 @@ const (
 )
 
 // ErrBaseURLRequired 表示选用 Production 但未提供 BaseURL。
-var ErrBaseURLRequired = errors.New("baseUrl is required: production base URL is provided per your agent domain (e.g. https://api.<agent_domain>/api/open/v1)")
+var ErrBaseURLRequired = errors.New("baseUrl is required: obtain the production URL from your service provider (e.g. https://api.<domain>/api/open/v1)")
 
 // ErrInsecureBaseURL 表示非本地的 baseUrl 用了非 https（明文传输密钥/签名，拒绝）。
 var ErrInsecureBaseURL = errors.New("baseUrl must use https:// for non-local hosts (refuse to transmit credentials over plaintext)")
@@ -54,7 +54,7 @@ type Config struct {
 
 	// Environment 预设环境，默认 Production。BaseURL 非空时优先于本字段。
 	Environment Environment
-	// BaseURL 自定义基址覆盖（代理专有域名或本地端口），非空则覆盖 Environment 预设。
+    // BaseURL 自定义基址覆盖（服务商提供的地址或本地端口），非空则覆盖 Environment 预设。
 	BaseURL string
 
 	// Timeout HTTP 请求超时，默认 30s。

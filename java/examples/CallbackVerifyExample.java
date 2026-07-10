@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * <p>在真实 Web 框架里，把 {@code handleCallback} 接到 HTTP handler：原始请求体作为 rawBody，
  * 返回值作为响应体（Content-Type: text/plain，状态码 200）。验签失败务必返回非 success 体或非 2xx，
- * 让平台重试。
+ * 同一订单可能再次收到回调。
  *
  * <p>编译运行（在 java 目录下）：
  * <pre>{@code
@@ -31,15 +31,15 @@ import java.util.Map;
  */
 public class CallbackVerifyExample {
 
-    // 两套密钥（来自平台/代理）
+    // 两套回调密钥
     static final String API_SECRET_PAY = "sk_pay_secret_demo";
     static final String API_SECRET_PAYOUT = "sk_payout_secret_demo";
 
     public static void main(String[] args) {
         Config config = Config.builder()
                 .environment(Environment.PRODUCTION)
-                // PRODUCTION 无内置基址：正式地址按上级代理专有域名派生，必须显式提供
-                .baseUrl("https://api.<agent_domain>/api/open/v1")
+                // PRODUCTION 无内置基址：正式地址请向服务商获取，必须显式提供
+                .baseUrl("https://api.<service_domain>/api/open/v1")
                 .merchantNo("M00000001")
                 .apiKey("ak_demo_key")
                 .apiSecretPay(API_SECRET_PAY)
@@ -48,7 +48,7 @@ public class CallbackVerifyExample {
         Client client = new Client(config);
 
         // ===== 1) 代收回调 =====
-        // 模拟平台 POST 过来的原始 body（实际由平台计算 sign）。
+        // 模拟收到的原始回调 body（实际签名由服务计算）。
         String payRawBody = buildSignedBody(payCallbackFields(), API_SECRET_PAY);
         System.out.println("代收回调原始 body:\n  " + payRawBody);
         String payAck = handlePayCallback(client, payRawBody);
@@ -63,20 +63,20 @@ public class CallbackVerifyExample {
         // ===== 3) 篡改演示：验签失败必须不回 success =====
         String tampered = payRawBody.replace("\"amount\":10000", "\"amount\":99999");
         String tamperedAck = handlePayCallback(client, tampered);
-        System.out.println("被篡改的代收回调应答: " + tamperedAck + " （非 success，平台将重试）");
+        System.out.println("被篡改的代收回调应答: " + tamperedAck + " （非 success，同一订单可能再次收到回调）");
     }
 
-    /** 处理代收回调：用 api_secret_pay 验签。返回给平台的应答体。 */
+    /** 处理代收回调：用 api_secret_pay 验签。返回回调应答体。 */
     static String handlePayCallback(Client client, String rawBody) {
         Map<String, Object> payload;
         try {
             payload = Json.parseObject(rawBody);
         } catch (RuntimeException e) {
-            return "invalid"; // 非 JSON：拒绝，让平台重试
+            return "invalid"; // 非 JSON：拒绝；同一订单可能再次收到回调
         }
         // 时序安全验签（密钥自动选 pay）
         if (!client.verifyPayCallback(payload)) {
-            return "verify_failed"; // 非 success → 平台重试
+            return "verify_failed"; // 非 success；同一订单可能再次收到回调
         }
         String orderNo = String.valueOf(payload.get("order_no"));
         String status = String.valueOf(payload.get("status"));
@@ -117,7 +117,7 @@ public class CallbackVerifyExample {
         return "success";
     }
 
-    // ---------- 仅用于本示例：本地按平台规则造一个带 sign 的回调体 ----------
+    // ---------- 仅用于本示例：本地按签名规则造一个带 sign 的回调体 ----------
 
     private static Map<String, Object> payCallbackFields() {
         Map<String, Object> m = new LinkedHashMap<>();

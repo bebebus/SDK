@@ -8,10 +8,10 @@
 
 | 环境 | Base URL | 说明 |
 |------|----------|------|
-| 正式（production） | **无内置默认值，必须显式传 baseUrl** | 真实正式地址按你的上级代理专有域名派生（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供 |
+| 正式（production） | **无内置默认值，必须显式传 baseUrl** | 正式环境地址请向服务商获取（形如 `https://api.<service_domain>/api/open/v1`） |
 | 测试/本地（sandbox） | `http://127.0.0.1:3090/api/open/v1` | 自建/联调；亦可用「正式 baseUrl + 测试密钥」做沙箱（测试密钥下单标记 `is_test`，不动真钱，可调 `*/test/complete`） |
 
-SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODUCTION`（默认）**不内置任何主机名**，必须显式传入 `baseUrl`（代理专有域名），否则构造时报错。所有请求 `POST`，`Content-Type: application/json`，请求体为 JSON。
+SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODUCTION`（默认）**不内置任何主机名**，必须显式传入 `baseUrl`（请向服务商获取），否则构造时报错。所有请求 `POST`，`Content-Type: application/json`，请求体为 JSON。
 
 ## 二、鉴权与通用字段
 
@@ -56,7 +56,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 ### POST `/merchant/pay/query` — 代收查单（密钥：pay）
 请求：`order_no` 或 `out_order_no`（**二选一，至少一个**）。
-响应 `data`：`order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(可空), paid_at(可空), notify_status(pending|success|failed)`。
+响应 `data`：`order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(始终为 null；订单查询和业务关联请使用 order_no 或 out_order_no), paid_at(可空), notify_status(pending|success|failed)`。
 
 ### POST `/merchant/pay-methods/query` — 可用支付方式（密钥：pay）
 请求：`country`（可选过滤）。
@@ -96,16 +96,16 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 ### POST `/merchant/payout/query` — 代付查单（密钥：payout）
 请求：`payout_no` 或 `out_payout_no`（二选一）。
-响应 `data`：`payout_no, out_payout_no, amount, currency, status, sub_state(处理中子态 accepted|reviewing|processing|verifying，终态为 null), channel_order_no(可空), finished_at(可空), failed_reason(可空), notify_status`。
+响应 `data`：`payout_no, out_payout_no, amount, currency, status, sub_state(处理中子态 accepted|reviewing|processing|verifying，终态为 null), channel_order_no(始终为 null；订单查询和业务关联请使用 payout_no 或 out_payout_no), finished_at(可空), failed_reason(可空), notify_status`。
 
 ### POST `/merchant/payout/banks/query` — 可用银行（密钥：payout）
 请求：`pay_method`(必填) + `country`(法币必填) + `currency`(可选)。
-响应 `data.banks[]`：`{code, name}`（钱包类或无银行类上游时为空数组）。下单 `bank_code` 取此 `code`。
+响应 `data.banks[]`：`{code, name}`（钱包类或当前没有可用银行的支付方式为空数组）。下单 `bank_code` 取此 `code`。
 
 ### POST `/merchant/payout/proof/query` — 代付凭证查询（密钥：payout）
 请求：`payout_no` 或 `out_payout_no`（二选一）。仅 `status=success` 可查。
 响应 `data`：`payout_no, out_payout_no, proof_url, expires_in(秒，可空)`。凭证有时效，即取即用。
-错误：`300408`(渠道不支持) / `300409`(上游查无/超窗) / `300410`(非成功态)。
+错误：`300408`(当前支付方式不支持凭证查询) / `300409`(未找到凭证或超出查询时限) / `300410`(订单不是成功状态)。
 
 ### POST `/merchant/payout/receipt/query` — 代付收据（密钥：payout）
 请求：`payout_no` 或 `out_payout_no`（二选一）+ `lang`(`en`|`zh-CN`|`zh-TW`, 可选) + `inline`(可选)。
@@ -117,13 +117,13 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 ## 五、回调（Notify）
 
-平台在订单进入终态时 POST JSON 到 `notify_url`，体内含 `sign`。验签与应答见 SIGNING.md §六（**验签按"除 sign 外全部字段"通用计算，不要硬编码字段表**）。
+订单进入终态后，服务会向 `notify_url` 发送 JSON 回调，体内含 `sign`。验签与应答见 SIGNING.md §六（**验签按"除 sign 外全部字段"通用计算，不要硬编码字段表**）。
 
-- **代收回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no, out_order_no, amount, actual_amount(可空), fee_amount(可空), net_amount(可空), currency, status, channel_order_no(可空), paid_at(可空), sign`。
-- **代付回调**（密钥 `api_secret_payout`）常见字段：`merchant_no, payout_no, out_payout_no, amount, currency, status, fee_amount(可空), channel_order_no(可空), finished_at(可空), failed_reason(可空), sign`。
-- **退款回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no(可空), out_order_no(可空), refund_no, out_refund_no, amount, currency, status, channel_order_no(可空), finished_at(可空), failed_reason(可空), sign`。
+- **代收回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no, out_order_no, amount, actual_amount(可空), fee_amount(可空), net_amount(可空), currency, status, channel_order_no(始终为 null；订单关联请使用 order_no 或 out_order_no), paid_at(可空), sign`。
+- **代付回调**（密钥 `api_secret_payout`）常见字段：`merchant_no, payout_no, out_payout_no, amount, currency, status, fee_amount(可空), channel_order_no(始终为 null；订单关联请使用 payout_no 或 out_payout_no), finished_at(可空), failed_reason(可空), sign`。
+- **退款回调**（密钥 `api_secret_pay`）常见字段：`merchant_no, order_no(可空), out_order_no(可空), refund_no, out_refund_no, amount, currency, status, channel_order_no(始终为 null；退款关联请使用 refund_no 或 out_refund_no), finished_at(可空), failed_reason(可空), sign`。
 
-> 字段集合可能随平台演进增删，故 SDK 验签器**只依赖"除 sign 外所有字段参与"这一规则**；业务处理按 `status` 分支并保持幂等。应答统一 HTTP 200 + 纯文本 `success`。
+> 回调字段可能随版本更新增删，故 SDK 验签器**只依赖"除 sign 外所有字段参与"这一规则**；业务处理按 `status` 分支并保持幂等。应答统一 HTTP 200 + 纯文本 `success`。
 
 ## 六、错误码
 
@@ -138,20 +138,20 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | 100104 | 签名错误 |
 | 100105 | IP 在黑名单 |
 | 100106 | 鉴权失败次数过多（限流；同 merchant_no + IP 60s 内失败达 60 次） |
-| 200002 | 代理已禁用 |
+| 200002 | 服务账户已禁用 |
 | 210002 | 商户已禁用 |
 | 300101 | 代收单幂等冲突（同 out_order_no 已存在但参数不一致） |
 | 300201 | 代付单幂等冲突 |
 | 300301 | 订单不存在 |
-| 300401 | 渠道不可用 / 不存在 |
-| 300402 | 上游配置不可用 |
+| 300401 | 支付方式不可用 / 不存在 |
+| 300402 | 支付方式配置不可用 |
 | 300403 | 费率未配置 |
-| 300404 | 无可用支付方式渠道 |
+| 300404 | 当前条件下无可用支付方式 |
 | 300405 | 缺少必要附加信息（`data.missing_fields`） |
 | 300406 | 缺少必要下单参数（`data.missing_fields`） |
 | 300407 | 银行编码无效 |
-| 300408 | 渠道不支持凭证查询 |
-| 300409 | 上游查无凭证/超出查询窗口 |
+| 300408 | 当前支付方式不支持凭证查询 |
+| 300409 | 未找到凭证 / 超出查询时间范围 |
 | 300410 | 订单非成功态（凭证/收据不可查） |
 | 300411 | 收据生成失败 |
 | 300501 | 余额不足 |

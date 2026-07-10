@@ -95,10 +95,10 @@ System.out.println(resp.dataAsMap().get("order_no"));
 ### 双环境与自定义基址
 
 ```java
-// PRODUCTION 无内置基址：正式地址按上级代理专有域名派生，必须显式传 baseUrl
+// PRODUCTION 无内置基址：正式地址请向服务商获取，必须显式传 baseUrl
 Config.builder()
       .environment(Environment.PRODUCTION)
-      .baseUrl("https://api.<agent_domain>/api/open/v1")        // 必填，否则 build() 抛错
+      .baseUrl("https://api.<service_domain>/api/open/v1")        // 必填，否则 build() 抛错
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 
@@ -107,23 +107,23 @@ Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.
 
 // 自定义基址覆盖：优先级高于 environment，尾斜杠会被去掉
 Config.builder()
-      .baseUrl("https://api.<agent_domain>/api/open/v1")
+      .baseUrl("https://api.<service_domain>/api/open/v1")
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 ```
 
 > 选 `PRODUCTION` 而不传 `baseUrl` 时，`build()` 会抛 `IllegalArgumentException`
-> （`baseUrl is required: production base URL is provided per your agent domain ...`）。
+> （`baseUrl is required: obtain the production URL from your service provider ...`）。
 
 ### 回调验签（验签 + 处理片段，非常驻服务）
 
 ```java
-// 在你的 HTTP handler 里：rawBody 是平台 POST 过来的原始请求体
+// 在你的 HTTP handler 里：rawBody 是收到的原始回调请求体
 Map<String, Object> payload = Json.parseObject(rawBody);
 
 // 时序安全验签：代收/退款用 pay 密钥，代付用 payout 密钥（密钥由 SDK 自动选）
 if (!client.verifyPayCallback(payload)) {       // 代收/退款回调
-    return /* 非 success 体或非 2xx，让平台重试 */;
+    return /* 非 success 体或非 2xx；同一订单可能再次收到回调 */;
 }
 String status = String.valueOf(payload.get("status"));
 if ("success".equals(status)) {
@@ -134,7 +134,7 @@ if ("success".equals(status)) {
 return "success"; // HTTP 200 + 纯文本 success
 ```
 
-代付回调同理，改用 `client.verifyPayoutCallback(payload)`。验签器**只依赖"除 sign 外所有字段参与"通用规则**，不硬编码字段表，平台增删字段也兼容。完整可运行示例见 [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java)（代收 + 代付各演示一次，含篡改反例）。
+代付回调同理，改用 `client.verifyPayoutCallback(payload)`。验签器**只依赖"除 sign 外所有字段参与"通用规则**，不硬编码字段表，回调字段新增或减少也兼容。完整可运行示例见 [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java)（代收 + 代付各演示一次，含篡改反例）。
 
 ## examples/
 

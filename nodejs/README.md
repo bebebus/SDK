@@ -38,8 +38,8 @@ const client = new Client(new Config({
   apiKey: 'ak_xxx',
   apiSecretPay: 'sk_pay_xxx',       // pay 类接口 / 代收·退款回调
   apiSecretPayout: 'sk_payout_xxx', // payout 类接口 / 代付回调
-  // PRODUCTION 无内置 URL，必须显式传入按代理专有域名派生的 baseUrl
-  baseUrl: 'https://api.<agent_domain>/api/open/v1',
+  // PRODUCTION 无内置 URL，必须显式传入服务商提供的 baseUrl
+  baseUrl: 'https://api.<service_domain>/api/open/v1',
 }));
 
 // 代收下单（金额是最小单位整数，10000 = 1 元）
@@ -62,16 +62,16 @@ console.log(data.pay_url, raw.code);
 import { Config, Environment } from './src/index.js';
 
 // 预设：正式（无内置 URL，必须显式传 baseUrl，否则抛错）
-new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<agent_domain>/api/open/v1' });
+new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1' });
 // 预设：本地/沙箱
 new Config({ /* ... */ environment: Environment.SANDBOX });
-// 自定义（代理专有域名或自定义端口）—— baseUrl 优先于 environment
-new Config({ /* ... */ baseUrl: 'https://api.<agent_domain>/api/open/v1' });
+// 自定义（服务商提供的地址或自定义端口）—— baseUrl 优先于 environment
+new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 ```
 
 | 预设 | Base URL |
 |------|----------|
-| `Environment.PRODUCTION` | 无内置 URL，按代理专有域名派生 `https://api.<agent_domain>/api/open/v1`，必须显式传 `baseUrl` |
+| `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v1`，并显式传入 `baseUrl` |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
 ## 全部 11 个端点
@@ -119,7 +119,7 @@ try {
 
 `verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` 按「除 `sign` 外所有字段参与」通用计算（不硬编码字段表），并用 `crypto.timingSafeEqual` 做时序安全比较。
 
-代收/退款回调用 `apiSecretPay`，代付回调用 `apiSecretPayout`。验签失败时**不要回成功应答**（让平台重试）；成功处理后回 **HTTP 200 + 纯文本 `success`**，处理务必**幂等**。
+代收/退款回调用 `apiSecretPay`，代付回调用 `apiSecretPayout`。验签失败时**不要回成功应答**；同一订单可能再次收到回调。成功处理后回 **HTTP 200 + 纯文本 `success`**，处理务必**幂等**。
 
 完整示例（代收 + 代付各演示一次、含幂等与篡改反例）见 [`examples/callback_verify.js`](./examples/callback_verify.js)：
 

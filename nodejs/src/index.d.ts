@@ -4,7 +4,7 @@
 
 /** 预设环境：PRODUCTION 无内置基址（必须显式传 baseUrl）；SANDBOX 为本地联调基址。 */
 export const Environment: {
-  /** 正式：无内置 URL，构造 Config 时必须显式传 baseUrl（按上级代理专有域名派生）。 */
+  /** 正式：无内置 URL，构造 Config 时必须显式传 baseUrl（请向服务商获取）。 */
   readonly PRODUCTION: null;
   /** 本地/联调：http://127.0.0.1:3090/api/open/v1 */
   readonly SANDBOX: string;

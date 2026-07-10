@@ -21,7 +21,7 @@ import java.util.Map;
 public class PayCreateExample {
 
     public static void main(String[] args) {
-        // 沙箱环境（亦可 .baseUrl("https://api.<agent_domain>/api/open/v1") 用代理专有域名覆盖）
+        // 沙箱环境（亦可通过 .baseUrl("https://api.<domain>/api/open/v1") 传入服务商提供的地址）
         Config config = Config.builder()
                 .environment(Environment.SANDBOX)
                 .merchantNo("M00000001")

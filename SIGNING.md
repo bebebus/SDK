@@ -92,17 +92,17 @@ sign：
 
 ## 六、回调验签（通用、字段无关）
 
-平台回调 POST 一段 JSON 到商户 `notify_url`，体内含 `sign` 与若干业务字段。验签步骤：
+服务会向商户 `notify_url` POST 一段 JSON 回调，体内含 `sign` 与若干业务字段。验签步骤：
 
 1. 解析回调 JSON 为键值表。
-2. **取出该表里除 `sign` 外的所有顶层字段**（不要硬编码字段清单——平台可能增删字段；只要"除 sign 外全参与"即与服务端一致）。
+2. **取出该表里除 `sign` 外的所有顶层字段**（不要硬编码字段清单——回调字段可能新增或减少；只要“除 sign 外全参与”即可保持兼容）。
 3. 用本文算法算出期望 `sign`（代收/退款回调用 `api_secret_pay`，代付回调用 `api_secret_payout`）。
 4. 与回调里的 `sign` **时序安全比较**（`crypto.timingSafeEqual` / `hmac.compare_digest` / `MessageDigest.isEqual` / `hmac.Equal` / `hash_equals`）。
-5. 验签失败 → 拒绝处理，不要回成功应答（让平台重试）。
+5. 验签失败 → 拒绝处理，不要回成功应答；同一订单可能再次收到回调。
 
-### 商户应答（决定平台是否重试）
+### 商户应答（决定是否继续收到回调）
 
-平台用 `isMerchantAckSuccess(body)` 判定（HTTP 必须 2xx，且 body 命中下列任一）：
+只要 HTTP 状态码为 2xx，且响应体符合下列任一格式，即视为成功应答：
 
 - 纯文本 `success` / `ok`（**大小写不敏感**，trim 后整段匹配）
 - JSON `{"success": true}`

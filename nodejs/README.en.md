@@ -38,8 +38,8 @@ const client = new Client(new Config({
   apiKey: 'ak_xxx',
   apiSecretPay: 'sk_pay_xxx',       // pay endpoints / collection & refund callbacks
   apiSecretPayout: 'sk_payout_xxx', // payout endpoints / payout callbacks
-  // PRODUCTION has no built-in URL; you must explicitly pass a baseUrl derived from the agent-specific domain
-  baseUrl: 'https://api.<agent_domain>/api/open/v1',
+  // PRODUCTION has no built-in URL; you must explicitly pass the baseUrl obtained from your service provider
+  baseUrl: 'https://api.<service_domain>/api/open/v1',
 }));
 
 // Create a collection order (amount is an integer in the smallest unit, 10000 = 1 unit of currency)
@@ -62,16 +62,16 @@ Each method returns `{ data, raw }`: `data` is the `data` field inside the unifi
 import { Config, Environment } from './src/index.js';
 
 // Preset: production (no built-in URL; you must explicitly pass baseUrl, otherwise it throws)
-new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<agent_domain>/api/open/v1' });
+new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1' });
 // Preset: local/sandbox
 new Config({ /* ... */ environment: Environment.SANDBOX });
-// Custom (agent-specific domain or custom port) — baseUrl takes precedence over environment
-new Config({ /* ... */ baseUrl: 'https://api.<agent_domain>/api/open/v1' });
+// Custom (service-provider URL or custom port) — baseUrl takes precedence over environment
+new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 ```
 
 | Preset | Base URL |
 |------|----------|
-| `Environment.PRODUCTION` | No built-in URL; derived from the agent-specific domain as `https://api.<agent_domain>/api/open/v1`, and `baseUrl` must be passed explicitly |
+| `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v1` from your service provider and pass it as `baseUrl` |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
 ## All 11 endpoints
@@ -119,7 +119,7 @@ try {
 
 `verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` compute generically over "all fields except `sign`" (without hardcoding a field table) and use `crypto.timingSafeEqual` for a timing-safe comparison.
 
-Collection/refund callbacks use `apiSecretPay`, payout callbacks use `apiSecretPayout`. On signature verification failure, **do not return a success acknowledgement** (let the platform retry); after successful processing, return **HTTP 200 + plain text `success`**, and the processing must be **idempotent**.
+Collection/refund callbacks use `apiSecretPay`, payout callbacks use `apiSecretPayout`. On signature verification failure, **do not return a success acknowledgement**; the same order may be sent again. After successful processing, return **HTTP 200 + plain text `success`**, and the processing must be **idempotent**.
 
 A complete example (demonstrating both collection and payout once each, including idempotency and tampering counter-examples) is in [`examples/callback_verify.js`](./examples/callback_verify.js):
 

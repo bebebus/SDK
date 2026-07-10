@@ -57,7 +57,7 @@ Each SDK provides two preset base URLs and supports a **custom baseUrl override*
 | `PRODUCTION` | **No built-in default; baseUrl must be passed explicitly** |
 | `SANDBOX` (test/local) | `http://127.0.0.1:3090/api/open/v1` |
 
-> The real production address is derived from **your upstream agent's dedicated domain** (in the form `https://api.<agent_domain>/api/open/v1`), provided by the platform/agent. The SDK **does not embed any production host name**: when choosing `PRODUCTION` (the default) you must pass `baseUrl` explicitly, otherwise construction throws an error.
+> Obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v1`). The SDK **does not embed any production host name**: when choosing `PRODUCTION` (the default) you must pass `baseUrl` explicitly, otherwise construction throws an error.
 > The "test key sandbox" can use the production baseUrl above + a test key (test orders are flagged `is_test`, do not touch real money, and can call `*/test/complete`).
 
 ## Quick Start (Node.js as an example; see each language's own README for the rest)
@@ -70,7 +70,7 @@ const client = new Client(new Config({
   apiKey: process.env.API_KEY,
   apiSecretPay: process.env.API_SECRET_PAY,
   apiSecretPayout: process.env.API_SECRET_PAYOUT,
-  // In production you must pass baseUrl explicitly (per the upstream agent's dedicated domain: https://api.<agent_domain>/api/open/v1)
+  // In production you must pass baseUrl explicitly (obtain it from your service provider: https://api.<service_domain>/api/open/v1)
   baseUrl: process.env.API_BASE_URL,
   // For local integration testing, switch to: environment: Environment.SANDBOX,
 }));
@@ -88,12 +88,12 @@ Runnable examples of `pay_create` / `payout_create` / `callback_verify` for each
 
 ## Callback (signature verification + handling snippet)
 
-When an order reaches a terminal state, the platform POSTs JSON to your `notify_url`, with `sign` in the body. Key handling points (examples in each language's `examples/callback_verify.*`):
+When an order reaches a terminal state, the service sends a JSON callback to your `notify_url`, with `sign` in the body. Key handling points (examples in each language's `examples/callback_verify.*`):
 
 1. Read the raw body → parse JSON.
 2. Verify the signature: use `api_secret_pay` for collection/refund callbacks, and `api_secret_payout` for payout callbacks; use a **constant-time comparison**; compute generically over "all fields except `sign` participate" (do not hard-code the field table).
 3. Process **idempotently** by `status` (the same order may be called back multiple times).
-4. Respond: HTTP 200 + plain text `success` (the platform judges success by this; otherwise it retries with backoff `1m,2m,5m,10m,30m,60m`, about 6 times).
+4. Respond with HTTP 200 + plain text `success`. If the expected success response is not returned, the same order may be called again at `1m,2m,5m,10m,30m,60m` intervals, about 6 times.
 
 ## Amount Convention
 

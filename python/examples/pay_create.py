@@ -25,8 +25,8 @@ def main() -> None:
         api_secret_pay=os.environ.get("PP_SECRET_PAY", "sk_pay_demo"),
         api_secret_payout=os.environ.get("PP_SECRET_PAYOUT", "sk_payout_demo"),
         # 切换正式 / 沙箱：Environment.PRODUCTION / Environment.SANDBOX
-        # 自定义基址（上级代理专有域名）用 base_url= 覆盖：
-        #   base_url="https://api.<agent_domain>/api/open/v1"
+        # 正式环境地址请向服务商获取，用 base_url= 覆盖：
+        #   base_url="https://api.<domain>/api/open/v1"
         environment=Environment.SANDBOX,
     )
     client = Client(config)

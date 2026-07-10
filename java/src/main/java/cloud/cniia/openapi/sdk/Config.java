@@ -37,8 +37,8 @@ public final class Config {
                 : (b.environment != null ? b.environment.baseUrl() : null);
         if (resolved == null || resolved.isEmpty()) {
             throw new IllegalArgumentException(
-                    "baseUrl is required: production base URL is provided per your agent domain "
-                            + "(e.g. https://api.<agent_domain>/api/open/v1)");
+                    "baseUrl is required: obtain the production URL from your service provider "
+                            + "(e.g. https://api.<domain>/api/open/v1)");
         }
         // 去掉尾部斜杠，统一后续拼接
         while (resolved.endsWith("/")) {
@@ -149,7 +149,7 @@ public final class Config {
             return this;
         }
 
-        /** 显式自定义基址（覆盖 environment，用于代理专有域名或自定义端口）。 */
+        /** 显式自定义基址（覆盖 environment，用于服务商提供的地址或自定义端口）。 */
         public Builder baseUrl(String baseUrl) {
             this.baseUrl = baseUrl;
             return this;

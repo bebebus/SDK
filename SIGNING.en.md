@@ -87,17 +87,17 @@ sign:
 
 ## 6. Callback Signature Verification (generic, field-agnostic)
 
-The platform POSTs a piece of JSON to the merchant's `notify_url`, with `sign` and several business fields in the body. Verification steps:
+The service sends a JSON callback to the merchant's `notify_url`, with `sign` and several business fields in the body. Verification steps:
 
 1. Parse the callback JSON into a key-value table.
-2. **Take all top-level fields in the table except `sign`** (do not hard-code the field list — the platform may add or remove fields; as long as "all fields except sign participate" it matches the server).
+2. **Take all top-level fields in the table except `sign`** (do not hard-code the field list — callback fields may be added or removed in future versions; the rule "all fields except sign participate" remains compatible).
 3. Compute the expected `sign` using the algorithm in this file (use `api_secret_pay` for collection/refund callbacks, `api_secret_payout` for payout callbacks).
 4. Compare with the `sign` in the callback using a **constant-time comparison** (`crypto.timingSafeEqual` / `hmac.compare_digest` / `MessageDigest.isEqual` / `hmac.Equal` / `hash_equals`).
-5. On verification failure → reject processing, do not return a success response (let the platform retry).
+5. On verification failure → reject processing and do not return a success response; the same order may be sent again.
 
-### Merchant Response (determines whether the platform retries)
+### Merchant Response (determines whether callbacks continue)
 
-The platform judges using `isMerchantAckSuccess(body)` (HTTP must be 2xx, and the body matches any of the following):
+An acknowledgement is considered successful when the HTTP status is 2xx and the body matches any of the following:
 
 - Plain text `success` / `ok` (**case-insensitive**, whole-string match after trim)
 - JSON `{"success": true}`

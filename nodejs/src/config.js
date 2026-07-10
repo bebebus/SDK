@@ -26,7 +26,7 @@ function assertSecureBaseUrl(resolved) {
 }
 
 // 预设：PRODUCTION（正式，无内置 URL）与 SANDBOX（本地联调）。
-// 正式地址按上级代理专有域名派生（https://api.<agent_domain>/api/open/v1），必须通过 baseUrl 显式传入。
+// 正式地址请向服务商获取（https://api.<service_domain>/api/open/v1），必须通过 baseUrl 显式传入。
 export const Environment = Object.freeze({
   PRODUCTION: null,
   SANDBOX: 'http://127.0.0.1:3090/api/open/v1',
@@ -62,8 +62,8 @@ export class Config {
     const resolved = baseUrl || environment;
     if (!resolved) {
       throw new TypeError(
-        'Config: baseUrl is required: production base URL is provided per your agent domain ' +
-          '(e.g. https://api.<agent_domain>/api/open/v1)',
+        'Config: baseUrl is required: obtain the production URL from your service provider ' +
+          '(e.g. https://api.<domain>/api/open/v1)',
       );
     }
     // [D 传输 https] 非 localhost 必须 https，否则拒绝（localhost 放行 http 兼容本地联调）。

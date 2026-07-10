@@ -19,7 +19,7 @@ func main() {
 		APIKey:       "ak_demo_key",
 		SecretPay:    "sk_test_pay_xxxxxxxxxxxxxxxxxxxxxxxx",
 		SecretPayout: "sk_test_payout_xxxxxxxxxxxxxxxxxxxxxxxx",
-		Environment:  openapi.Sandbox, // 或 openapi.Production；用 BaseURL 覆盖为代理专有域名。
+		Environment:  openapi.Sandbox, // 或 openapi.Production；用 BaseURL 传入服务商提供的地址。
 		Timeout:      30 * time.Second,
 	})
 

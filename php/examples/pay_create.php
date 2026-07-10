@@ -6,7 +6,7 @@ declare(strict_types=1);
  * 示例：代收下单（pay/create）+ 代收查单（pay/query）。
  *
  * 运行：php examples/pay_create.php
- * （需服务端可达；这里用 SANDBOX 本地基址，也可换 PRODUCTION 或自定义代理域名。）
+ * （需服务端可达；这里用 SANDBOX 本地基址，也可换 PRODUCTION 或自定义服务地址。）
  */
 
 require __DIR__ . '/../autoload.php';
@@ -24,7 +24,7 @@ $config = new Config(
     apiSecretPay: getenv('PP_API_SECRET_PAY') ?: 'sk_test_pay',
     apiSecretPayout: getenv('PP_API_SECRET_PAYOUT') ?: 'sk_test_payout',
     environment: Environment::SANDBOX, // 正式用 Environment::PRODUCTION + 显式 baseUrl
-    // baseUrl: 'https://api.<agent_domain>/api/open/v1', // 正式按上级代理专有域名显式传入
+    // baseUrl: 'https://api.<domain>/api/open/v1', // 正式地址请向服务商获取后显式传入
 );
 
 $client = new Client($config);

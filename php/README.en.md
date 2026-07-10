@@ -58,7 +58,7 @@ $config = new Config(
     apiSecretPay: 'sk_pay_xxx',       // for collection-type calls and collection/refund callbacks
     apiSecretPayout: 'sk_payout_xxx', // for payout-type calls and payout callbacks
     environment: Environment::PRODUCTION,
-    baseUrl: 'https://api.<agent_domain>/api/open/v1', // required in production: derived from your parent agent's dedicated domain
+    baseUrl: 'https://api.<service_domain>/api/open/v1', // required in production: obtain it from your service provider
 );
 
 $client = new Client($config);
@@ -85,15 +85,15 @@ try {
 
 ```php
 // Preset: production (no built-in address; you must pass baseUrl explicitly, or construction throws)
-new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<agent_domain>/api/open/v1');
+new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1');
 // Preset: local/sandbox (http://127.0.0.1:3090/api/open/v1)
 new Config(..., environment: Environment::SANDBOX);
 
-// Custom base URL override (agent's dedicated domain / self-hosted port); takes precedence over environment
-new Config(..., baseUrl: 'https://api.<agent_domain>/api/open/v1');
+// Custom base URL override (service-provider URL / self-hosted port); takes precedence over environment
+new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 ```
 
-> `PRODUCTION` **has no built-in production address**: the real production address is derived from your parent agent's dedicated domain (in the form `https://api.<agent_domain>/api/open/v1`), provided by the platform/agent, and must be passed explicitly via `baseUrl`. Choosing `PRODUCTION` without passing `baseUrl` throws an `InvalidArgumentException` when constructing `Config`.
+> `PRODUCTION` **has no built-in production address**: obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v1`) and pass it explicitly via `baseUrl`. Choosing `PRODUCTION` without passing `baseUrl` throws an `InvalidArgumentException` when constructing `Config`.
 
 ## Endpoint Methods (all 11)
 
@@ -134,7 +134,7 @@ $base = Signer::buildSignBase($payload, $secret);
 // Callback signature verification (timing-safe comparison; every field except sign participates, with no hardcoded field list)
 $ok = Signer::verifyCallback($callbackPayload, $secret);
 
-// Recommended: big-integer-safe convenience verification — pass the raw body directly; internally it parses
+// Recommended: big-integer-safe convenience verification — pass the raw body directly; the SDK parses it
 // with JSON_BIGINT_AS_STRING, keeping big integers beyond PHP's integer range (such as 64-bit order numbers)
 // as strings before verifying, avoiding precision loss that would diverge the signature.
 $ok = Signer::verifyCallbackRaw($rawBody, $secret);
@@ -146,7 +146,7 @@ $client->verifyPayoutCallback($payload); // payout callback, uses api_secret_pay
 
 Callback handling pattern (see `examples/callback_verify.php`): take the raw body → prefer `verifyCallbackRaw($rawBody, $secret)`
 (or `json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING)` then `verifyCallback`, keeping big integers as strings) →
-process **idempotently** by `status` (success/failed) → reply with **HTTP 200 + plain text `success`**. Do not reply success on verification failure; let the platform retry.
+process **idempotently** by `status` (success/failed) → reply with **HTTP 200 + plain text `success`**. Do not reply success on verification failure; the same order may be sent again.
 
 **Security constraints** (fail-closed; only rejects illegal input, never affects valid signature results):
 

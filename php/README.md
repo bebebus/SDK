@@ -58,7 +58,7 @@ $config = new Config(
     apiSecretPay: 'sk_pay_xxx',       // 代收类与代收/退款回调用
     apiSecretPayout: 'sk_payout_xxx', // 代付类与代付回调用
     environment: Environment::PRODUCTION,
-    baseUrl: 'https://api.<agent_domain>/api/open/v1', // 正式必传：按上级代理专有域名派生
+    baseUrl: 'https://api.<service_domain>/api/open/v1', // 正式必传：请向服务商获取
 );
 
 $client = new Client($config);
@@ -85,15 +85,15 @@ try {
 
 ```php
 // 预设：正式（无内置地址，必须显式传 baseUrl，否则构造时抛错）
-new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<agent_domain>/api/open/v1');
+new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1');
 // 预设：本地/沙箱（http://127.0.0.1:3090/api/open/v1）
 new Config(..., environment: Environment::SANDBOX);
 
-// 自定义基址覆盖（代理专有域名 / 自建端口），优先级高于 environment
-new Config(..., baseUrl: 'https://api.<agent_domain>/api/open/v1');
+// 自定义基址覆盖（服务商提供的地址 / 自建端口），优先级高于 environment
+new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 ```
 
-> `PRODUCTION` **不内置任何正式地址**：正式真实地址按上级代理专有域名派生（形如 `https://api.<agent_domain>/api/open/v1`），由平台/代理提供，必须用 `baseUrl` 显式传入。选 `PRODUCTION` 而不传 `baseUrl` 会在构造 `Config` 时抛 `InvalidArgumentException`。
+> `PRODUCTION` **不内置任何正式地址**：正式地址请向服务商获取（形如 `https://api.<service_domain>/api/open/v1`），必须用 `baseUrl` 显式传入。选 `PRODUCTION` 而不传 `baseUrl` 会在构造 `Config` 时抛 `InvalidArgumentException`。
 
 ## 端点方法（全 11 个）
 
@@ -134,7 +134,7 @@ $base = Signer::buildSignBase($payload, $secret);
 // 回调验签（时序安全比较，除 sign 外所有字段参与，不硬编码字段表）
 $ok = Signer::verifyCallback($callbackPayload, $secret);
 
-// 推荐：大整数安全的便捷验签——直接传原始 body，内部用 JSON_BIGINT_AS_STRING 解析，
+// 推荐：大整数安全的便捷验签——直接传原始 body，SDK 用 JSON_BIGINT_AS_STRING 解析，
 // 把超出 PHP 整数范围的大整数（如 64 位订单号）保留为字符串后再验签，避免精度丢失致签名分叉。
 $ok = Signer::verifyCallbackRaw($rawBody, $secret);
 
@@ -145,7 +145,7 @@ $client->verifyPayoutCallback($payload); // 代付回调，用 api_secret_payout
 
 回调处理范式（见 `examples/callback_verify.php`）：拿原始 body → 优先用 `verifyCallbackRaw($rawBody, $secret)`
 （或 `json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING)` 后再 `verifyCallback`，保大整数为字符串）→
-按 `status`（success/failed）**幂等**处理 → 回 **HTTP 200 + 纯文本 `success`**。验签失败不要回成功，让平台重试。
+按 `status`（success/failed）**幂等**处理 → 回 **HTTP 200 + 纯文本 `success`**。验签失败不要回成功；同一订单可能再次收到回调。
 
 **安全约束**（fail-closed，仅拦非法输入，不影响合法签名结果）：
 

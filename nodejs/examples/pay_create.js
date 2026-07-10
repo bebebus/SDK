@@ -8,7 +8,7 @@ const config = new Config({
   merchantNo: process.env.PP_MERCHANT_NO || 'M00000001',
   apiKey: process.env.PP_API_KEY || 'ak_demo_key',
   apiSecretPay: process.env.PP_API_SECRET_PAY || 'sk_test_pay',
-  // 双环境：默认 PRODUCTION；本地联调用 SANDBOX；代理专有域名用 baseUrl 覆盖。
+  // 双环境：默认 PRODUCTION；本地联调用 SANDBOX；正式地址通过 baseUrl 传入。
   environment: Environment.SANDBOX,
   baseUrl: process.env.PP_BASE_URL || undefined,
 });

@@ -25,15 +25,15 @@ from openapi_sdk import verify_callback
 API_SECRET_PAY = "sk_pay_demo"  # 代收/退款回调
 API_SECRET_PAYOUT = "sk_payout_demo"  # 代付回调
 
-# 应答：平台用 isMerchantAckSuccess 判定，HTTP 200 + 纯文本 success 即视为成功。
+# 应答：HTTP 200 + 纯文本 success 即视为成功。
 _ACK_OK: Tuple[int, str, str] = (200, "text/plain; charset=utf-8", "success")
-# 验签失败 -> 不回成功，让平台重试。
+# 验签失败 -> 不回成功；同一订单可能再次收到回调。
 _ACK_REJECT: Tuple[int, str, str] = (400, "text/plain; charset=utf-8", "invalid signature")
 
 
 def _handle(raw_body: bytes, secret: str, kind: str) -> Tuple[int, str, str]:
     """通用回调处理：解析 -> 验签 -> 按 status 幂等分支 -> 应答。"""
-    # 1) 解析原始 body。解析失败按拒绝处理（让平台重试）。
+    # 1) 解析原始 body。解析失败按拒绝处理。
     try:
         payload = json.loads(raw_body.decode("utf-8"))
     except (ValueError, UnicodeDecodeError):
@@ -43,7 +43,7 @@ def _handle(raw_body: bytes, secret: str, kind: str) -> Tuple[int, str, str]:
 
     # 2) 时序安全验签（字段无关：除 sign 外全部字段参与）。
     if not verify_callback(payload, secret):
-        # 验签失败：拒绝处理、不回成功，让平台重试。
+        # 验签失败：拒绝处理、不回成功；同一订单可能再次收到回调。
         return _ACK_REJECT
 
     # 3) 按 status 幂等处理。
@@ -63,7 +63,7 @@ def _handle(raw_body: bytes, secret: str, kind: str) -> Tuple[int, str, str]:
         # mark_failed(order_key, reason=payload.get("failed_reason"))
         print(f"[{kind}] 失败回调 {order_key}: {payload.get('failed_reason')}")
     else:
-        # 其它/未知态：记录后仍正常应答，避免平台无谓重试。
+        # 其它/未知态：记录后仍正常应答，避免重复回调。
         print(f"[{kind}] 其它状态回调 {order_key}: status={status}")
 
     # 4) 正确应答：HTTP 200 + 纯文本 success。

@@ -95,10 +95,10 @@ Each method accepts a `Map<String, Object>` of business fields:
 ### Dual environments (sandbox/production) and custom base URL
 
 ```java
-// PRODUCTION has no built-in base URL: the production address is derived from your upstream agent's dedicated domain, so baseUrl must be passed explicitly
+// PRODUCTION has no built-in base URL: obtain the production address from your service provider, so baseUrl must be passed explicitly
 Config.builder()
       .environment(Environment.PRODUCTION)
-      .baseUrl("https://api.<agent_domain>/api/open/v1")        // required, otherwise build() throws
+      .baseUrl("https://api.<service_domain>/api/open/v1")        // required, otherwise build() throws
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 
@@ -107,23 +107,23 @@ Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.
 
 // Custom base URL override: takes priority over environment; a trailing slash is stripped
 Config.builder()
-      .baseUrl("https://api.<agent_domain>/api/open/v1")
+      .baseUrl("https://api.<service_domain>/api/open/v1")
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 ```
 
 > When you choose `PRODUCTION` without passing `baseUrl`, `build()` throws `IllegalArgumentException`
-> (`baseUrl is required: production base URL is provided per your agent domain ...`).
+> (`baseUrl is required: obtain the production URL from your service provider ...`).
 
 ### Callback signature verification (verify + handle snippet, not a long-running service)
 
 ```java
-// In your HTTP handler: rawBody is the raw request body POSTed by the platform
+// In your HTTP handler: rawBody is the raw callback request body
 Map<String, Object> payload = Json.parseObject(rawBody);
 
 // Timing-safe signature verification: collection/refund uses the pay secret, payout uses the payout secret (the SDK picks the secret automatically)
 if (!client.verifyPayCallback(payload)) {       // collection/refund callback
-    return /* not a success body or not 2xx, let the platform retry */;
+    return /* not a success body or not 2xx; the same order may be sent again */;
 }
 String status = String.valueOf(payload.get("status"));
 if ("success".equals(status)) {
@@ -134,7 +134,7 @@ if ("success".equals(status)) {
 return "success"; // HTTP 200 + plain text success
 ```
 
-Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` instead. The verifier **relies only on the general rule that "all fields except sign participate"**, does not hardcode a field table, and remains compatible when the platform adds or removes fields. For a complete runnable example, see [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java) (demonstrates collection + payout once each, including a tampering counter-example).
+Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` instead. The verifier **relies only on the general rule that "all fields except sign participate"**, does not hardcode a field table, and remains compatible when callback fields are added or removed. For a complete runnable example, see [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java) (demonstrates collection + payout once each, including a tampering counter-example).
 
 ## examples/
 

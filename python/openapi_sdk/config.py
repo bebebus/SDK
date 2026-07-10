@@ -3,8 +3,8 @@
 - ``Environment``：预设环境枚举（PRODUCTION / SANDBOX）。
 - ``Config``：商户号 + API Key + 双密钥 + 基址 + 超时。
 
-正式环境（PRODUCTION）没有内置基址：真实地址按上级代理专有域名派生
-（``https://api.<agent_domain>/api/open/v1``），必须显式传入 ``base_url``。
+正式环境（PRODUCTION）没有内置基址：请向服务商获取正式地址
+（``https://api.<domain>/api/open/v1``），并显式传入 ``base_url``。
 沙箱（SANDBOX）保留本地预设基址，便于本地联调。
 """
 
@@ -74,8 +74,8 @@ class Config:
         resolved = base_url if base_url else environment.base_url
         if not resolved:
             raise ValueError(
-                "baseUrl is required: production base URL is provided per your "
-                "agent domain (e.g. https://api.<agent_domain>/api/open/v1)"
+                "baseUrl is required: obtain the production URL from your service "
+                "provider (e.g. https://api.<domain>/api/open/v1)"
             )
         resolved = resolved.rstrip("/")
         # [D] 传输层 fail-closed：

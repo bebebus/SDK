@@ -20,7 +20,7 @@ final class Config
      * @param string      $apiSecretPay    代收类密钥（pay/*、pay-methods、balance、代收/退款回调）
      * @param string      $apiSecretPayout 代付类密钥（payout/*、代付回调）
      * @param Environment $environment     环境预设基址（baseUrl 为 null 时生效）
-     * @param string|null $baseUrl         自定义基址，覆盖 environment（用于代理专有域名/本地端口）
+     * @param string|null $baseUrl         自定义基址，覆盖 environment（用于服务商地址/本地端口）
      * @param int         $timeoutSeconds  HTTP 超时（秒）
      */
     public function __construct(
@@ -37,8 +37,8 @@ final class Config
         if ($resolved === '') {
             // 选了 PRODUCTION（或显式空串）又没传 baseUrl：正式无内置地址，必须显式提供。
             throw new \InvalidArgumentException(
-                'baseUrl is required: production base URL is provided per your agent domain '
-                . '(e.g. https://api.<agent_domain>/api/open/v1)'
+                'baseUrl is required: obtain the production URL from your service provider '
+                . '(e.g. https://api.<domain>/api/open/v1)'
             );
         }
 
