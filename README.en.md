@@ -17,6 +17,7 @@ SDK/
 ├── SIGNING.md           # Authoritative signing algorithm description + per-language serialization pitfalls (required reading for implementation/debugging)
 ├── INTERFACES.md        # Field-level request/response for the 11 signed business endpoints, callback fields, error codes
 ├── CONTRIBUTING.md      # Branch, pull request, testing, and release contribution requirements
+├── RELEASE_NOTES.md     # Human-readable summaries for each user-facing release
 ├── test-vectors.json    # Cross-language signing test vectors (11 entries; asserted by all five test suites)
 ├── _tooling/
 │   └── generate-vectors.mjs   # Vector generator (produced after cross-validation against three authoritative implementations)

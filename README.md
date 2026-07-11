@@ -19,6 +19,7 @@ SDK/
 ├── SIGNING.md           # 签名算法权威说明 + 逐语言序列化坑（实现/排错必读）
 ├── INTERFACES.md        # 11 个签名业务端点字段级请求/响应、回调字段、错误码
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
+├── RELEASE_NOTES.md     # 各版本面向用户的变更摘要
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
 ├── _tooling/
 │   └── generate-vectors.mjs   # 向量生成器（经三处权威实现交叉校验后产出）
