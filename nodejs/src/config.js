@@ -69,7 +69,9 @@ export class Config {
     // [D 传输 https] 非 localhost 必须 https，否则拒绝（localhost 放行 http 兼容本地联调）。
     assertSecureBaseUrl(resolved);
     // 去掉末尾斜杠，避免拼接出双斜杠。
-    this.baseUrl = resolved.replace(/\/+$/, '');
+    let trimEnd = resolved.length;
+    while (trimEnd > 0 && resolved.charCodeAt(trimEnd - 1) === 47) trimEnd--;
+    this.baseUrl = resolved.slice(0, trimEnd);
 
     this.timeout = timeout;
   }
