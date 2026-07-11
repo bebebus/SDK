@@ -16,6 +16,7 @@ SDK/
 ├── README.md            # This file
 ├── SIGNING.md           # Authoritative signing algorithm description + per-language serialization pitfalls (required reading for implementation/debugging)
 ├── INTERFACES.md        # Field-level request/response for the 11 signed business endpoints, callback fields, error codes
+├── CONTRIBUTING.md      # Branch, pull request, testing, and release contribution requirements
 ├── test-vectors.json    # Cross-language signing test vectors (11 entries; asserted by all five test suites)
 ├── _tooling/
 │   └── generate-vectors.mjs   # Vector generator (produced after cross-validation against three authoritative implementations)
@@ -126,4 +127,4 @@ cd go     && go test -count=1 ./... && cd ..
 
 The SDK is connected to [OpenSSF Scorecard](https://scorecard.dev/). Results are generated continuously by GitHub Actions and published to the public report and Code Scanning. This is an automated open-source supply-chain security assessment; **it is not a manual code audit or penetration test by an independent security firm**.
 
-See [`SECURITY-AUDIT.en.md`](./SECURITY-AUDIT.en.md) for the public report, API, check definitions, and current status.
+See [`SECURITY-AUDIT.en.md`](./SECURITY-AUDIT.en.md) for the public report, API, check definitions, and current status; contribution requirements are in [`CONTRIBUTING.en.md`](./CONTRIBUTING.en.md).

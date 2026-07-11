@@ -18,6 +18,7 @@ SDK/
 ├── README.md            # 本文件
 ├── SIGNING.md           # 签名算法权威说明 + 逐语言序列化坑（实现/排错必读）
 ├── INTERFACES.md        # 11 个签名业务端点字段级请求/响应、回调字段、错误码
+├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
 ├── _tooling/
 │   └── generate-vectors.mjs   # 向量生成器（经三处权威实现交叉校验后产出）
@@ -128,4 +129,4 @@ cd go     && go test -count=1 ./... && cd ..
 
 SDK 已接入 [OpenSSF Scorecard](https://scorecard.dev/)，结果会在 GitHub Actions 中持续生成，并同步到公开报告与 Code Scanning。它属于自动化开源供应链安全评估，**不等同于独立安全公司的人工代码审计或渗透测试**。
 
-详见 [`SECURITY-AUDIT.md`](./SECURITY-AUDIT.md)，包括公开报告、API、评估规则和当前状态。
+详见 [`SECURITY-AUDIT.md`](./SECURITY-AUDIT.md)，包括公开报告、API、评估规则和当前状态；贡献流程见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
