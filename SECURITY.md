@@ -2,16 +2,16 @@
 
 ## 报告安全问题
 
-请优先通过 [GitHub Security Advisories](https://github.com/bebebus/SDK/security/advisories/new) 私下报告安全问题。请不要在公开 Issue、Pull Request 或讨论区发布可利用细节、密钥、真实商户数据或完整攻击步骤。
+当前仓库尚未启用 GitHub Security Advisories 的 Private vulnerability reporting 入口，因此暂不接受通过该入口提交的私密报告。请先通过仓库 [Issues](https://github.com/bebebus/SDK/issues) 联系维护者，并只说明需要进行安全沟通，不要在公开 Issue、Pull Request 或讨论区发布可利用细节、密钥、真实商户数据或完整攻击步骤。私密报告入口启用后，本文件会同步更新。
 
-报告中请尽量包含：
+在维护者提供私下沟通渠道后，报告中请尽量包含：
 
 - 受影响的 SDK 语言和版本；
 - 受影响的文件、接口或调用方式；
 - 可复现步骤或最小化示例；
 - 影响范围和可能的缓解措施。
 
-如果无法使用 Security Advisories，也可以先通过仓库 [Issues](https://github.com/bebebus/SDK/issues) 联系维护者，但请只说明需要私下沟通，不要公开漏洞细节。
+在私密报告入口启用前，Issues 仅用于发起不含敏感信息的私下沟通请求，不用于提交漏洞细节。
 
 ## 响应与披露
 
