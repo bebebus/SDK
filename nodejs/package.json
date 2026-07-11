@@ -18,7 +18,11 @@
     "LICENSE"
   ],
   "scripts": {
+    "lint": "eslint .",
     "test": "node --test"
+  },
+  "devDependencies": {
+    "eslint": "9.39.5"
   },
   "engines": {
     "node": ">=18"

@@ -230,7 +230,9 @@ func (c *Client) do(ctx context.Context, path string, body map[string]any) ([]by
 	if err != nil {
 		return nil, 0, &TransportError{Op: "request", Err: err}
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	raw, err := io.ReadAll(res.Body)
 	if err != nil {

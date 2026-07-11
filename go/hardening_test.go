@@ -54,10 +54,10 @@ func TestVerifyCallbackInvalidSign(t *testing.T) {
 	base := map[string]any{"amount": json.Number("1"), "status": "success"}
 
 	cases := []any{
-		12345,                  // 非字符串
-		true,                   // 非字符串
-		"",                     // 空串
-		"abc",                  // 长度不足
+		12345,                   // 非字符串
+		true,                    // 非字符串
+		"",                      // 空串
+		"abc",                   // 长度不足
 		strings.Repeat("a", 63), // 长度 63
 		strings.Repeat("a", 65), // 长度 65
 		strings.Repeat("z", 64), // 64 位但含非 hex 字符 z

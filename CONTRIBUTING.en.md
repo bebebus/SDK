@@ -29,6 +29,16 @@ cd java && bash run-tests.sh && cd ..
 cd go && go test -count=1 ./... && cd ..
 ```
 
+Before submitting a change, also run the static checks for all five languages:
+
+```bash
+cd nodejs && npm ci && npm run lint && cd ..
+cd python && python3 -m pip install -e '.[dev]' && ruff check . && cd ..
+cd php && composer install && composer run lint && cd ..
+cd java && mvn --batch-mode --no-transfer-progress verify && cd ..
+cd go && golangci-lint run && cd ..
+```
+
 Run the Go callback verification fuzz target separately when changing parsing or signing boundaries:
 
 ```bash

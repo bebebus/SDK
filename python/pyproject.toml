@@ -26,8 +26,16 @@ Repository = "https://github.com/bebebus/SDK"
 Issues = "https://github.com/bebebus/SDK/issues"
 
 [project.optional-dependencies]
-# 测试也只用标准库 unittest，无需任何额外安装。
-dev = []
+# 运行时仍为零第三方依赖；dev 额外提供静态检查工具。
+dev = ["ruff==0.15.21"]
 
 [tool.setuptools]
 packages = ["openapi_sdk"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B", "SIM"]
+ignore = ["E501"]

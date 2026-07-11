@@ -29,6 +29,16 @@ cd java && bash run-tests.sh && cd ..
 cd go && go test -count=1 ./... && cd ..
 ```
 
+提交前还应运行五种语言的静态检查：
+
+```bash
+cd nodejs && npm ci && npm run lint && cd ..
+cd python && python3 -m pip install -e '.[dev]' && ruff check . && cd ..
+cd php && composer install && composer run lint && cd ..
+cd java && mvn --batch-mode --no-transfer-progress verify && cd ..
+cd go && golangci-lint run && cd ..
+```
+
 Go 的回调验签 fuzz 目标可单独运行：
 
 ```bash

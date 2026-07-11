@@ -20,11 +20,9 @@ from openapi_sdk import (  # noqa: E402
     Client,
     Config,
     Environment,
-    TransportError,
     build_sign_base,
     signer,
 )
-from openapi_sdk import client as client_module  # noqa: E402
 
 
 def _make_client(timeout: float = 5.0) -> Client:
