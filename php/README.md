@@ -169,4 +169,10 @@ cd php
 php tests/run.php
 ```
 
+## 第三方安全验证
+
+本 PHP SDK 所属的多语言 SDK 仓库已接入 [OpenSSF Scorecard](https://scorecard.dev/)，用于持续进行自动化开源供应链安全评估。
+
+公开验证入口见主仓库的 [第三方安全验证说明](https://github.com/bebebus/SDK/blob/main/SECURITY-AUDIT.md)。该评估不等同于独立安全公司的人工代码审计或渗透测试。
+
 退出码 `0` = 全绿；非 `0` = 有失败（CI 可直接据此判定）。

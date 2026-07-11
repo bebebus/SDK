@@ -170,4 +170,10 @@ cd php
 php tests/run.php
 ```
 
+## Third-Party Security Verification
+
+The multi-language SDK repository that contains this PHP SDK is connected to [OpenSSF Scorecard](https://scorecard.dev/) for continuous automated open-source supply-chain security assessment.
+
+See the main repository's [Third-Party Security Verification](https://github.com/bebebus/SDK/blob/main/SECURITY-AUDIT.en.md) page for the public verification sources. This assessment is not a manual code audit or penetration test by an independent security firm.
+
 Exit code `0` = all green; non-`0` = there were failures (CI can decide directly from this).
