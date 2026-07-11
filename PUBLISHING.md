@@ -16,7 +16,7 @@
 
 ## GitHub Actions 发布流程
 
-仓库提供手动触发的 [`release.yml`](./.github/workflows/release.yml)。它会先验证已存在的版本 Tag、运行五语言测试、生成发布文件、构建 provenance 并创建 GitHub Release。
+仓库提供 Tag 自动触发、也支持手动触发的 [`release.yml`](./.github/workflows/release.yml)。它会先验证已存在的版本 Tag、运行五语言测试、生成发布文件、构建 provenance 并创建 GitHub Release。手动触发必须输入 `RELEASE` 确认。
 
 默认只构建和创建 GitHub Release；只有在手动输入 `publish_registries=true` 且已配置 `release` 环境和 `PHP_MIRROR_TOKEN` 时，才会发布 npm、PyPI，并同步 PHP 镜像仓。npm/PyPI 使用 Trusted Publishing/OIDC，不在仓库中保存长期令牌。Java 仍然只发布源码归档，不发布 Maven 包。
 

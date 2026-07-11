@@ -2,10 +2,17 @@ name: Release
 
 # 发布必须由维护者手动确认，避免普通代码 Push 意外发布公共包。
 on:
+  push:
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       version:
         description: '已存在的版本 Tag，例如 1.1.3'
+        required: true
+        type: string
+      confirm:
+        description: '输入 RELEASE 才会执行手动发布'
         required: true
         type: string
       publish_registries:
@@ -20,8 +27,11 @@ permissions:
 jobs:
   release:
     name: Build and release SDK
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'RELEASE' }}
     runs-on: ubuntu-latest
     environment: release
+    env:
+      RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
     permissions:
       contents: write
       id-token: write
@@ -31,7 +41,7 @@ jobs:
       - name: Checkout full history
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: v${{ inputs.version }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || github.ref }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -63,8 +73,6 @@ jobs:
           go-version: '1.21'
 
       - name: Validate version and existing tag
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           version="${RELEASE_VERSION#v}"
@@ -77,19 +85,16 @@ jobs:
           test "$(sed -n 's/.*const Version = \"\([^\"]*\)\".*/\1/p' go/client.go)" = "$version"
 
       - name: Run all SDK tests
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
         run: ./release.sh "${RELEASE_VERSION#v}" --dry-run
 
       - name: Build release assets
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           version="${RELEASE_VERSION#v}"
           mkdir -p dist
           (cd nodejs && npm pack --pack-destination "$GITHUB_WORKSPACE/dist")
-          python -m pip install --disable-pip-version-check --no-input build
+          python -m pip install --disable-pip-version-check --no-input \
+            --require-hashes --only-binary=:all: -r release-requirements.txt
           python -m build --outdir dist python
           tar --exclude='out' --exclude='.DS_Store' -czf "dist/php-${version}.tar.gz" -C php .
           tar --exclude='out' --exclude='.DS_Store' -czf "dist/java-${version}.tar.gz" -C java .
@@ -104,7 +109,6 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           version="${RELEASE_VERSION#v}"
@@ -126,7 +130,6 @@ jobs:
         if: ${{ inputs.publish_registries == true }}
         env:
           PHP_MIRROR_TOKEN: ${{ secrets.PHP_MIRROR_TOKEN }}
-          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           if [ -z "${PHP_MIRROR_TOKEN:-}" ]; then
