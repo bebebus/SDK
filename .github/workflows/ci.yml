@@ -38,7 +38,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: install Ruff
-        run: python -m pip install --disable-pip-version-check 'ruff==0.15.21'
+        run: python -m pip install --disable-pip-version-check --require-hashes -r python/requirements-ci.txt
       - name: ruff check
         working-directory: python
         run: ruff check .
