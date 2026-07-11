@@ -39,7 +39,7 @@ jobs:
 
       - name: Autobuild compiled languages
         if: matrix.language == 'java-kotlin' || matrix.language == 'go'
-        uses: github/codeql-action/autobuild@1ad29ea4a422cce9a242a9fae469541dcd08addc # v4
+        uses: github/codeql-action/autobuild@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4
