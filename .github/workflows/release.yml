@@ -87,6 +87,9 @@ jobs:
       - name: Run all SDK tests
         run: ./release.sh "${RELEASE_VERSION#v}" --dry-run
 
+      - name: Pin build requirements from workflow revision
+        run: git show "${GITHUB_SHA}:release-requirements.txt" > "$RUNNER_TEMP/release-requirements.txt"
+
       - name: Build release assets
         run: |
           set -euo pipefail
@@ -94,7 +97,8 @@ jobs:
           mkdir -p dist
           (cd nodejs && npm pack --pack-destination "$GITHUB_WORKSPACE/dist")
           python -m pip install --disable-pip-version-check --no-input \
-            --require-hashes --only-binary=:all: -r release-requirements.txt
+            --require-hashes --only-binary=:all: \
+            -r "$RUNNER_TEMP/release-requirements.txt"
           python -m build --outdir dist python
           tar --exclude='out' --exclude='.DS_Store' -czf "dist/php-${version}.tar.gz" -C php .
           tar --exclude='out' --exclude='.DS_Store' -czf "dist/java-${version}.tar.gz" -C java .
@@ -113,7 +117,11 @@ jobs:
           set -euo pipefail
           version="${RELEASE_VERSION#v}"
           tag="v${version}"
-          gh release create "$tag" dist/* --verify-tag --generate-notes --title "SDK ${tag}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" dist/* --clobber
+          else
+            gh release create "$tag" dist/* --verify-tag --generate-notes --title "SDK ${tag}"
+          fi
 
       - name: Publish npm package with provenance
         if: ${{ inputs.publish_registries == true }}
