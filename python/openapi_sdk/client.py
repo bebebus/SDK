@@ -19,7 +19,8 @@ import time
 import urllib.error
 import urllib.request
 import uuid
-from typing import Any, Dict, List, Mapping, Optional
+from contextlib import suppress
+from typing import Any, Dict, Mapping, Optional
 
 from . import signer
 from .config import Config, Environment
@@ -30,7 +31,8 @@ __all__ = ["Client"]
 # [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
 # 不再硬编码；源码直跑（未安装）取不到则兜底 '1.1.0'。
 try:
-    from importlib.metadata import PackageNotFoundError, version as _pkg_version
+    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import version as _pkg_version
 
     try:
         _SDK_VERSION = _pkg_version("bebebus-merchant-openapi-sdk")
@@ -356,10 +358,8 @@ class Client:
                 raw = resp.read().decode("utf-8")
         except urllib.error.HTTPError as exc:  # 非 2xx
             raw_body = None
-            try:
+            with suppress(Exception):
                 raw_body = exc.read().decode("utf-8")
-            except Exception:  # noqa: BLE001 - 读取错误体本身失败时忽略
-                pass
             raise TransportError(
                 f"HTTP {exc.code} 请求失败: {url}",
                 status_code=exc.code,

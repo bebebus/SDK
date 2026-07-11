@@ -118,7 +118,10 @@ func isValidHexSign(sign string) bool {
 	}
 	for i := 0; i < len(sign); i++ {
 		c := sign[i]
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+		isDigit := c >= '0' && c <= '9'
+		isLowerHex := c >= 'a' && c <= 'f'
+		isUpperHex := c >= 'A' && c <= 'F'
+		if !isDigit && !isLowerHex && !isUpperHex {
 			return false
 		}
 	}
@@ -185,7 +188,7 @@ func normalizeContainer(v any) (any, bool) {
 		return out, true
 	case reflect.Struct:
 		return structToMap(rv), true
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if rv.IsNil() {
 			return nil, true // nil 指针 → null（stableStringify 写 "null"）。
 		}
@@ -208,7 +211,7 @@ func reflectToSignable(rv reflect.Value) any {
 		}
 		rv = rv.Elem()
 	}
-	if rv.Kind() == reflect.Ptr {
+	if rv.Kind() == reflect.Pointer {
 		if rv.IsNil() {
 			return nil
 		}
@@ -223,7 +226,7 @@ func reflectToSignable(rv reflect.Value) any {
 
 // mapKeyToString 把 map 键统一转为字符串（与 JSON 对象键一致）。
 func mapKeyToString(k reflect.Value) string {
-	for k.Kind() == reflect.Interface || k.Kind() == reflect.Ptr {
+	for k.Kind() == reflect.Interface || k.Kind() == reflect.Pointer {
 		if k.IsNil() {
 			return ""
 		}

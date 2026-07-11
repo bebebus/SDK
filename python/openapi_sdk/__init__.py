@@ -31,7 +31,8 @@ __all__ = [
 # [L20] 版本号单一事实源：从已安装包元数据（pyproject 的 version=1.1.0）派生，
 # 避免与 pyproject 自相矛盾；源码直跑（未安装）时取不到则兜底 '1.1.0'。
 try:
-    from importlib.metadata import PackageNotFoundError, version as _pkg_version
+    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import version as _pkg_version
 
     try:
         __version__ = _pkg_version("bebebus-merchant-openapi-sdk")

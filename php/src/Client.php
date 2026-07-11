@@ -28,7 +28,7 @@ final class Client
     /** @var callable(string,string,int):array{status:int,body:string} 注入的 HTTP 执行器（默认 cURL） */
     private $httpExecutor;
 
-    /** 最近一次原始响应信封（保留拿原始响应的途径） */
+    /** @var array<string,mixed>|null 最近一次原始响应信封（保留拿原始响应的途径） */
     private ?array $lastRawResponse = null;
 
     /**
@@ -52,7 +52,7 @@ final class Client
      * @param array{
      *   out_order_no:string, amount:int, currency:string, pay_method:string,
      *   notify_url:string, country?:string|null, return_url?:string|null,
-     *   subject?:string|null, remark?:string|null, client_ip?:string|null, extra?:array|null
+     *   subject?:string|null, remark?:string|null, client_ip?:string|null, extra?:array<string,mixed>|null
      * } $params
      * @return array<string,mixed> data
      */
@@ -115,7 +115,7 @@ final class Client
      *   out_payout_no:string, amount:int, currency:string, pay_method:string,
      *   notify_url:string, account_no:string, country?:string|null, account_name?:string|null,
      *   bank_code?:string|null, bank_name?:string|null, remark?:string|null,
-     *   client_ip?:string|null, extra?:array|null
+     *   client_ip?:string|null, extra?:array<string,mixed>|null
      * } $params
      * @return array<string,mixed> data
      */
@@ -163,7 +163,7 @@ final class Client
      *
      * inline 以整数 1/0 发送（避免布尔签名歧义）：true→1（内联 base64 图片），false/省略→0（带 token 的 URL）。
      *
-     * @param array{payout_no?:string|null, out_payout_no?:string|null, lang?:string|null, inline?:bool|int|null} $params
+     * @param array{payout_no?:string|null, out_payout_no?:string|null, lang?:string|null, inline?:bool|int|string|null} $params
      * @return array<string,mixed> data
      */
     public function payoutReceiptQuery(array $params): array

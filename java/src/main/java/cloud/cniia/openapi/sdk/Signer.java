@@ -26,7 +26,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public final class Signer {
 
-    private Signer() {}
+    private Signer() { }
 
     /**
      * 构造签名 base 串（不计算 HMAC）。便于测试逐字节断言。

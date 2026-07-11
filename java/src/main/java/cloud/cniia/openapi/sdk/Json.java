@@ -30,7 +30,7 @@ import java.math.BigDecimal;
  */
 public final class Json {
 
-    private Json() {}
+    private Json() { }
 
     // ===================== 序列化（签名用稳定形态） =====================
 
@@ -317,14 +317,30 @@ public final class Json {
                     }
                     char e = s.charAt(pos++);
                     switch (e) {
-                        case '"': sb.append('"'); break;
-                        case '\\': sb.append('\\'); break;
-                        case '/': sb.append('/'); break;
-                        case 'b': sb.append('\b'); break;
-                        case 'f': sb.append('\f'); break;
-                        case 'n': sb.append('\n'); break;
-                        case 'r': sb.append('\r'); break;
-                        case 't': sb.append('\t'); break;
+                        case '"':
+                            sb.append('"');
+                            break;
+                        case '\\':
+                            sb.append('\\');
+                            break;
+                        case '/':
+                            sb.append('/');
+                            break;
+                        case 'b':
+                            sb.append('\b');
+                            break;
+                        case 'f':
+                            sb.append('\f');
+                            break;
+                        case 'n':
+                            sb.append('\n');
+                            break;
+                        case 'r':
+                            sb.append('\r');
+                            break;
+                        case 't':
+                            sb.append('\t');
+                            break;
                         case 'u':
                             if (pos + 4 > s.length()) {
                                 throw new JsonException("\\u 转义不完整");

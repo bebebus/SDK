@@ -14,8 +14,8 @@ import (
 type Environment int
 
 const (
-    // Production 正式环境。无内置 URL：正式基址请向服务商获取，
-    // 形如 https://api.<domain>/api/open/v1，必须用 Config.BaseURL 显式提供。
+	// Production 正式环境。无内置 URL：正式基址请向服务商获取，
+	// 形如 https://api.<domain>/api/open/v1，必须用 Config.BaseURL 显式提供。
 	Production Environment = iota
 	// Sandbox 本地/联调环境。
 	Sandbox
@@ -54,7 +54,7 @@ type Config struct {
 
 	// Environment 预设环境，默认 Production。BaseURL 非空时优先于本字段。
 	Environment Environment
-    // BaseURL 自定义基址覆盖（服务商提供的地址或本地端口），非空则覆盖 Environment 预设。
+	// BaseURL 自定义基址覆盖（服务商提供的地址或本地端口），非空则覆盖 Environment 预设。
 	BaseURL string
 
 	// Timeout HTTP 请求超时，默认 30s。
