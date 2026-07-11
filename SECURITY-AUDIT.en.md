@@ -14,7 +14,7 @@ The SDK includes an OpenSSF Scorecard workflow for the `bebebus/SDK` repository.
 - Check definitions: [Scorecard checks](https://github.com/ossf/scorecard/blob/main/docs/checks.md)
 - Source project: [OpenSSF Scorecard](https://github.com/ossf/scorecard)
 
-The first result requires one successful GitHub Actions run on `main`; until then, the report link may not contain a result.
+The report is updated by GitHub Actions runs on `main`. The current baseline (2026-07-11 07:23 UTC) is **3.2/10**, covering commit `b23e600`. See [`SECURITY-REMEDIATION-PLAN.en.md`](./SECURITY-REMEDIATION-PLAN.en.md) for the findings and remediation order.
 
 ## Dependency and Supply-Chain Information
 
@@ -29,7 +29,7 @@ The SDK declares no runtime dependencies. This source is mainly useful for revie
 
 | Item | Status |
 | --- | --- |
-| OpenSSF Scorecard workflow | Configured; first public result pending a GitHub Actions run |
+| OpenSSF Scorecard workflow | Configured; current public result is 3.2/10 and will be updated by future runs |
 | GitHub Code Scanning | SARIF uploaded by the Scorecard workflow |
 | Dependency supply-chain review | Publicly reviewable through deps.dev |
 | Independent manual code audit / penetration test | Not commissioned; not claimed as completed |
