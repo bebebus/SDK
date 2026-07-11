@@ -3,6 +3,7 @@
 # Merchant Payment OpenAPI Multi-Language SDK
 
 [![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bebebus/SDK/badge)](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
 
 Provides five SDKs in **PHP / Python / Java / Go / Node.js** for the merchant payment open API (collection / payout / callback).
 
@@ -120,3 +121,9 @@ cd go     && go test -count=1 ./... && cd ..
 - **Inject credentials from environment variables/configuration**; examples and tests contain no real keys (vectors use synthetic keys). Do not commit production keys into the repository.
 - Always use the SDK-provided constant-time comparison for callback signature verification; on verification failure, always reject and do not respond `success`.
 - When IP allowlisting is enabled, the egress IP must be registered in the merchant backend.
+
+## Third-Party Security Verification
+
+The SDK is connected to [OpenSSF Scorecard](https://scorecard.dev/). Results are generated continuously by GitHub Actions and published to the public report and Code Scanning. This is an automated open-source supply-chain security assessment; **it is not a manual code audit or penetration test by an independent security firm**.
+
+See [`SECURITY-AUDIT.en.md`](./SECURITY-AUDIT.en.md) for the public report, API, check definitions, and current status.

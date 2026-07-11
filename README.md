@@ -3,6 +3,7 @@
 # 商户支付 OpenAPI 多语言 SDK
 
 [![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bebebus/SDK/badge)](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
 
 为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
@@ -122,3 +123,9 @@ cd go     && go test -count=1 ./... && cd ..
 - **凭证从环境变量/配置注入**，示例与测试不含任何真实密钥（向量用合成密钥）。请勿把生产密钥提交进仓库。
 - 回调验签务必用 SDK 提供的时序安全比较；验签失败一律拒绝、不回 `success`。
 - 启用 IP 白名单时，出口 IP 需在商户后台登记。
+
+## 第三方安全验证
+
+SDK 已接入 [OpenSSF Scorecard](https://scorecard.dev/)，结果会在 GitHub Actions 中持续生成，并同步到公开报告与 Code Scanning。它属于自动化开源供应链安全评估，**不等同于独立安全公司的人工代码审计或渗透测试**。
+
+详见 [`SECURITY-AUDIT.md`](./SECURITY-AUDIT.md)，包括公开报告、API、评估规则和当前状态。
