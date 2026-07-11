@@ -104,6 +104,25 @@ else
 fi
 echo ""
 
+# ---------- 3.1 创建 monorepo 根版本 Tag（供 GitHub Release / provenance 使用）----------
+# 旧版本只有 Go 子模块 tag；从这里开始补齐根 tag。默认使用 annotated tag，
+# 如发布机已配置签名密钥，可设置 RELEASE_TAG_SIGNING=1 改用签名 tag。
+if git ls-remote --tags origin "refs/tags/$TAG" 2>/dev/null | grep -q "$TAG"; then
+  echo "  根版本 tag $TAG 已存在，跳过"
+else
+  if [ "${RELEASE_TAG_SIGNING:-0}" = "1" ]; then
+    git tag -s "$TAG" -m "$TAG"
+  else
+    git tag -a "$TAG" -m "$TAG"
+  fi
+  if git push origin "$TAG" >/dev/null 2>&1; then
+    echo "  根版本 tag $TAG 已推送"
+  else
+    echo "  ⛔ 根版本 tag 推送失败，发布中止。"; exit 1
+  fi
+fi
+echo ""
+
 # ---------- 4. 逐索引发布 ----------
 
 # npm

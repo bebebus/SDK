@@ -1,6 +1,6 @@
 # 发布到包索引
 
-五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `1.1.0`。
+五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `1.1.2`。
 
 **仅以下 4 套上架公共包索引；Java 不发 Maven，只做源码引入**（把 `java/src/main/java` 加入工程或自行 `pom.xml` 打 jar）。故 `release.sh` 的发布闭环**不含 Java**。
 
@@ -14,9 +14,17 @@
 
 > ⚠️ 发布到公共索引**不可撤销**（版本号永久占用）。令牌只用于发布、勿入库。每次发版先 bump 版本号。
 
+## GitHub Actions 发布流程
+
+仓库提供手动触发的 [`release.yml`](./.github/workflows/release.yml)。它会先验证已存在的版本 Tag、运行五语言测试、生成发布文件、构建 provenance 并创建 GitHub Release。
+
+默认只构建和创建 GitHub Release；只有在手动输入 `publish_registries=true` 且已配置 `release` 环境和 `PHP_MIRROR_TOKEN` 时，才会发布 npm、PyPI，并同步 PHP 镜像仓。npm/PyPI 使用 Trusted Publishing/OIDC，不在仓库中保存长期令牌。Java 仍然只发布源码归档，不发布 Maven 包。
+
 ## 一键发版（推荐）：`release.sh`
 
 `./release.sh <version>` 一条命令完成：bump 版本 → 跑五套测试（不过即中止）→ 发布 npm + PyPI + Go tag + Packagist 镜像仓。令牌经环境变量注入、用完不留盘；各索引独立成败互不阻塞。
+
+从 `v1.1.3` 起脚本还会创建 monorepo 根版本 tag（默认 annotated tag），供 GitHub Release 和构建 provenance 使用。发布机配置了 GPG 签名密钥时，可设置 `RELEASE_TAG_SIGNING=1` 创建签名 tag。
 
 ```bash
 # 全部索引（npm/PyPI 需令牌；缺令牌则跳过对应项并告警）

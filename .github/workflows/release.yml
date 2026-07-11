@@ -1,0 +1,144 @@
+name: Release
+
+# 发布必须由维护者手动确认，避免普通代码 Push 意外发布公共包。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '已存在的版本 Tag，例如 1.1.3'
+        required: true
+        type: string
+      publish_registries:
+        description: '同时发布 npm、PyPI 并同步 PHP 镜像/Packagist'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Build and release SDK
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: v${{ inputs.version }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: '8.2'
+          extensions: curl, json
+
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.21'
+
+      - name: Validate version and existing tag
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_VERSION#v}"
+          tag="v${version}"
+          git rev-parse --verify "refs/tags/${tag}^{commit}" >/dev/null
+          test "$(node -p "require('./nodejs/package.json').version")" = "$version"
+          test "$(sed -n 's/^version = \"\([^\"]*\)\"/\1/p' python/pyproject.toml)" = "$version"
+          test "$(sed -n "s/.*const VERSION = '\([^']*\)'.*/\1/p" php/src/Client.php)" = "$version"
+          test "$(sed -n 's/.*public static final String VERSION = \"\([^\"]*\)\";.*/\1/p' java/src/main/java/cloud/cniia/openapi/sdk/Client.java)" = "$version"
+          test "$(sed -n 's/.*const Version = \"\([^\"]*\)\".*/\1/p' go/client.go)" = "$version"
+
+      - name: Run all SDK tests
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: ./release.sh "${RELEASE_VERSION#v}" --dry-run
+
+      - name: Build release assets
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_VERSION#v}"
+          mkdir -p dist
+          (cd nodejs && npm pack --pack-destination "$GITHUB_WORKSPACE/dist")
+          python -m pip install --disable-pip-version-check --no-input build
+          python -m build --outdir dist python
+          tar --exclude='out' --exclude='.DS_Store' -czf "dist/php-${version}.tar.gz" -C php .
+          tar --exclude='out' --exclude='.DS_Store' -czf "dist/java-${version}.tar.gz" -C java .
+          tar --exclude='out' --exclude='.DS_Store' -czf "dist/go-${version}.tar.gz" -C go .
+          find dist -maxdepth 1 -type f -print | sort
+
+      - name: Generate build provenance
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-path: 'dist/*'
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_VERSION#v}"
+          tag="v${version}"
+          gh release create "$tag" dist/* --verify-tag --generate-notes --title "SDK ${tag}"
+
+      - name: Publish npm package with provenance
+        if: ${{ inputs.publish_registries == true }}
+        working-directory: nodejs
+        run: npm publish --provenance --access public
+
+      - name: Publish Python package to PyPI
+        if: ${{ inputs.publish_registries == true }}
+        uses: pypa/gh-action-pypi-publish@ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0 # v1.9.0
+        with:
+          packages-dir: python/dist/
+
+      - name: Sync PHP mirror and Packagist
+        if: ${{ inputs.publish_registries == true }}
+        env:
+          PHP_MIRROR_TOKEN: ${{ secrets.PHP_MIRROR_TOKEN }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PHP_MIRROR_TOKEN:-}" ]; then
+            echo '::error::publish_registries=true requires the PHP_MIRROR_TOKEN secret.'
+            exit 1
+          fi
+          version="${RELEASE_VERSION#v}"
+          tag="v${version}"
+          mirror="https://x-access-token:${PHP_MIRROR_TOKEN}@github.com/bebebus/merchant-openapi-sdk-php.git"
+          split="$(git subtree split --prefix=php | tail -n 1)"
+          git push "$mirror" "${split}:refs/heads/main"
+          temp_tag="relsplit-${tag}"
+          git tag -a "$temp_tag" "$split" -m "$tag"
+          git push "$mirror" "${temp_tag}:refs/tags/${tag}"
+          git tag -d "$temp_tag"
