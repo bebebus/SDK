@@ -99,8 +99,8 @@ Request: `payout_no` or `out_payout_no` (either one).
 Response `data`: `payout_no, out_payout_no, amount, currency, status, sub_state(in-progress sub-state accepted|reviewing|processing|verifying, null in a terminal state), channel_order_no(always null; use payout_no or out_payout_no for order queries and correlation), finished_at(nullable), failed_reason(nullable), notify_status`.
 
 ### POST `/merchant/payout/banks/query` — available banks (key: payout)
-Request: `pay_method`(required) + `country`(required for fiat) + `currency`(optional).
-Response `data.banks[]`: `{code, name}` (empty array for wallet types or payment methods with no available bank). Use this `code` as `bank_code` when creating the payout.
+Request: `pay_method` + `country` + `currency` are all required. Here `pay_method` identifies a payment capability; it differs from the same-named field in `payout/create`, which identifies a payment group. When querying available banks, it is usually fixed to `bank`.
+Response `data.banks[]`: `{code, name}` (an empty array when no bank is currently available). Use this `code` as `bank_code` when creating the payout.
 
 ### POST `/merchant/payout/proof/query` — payout proof query (key: payout)
 Request: `payout_no` or `out_payout_no` (either one). Only queryable when `status=success`.

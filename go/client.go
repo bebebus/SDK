@@ -102,7 +102,8 @@ func (c *Client) PayoutQuery(ctx context.Context, params map[string]any) (*Respo
 	return c.call(ctx, "/merchant/payout/query", params, usePayout)
 }
 
-// PayoutBanksQuery 可用银行。params 须含 pay_method，法币须含 country，可选 currency。
+// PayoutBanksQuery 可用银行。params 须含 pay_method/country/currency。
+// pay_method 表示支付能力（查询银行时通常固定为 bank），不是 payout/create 的支付分组。
 func (c *Client) PayoutBanksQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/payout/banks/query", params, usePayout)
 }

@@ -15,7 +15,7 @@ const client = new Client(config);
 
 async function main() {
   try {
-    // 先查可用银行，取一个 bank_code
+    // 先按支付能力 bank 查可用银行，取一个 bank_code。此 pay_method 不是下单的支付分组。
     const { data: banksData } = await client.payoutBanksQuery({
       pay_method: 'bank',
       country: 'PH',

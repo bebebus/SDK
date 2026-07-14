@@ -26,7 +26,7 @@ def main() -> None:
     client = Client(config)
 
     try:
-        # 银行类代付前可先查可用银行列表，取 code 作为 bank_code。
+        # 按支付能力 bank 查可用银行，取 code 作为 bank_code。此 pay_method 不是下单的支付分组。
         banks = client.payout_banks_query(pay_method="bank", country="PH", currency="PHP")
         print("可用银行:", banks.get("banks"))
 

@@ -99,8 +99,8 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 响应 `data`：`payout_no, out_payout_no, amount, currency, status, sub_state(处理中子态 accepted|reviewing|processing|verifying，终态为 null), channel_order_no(始终为 null；订单查询和业务关联请使用 payout_no 或 out_payout_no), finished_at(可空), failed_reason(可空), notify_status`。
 
 ### POST `/merchant/payout/banks/query` — 可用银行（密钥：payout）
-请求：`pay_method`(必填) + `country`(法币必填) + `currency`(可选)。
-响应 `data.banks[]`：`{code, name}`（钱包类或当前没有可用银行的支付方式为空数组）。下单 `bank_code` 取此 `code`。
+请求：`pay_method` + `country` + `currency` 均必填。此处 `pay_method` 表示支付能力，与 `payout/create` 中表示支付分组的同名字段含义不同；查询可用银行时通常固定传 `bank`。
+响应 `data.banks[]`：`{code, name}`（当前没有可用银行时为空数组）。下单 `bank_code` 取此 `code`。
 
 ### POST `/merchant/payout/proof/query` — 代付凭证查询（密钥：payout）
 请求：`payout_no` 或 `out_payout_no`（二选一）。仅 `status=success` 可查。

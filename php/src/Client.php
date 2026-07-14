@@ -136,9 +136,10 @@ final class Client
     }
 
     /**
-     * 可用银行 POST /merchant/payout/banks/query。pay_method 必填 + country(法币必填) + currency(可选)。
+     * 可用银行 POST /merchant/payout/banks/query。pay_method/country/currency 均必填。
+     * pay_method 表示支付能力（查询银行时通常固定为 bank），不是 payout/create 的支付分组。
      *
-     * @param array{pay_method:string, country?:string|null, currency?:string|null} $params
+     * @param array{pay_method:string, country:string, currency:string} $params
      * @return array<string,mixed> data（含 banks[]）
      */
     public function payoutBanksQuery(array $params): array

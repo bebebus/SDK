@@ -185,7 +185,7 @@ export class Client {
     return this._post('/merchant/payout/query', params, 'payout');
   }
 
-  // 可用银行。params: { pay_method, country?, currency? }
+  // 可用银行。pay_method 是支付能力（通常固定为 bank）；pay_method/country/currency 均必填。
   payoutBanksQuery(params) {
     return this._post('/merchant/payout/banks/query', params, 'payout');
   }

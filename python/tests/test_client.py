@@ -186,6 +186,16 @@ class TestKeySelectionAndShaping(unittest.TestCase):
         client.balance_query()
         self.assertEqual(self.capture.calls[-1]["secret"], "sk_pay_secret")
 
+    def test_payout_banks_query_contract_fields(self):
+        client = _make_client()
+        client.payout_banks_query(pay_method="bank", country="PH", currency="PHP")
+        call = self.capture.calls[-1]
+        self.assertEqual(call["path"], "/merchant/payout/banks/query")
+        self.assertEqual(call["secret"], "sk_payout_secret")
+        self.assertEqual(call["body"]["pay_method"], "bank")
+        self.assertEqual(call["body"]["country"], "PH")
+        self.assertEqual(call["body"]["currency"], "PHP")
+
     def test_receipt_inline_true_sent_as_int_1(self):
         client = _make_client()
         client.payout_receipt_query(out_payout_no="WD1", inline=True)

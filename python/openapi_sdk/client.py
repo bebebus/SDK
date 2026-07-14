@@ -224,10 +224,14 @@ class Client:
     def payout_banks_query(
         self,
         pay_method: str,
-        country: Optional[str] = None,
-        currency: Optional[str] = None,
+        country: str,
+        currency: str,
     ) -> Dict[str, Any]:
-        """POST /merchant/payout/banks/query — 可用银行。"""
+        """POST /merchant/payout/banks/query — 可用银行。
+
+        pay_method 表示支付能力（查询银行时通常固定为 bank），不是
+        payout/create 中表示支付分组的同名字段。
+        """
         return self._call_payout(
             "/merchant/payout/banks/query",
             {"pay_method": pay_method, "country": country, "currency": currency},

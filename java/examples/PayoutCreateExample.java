@@ -31,10 +31,11 @@ public class PayoutCreateExample {
         Client client = new Client(config);
 
         try {
-            // 1) 查可用银行（银行类必须传 bank_code，取自此处 code）
+            // 1) 按支付能力 bank 查可用银行（此 pay_method 不是下单的支付分组）
             Map<String, Object> banksReq = new LinkedHashMap<>();
             banksReq.put("pay_method", "bank");
             banksReq.put("country", "PH");
+            banksReq.put("currency", "PHP");
             ApiResponse banks = client.payoutBanksQuery(banksReq);
             System.out.println("可用银行: " + banks.dataAsMap());
 

@@ -27,7 +27,7 @@ $config = new Config(
 $client = new Client($config);
 
 try {
-    // 银行类代付需先查可用银行，取 code 作为 bank_code
+    // 按支付能力 bank 查可用银行，取 code 作为 bank_code。此 pay_method 不是下单的支付分组。
     $banks = $client->payoutBanksQuery([
         'pay_method' => 'bank',
         'country' => 'PH',

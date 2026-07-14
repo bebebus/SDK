@@ -91,6 +91,13 @@ export type Params = Record<string, unknown>;
 /** 回调键值表（含 sign 字段）。 */
 export type CallbackPayload = Record<string, unknown>;
 
+/** 可用银行查询参数。pay_method 表示支付能力（通常固定为 bank），不是 payout/create 的支付分组。 */
+export interface PayoutBanksQueryParams extends Params {
+  pay_method: string;
+  country: string;
+  currency: string;
+}
+
 /** 商户支付 OpenAPI 客户端：覆盖全部 11 个签名业务端点 + 回调验签。 */
 export class Client {
   constructor(config: Config);
@@ -116,7 +123,7 @@ export class Client {
   /** 代付查单 POST /merchant/payout/query（payout_no 或 out_payout_no 二选一）。 */
   payoutQuery(params: Params): Promise<ApiResult>;
   /** 可用银行 POST /merchant/payout/banks/query。 */
-  payoutBanksQuery(params: Params): Promise<ApiResult>;
+  payoutBanksQuery(params: PayoutBanksQueryParams): Promise<ApiResult>;
   /** 代付凭证查询 POST /merchant/payout/proof/query（仅 status=success）。 */
   payoutProofQuery(params: Params): Promise<ApiResult>;
   /** 代付收据 POST /merchant/payout/receipt/query（inline 以整数 1/0 发送）。 */

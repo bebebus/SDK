@@ -105,7 +105,8 @@ public final class Client {
 
     /**
      * 可用银行 POST /merchant/payout/banks/query（密钥：payout）。
-     * params: pay_method 必填 + country(法币必填) + currency 可选。
+     * params: pay_method/country/currency 均必填。pay_method 表示支付能力
+     * （查询银行时通常固定为 bank），不是 payout/create 的支付分组。
      */
     public ApiResponse payoutBanksQuery(Map<String, Object> params) {
         return call("/merchant/payout/banks/query", params, Secret.PAYOUT);
