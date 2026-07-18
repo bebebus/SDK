@@ -22,7 +22,7 @@
     "test": "node --test"
   },
   "devDependencies": {
-    "eslint": "9.39.5"
+    "eslint": "10.7.0"
   },
   "engines": {
     "node": ">=18"
