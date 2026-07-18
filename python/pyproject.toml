@@ -27,7 +27,7 @@ Issues = "https://github.com/bebebus/SDK/issues"
 
 [project.optional-dependencies]
 # 运行时仍为零第三方依赖；dev 额外提供静态检查工具。
-dev = ["ruff==0.15.21"]
+dev = ["ruff==0.15.22"]
 
 [tool.setuptools]
 packages = ["openapi_sdk"]
