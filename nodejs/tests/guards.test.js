@@ -122,8 +122,5 @@ test('[D] SANDBOX 预设（http 127.0.0.1）仍可构造', () => {
 });
 
 test('[D] 非法 URL baseUrl 被拒绝', () => {
-  assert.throws(
-    () => new Config({ merchantNo: 'M', apiKey: 'k', baseUrl: 'not a url' }),
-    /not a valid URL/,
-  );
+  assert.throws(() => new Config({ merchantNo: 'M', apiKey: 'k', baseUrl: 'not a url' }), /not a valid URL/);
 });
