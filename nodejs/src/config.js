@@ -15,8 +15,7 @@ function assertSecureBaseUrl(resolved) {
   const host = parsed.hostname;
   // URL 解析 IPv6 主机名带方括号（如 [::1]），归一去掉后再比较。
   const normalizedHost = host.replace(/^\[|\]$/g, '');
-  const isLocal =
-    normalizedHost === 'localhost' || normalizedHost === '127.0.0.1' || normalizedHost === '::1';
+  const isLocal = normalizedHost === 'localhost' || normalizedHost === '127.0.0.1' || normalizedHost === '::1';
   if (parsed.protocol === 'https:') return;
   if (parsed.protocol === 'http:' && isLocal) return;
   throw new TypeError(

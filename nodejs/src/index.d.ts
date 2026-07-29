@@ -57,10 +57,7 @@ export class ApiError extends Error {
 
 /** 传输层错误：HTTP 非 2xx、连接失败、超时、响应非合法 JSON 等。 */
 export class TransportError extends Error {
-  constructor(
-    message: string,
-    options?: { statusCode?: number | null; body?: string | null; cause?: unknown },
-  );
+  constructor(message: string, options?: { statusCode?: number | null; body?: string | null; cause?: unknown });
   readonly name: 'TransportError';
   /** HTTP 状态码（若有）。 */
   readonly statusCode: number | null;

@@ -88,7 +88,9 @@ export function handlePayoutCallback(rawBody) {
       processedPayouts.add(payload.out_payout_no);
       break;
     case 'failed':
-      console.log(`[payout] 代付 ${payload.out_payout_no} 失败，原因=${payload.failed_reason ?? '-'}（应解冻/退回余额）`);
+      console.log(
+        `[payout] 代付 ${payload.out_payout_no} 失败，原因=${payload.failed_reason ?? '-'}（应解冻/退回余额）`,
+      );
       processedPayouts.add(payload.out_payout_no);
       break;
     default:
