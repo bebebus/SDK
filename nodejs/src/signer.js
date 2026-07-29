@@ -25,14 +25,10 @@ function assertSafeIntegerNumber(n) {
     throw new TypeError(`Sign: non-finite number is not allowed (got ${n}); use an integer minor unit`);
   }
   if (!Number.isInteger(n)) {
-    throw new TypeError(
-      `Sign: non-integer number is not allowed (got ${n}); use an integer minor unit (e.g. cents)`,
-    );
+    throw new TypeError(`Sign: non-integer number is not allowed (got ${n}); use an integer minor unit (e.g. cents)`);
   }
   if (!Number.isSafeInteger(n)) {
-    throw new TypeError(
-      `Sign: integer exceeds Number.MAX_SAFE_INTEGER (got ${n}); precision is not reliable`,
-    );
+    throw new TypeError(`Sign: integer exceeds Number.MAX_SAFE_INTEGER (got ${n}); precision is not reliable`);
   }
 }
 

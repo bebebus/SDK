@@ -18,11 +18,11 @@
     "LICENSE"
   ],
   "scripts": {
-    "lint": "eslint .",
+    "lint": "biome check .",
     "test": "node --test"
   },
   "devDependencies": {
-    "eslint": "9.39.5"
+    "@biomejs/biome": "2.5.5"
   },
   "engines": {
     "node": ">=18"
