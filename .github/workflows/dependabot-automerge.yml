@@ -1,0 +1,43 @@
+name: Dependabot Low-risk Auto-merge
+
+on:
+  workflow_run:
+    workflows: [ci, CodeQL]
+    types: [completed]
+  schedule:
+    - cron: '15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  checks: read
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dependabot-low-risk-automerge
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    name: 校验并合并一个低风险依赖更新
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.repository.id == github.event.repository.id &&
+      !github.event.workflow_run.repository.fork)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout trusted default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Evaluate and merge
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const run = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/dependabot-automerge.cjs`);
+            await run({ github, context, core });

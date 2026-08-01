@@ -5,6 +5,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    ignore:
+      # gh-aw 编译器会统一更新生成工作流中的 action pin，禁止直接合并此类 PR。
+      - dependency-name: github/gh-aw-actions
 
   - package-ecosystem: npm
     directory: /nodejs
