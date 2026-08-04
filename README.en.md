@@ -38,7 +38,7 @@ npm / PyPI / Packagist / Go are published to their respective package indexes (s
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`; `import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`; `from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`; namespace `Merchant\Openapi` | cURL extension | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go@v1.1.0` (min Go 1.21); `import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go get github.com/bebebus/SDK/go@v1.1.2` (min Go 1.21); `import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
 | Java | **Source import (NOT published to Maven)**; `import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > The Go tests read the external `test-vectors.json`, and `go test`'s cache does not track that file, so **after changing the vectors use `-count=1`** to force a re-run.
