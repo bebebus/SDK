@@ -26,7 +26,6 @@ tools:
     min-integrity: approved
 
 safe-outputs:
-  missing-tool: false
   add-comment:
     target: "*"
     max: 1
