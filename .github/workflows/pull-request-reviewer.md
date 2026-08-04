@@ -15,7 +15,7 @@ permissions:
   issues: read
   pull-requests: read
 
-engine: claude
+engine: codex
 max-ai-credits: 100
 timeout-minutes: 15
 network: defaults
