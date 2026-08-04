@@ -14,9 +14,8 @@ permissions:
   checks: read
   issues: read
   pull-requests: read
-  copilot-requests: write
 
-engine: copilot
+engine: claude
 max-ai-credits: 100
 timeout-minutes: 15
 network: defaults
