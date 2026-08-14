@@ -11,8 +11,8 @@ on:
 permissions:
   actions: read
   checks: read
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 concurrency:
   group: dependabot-low-risk-automerge
@@ -28,6 +28,11 @@ jobs:
       !github.event.workflow_run.repository.fork)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      actions: read
+      checks: read
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout trusted default branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
