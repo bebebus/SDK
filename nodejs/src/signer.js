@@ -105,9 +105,11 @@ function isBlankSecret(secret) {
 }
 
 // v2 请求绑定前缀：POST\n + 规范路径 + \n。缺省 binding 时与 v1 基串逐字节一致。
-export function bindingPrefix(binding) {
+function bindingPrefix(binding) {
   if (!binding) return '';
-  const method = String(binding.method || '').trim().toUpperCase();
+  const method = String(binding.method || '')
+    .trim()
+    .toUpperCase();
   const path = String(binding.path || '').trim();
   if (!method || !path) {
     throw new TypeError('Sign: binding requires method and path');

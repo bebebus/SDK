@@ -196,21 +196,6 @@ class Client:
             {"biz_type": biz_type, "currency": currency, "country": country},
         )
 
-    def groups_query(
-        self,
-        biz_type: Optional[str] = None,
-        currency: Optional[str] = None,
-        country: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """POST /merchant/groups/query — 可用渠道编码（v2）。
-
-        返回的 ``channel_code`` 即 ``pay_create`` / ``payout_create`` 的合法取值。
-        """
-        return self._call_pay(
-            "/merchant/groups/query",
-            {"biz_type": biz_type, "currency": currency, "country": country},
-        )
-
     def balance_query(self, currency: Optional[str] = None) -> Dict[str, Any]:
         """POST /merchant/balance/query — 余额查询。"""
         return self._call_pay("/merchant/balance/query", {"currency": currency})

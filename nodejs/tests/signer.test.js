@@ -73,10 +73,7 @@ test('v2 请求绑定：基串前缀 METHOD\\npath\\n，缺省 binding 仍为 v1
   const payload = { a: 1 };
   const secret = 's';
   const binding = { method: 'POST', path: '/api/open/v2/merchant/pay/create' };
-  assert.equal(
-    buildSignBase(payload, secret, binding),
-    'POST\n/api/open/v2/merchant/pay/create\na=1&secret=s',
-  );
+  assert.equal(buildSignBase(payload, secret, binding), 'POST\n/api/open/v2/merchant/pay/create\na=1&secret=s');
   assert.equal(sign(payload, secret, binding), '1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b');
   assert.equal(buildSignBase(payload, secret), 'a=1&secret=s');
 });

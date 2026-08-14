@@ -23,6 +23,7 @@ final class Signer
      *
      * @param array<string,mixed> $payload 业务字段键值表（不含 sign，含 null 的会被自动跳过）
      * @param string              $secret  与 base 末尾及 HMAC key 同一个 secret
+     * @param array{method?:string,path?:string}|null $binding v2 请求绑定，v1 传 null
      */
     public static function buildSignBase(array $payload, string $secret, ?array $binding = null): string
     {
@@ -74,6 +75,7 @@ final class Signer
      * 否则攻击者用空密钥即可伪造任意签名）。合法非空密钥的签名结果与服务端逐字节一致。
      *
      * @param array<string,mixed> $payload
+     * @param array{method?:string,path?:string}|null $binding v2 请求绑定，v1 传 null
      */
     public static function sign(array $payload, string $secret, ?array $binding = null): string
     {
