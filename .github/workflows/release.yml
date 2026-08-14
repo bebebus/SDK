@@ -100,7 +100,10 @@ jobs:
           python -m pip install --disable-pip-version-check --no-input \
             --require-hashes --only-binary=:all: \
             -r "$RUNNER_TEMP/release-requirements.txt"
-          python -m build --outdir dist python
+          # python 构建产物落独立目录（PyPI 上传步 packages-dir 只能指向纯 python 产物；
+          # 根 dist/ 混有 php/java/go tarball），再拷回根 dist/ 保持 GitHub Release 资产不变。
+          python -m build --outdir python/dist python
+          cp python/dist/* dist/
           tar --exclude='out' --exclude='.DS_Store' -czf "dist/php-${version}.tar.gz" -C php .
           tar --exclude='out' --exclude='.DS_Store' -czf "dist/java-${version}.tar.gz" -C java .
           tar --exclude='out' --exclude='.DS_Store' -czf "dist/go-${version}.tar.gz" -C go .
