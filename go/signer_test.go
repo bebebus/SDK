@@ -19,9 +19,9 @@ type vector struct {
 	Secret  string         `json:"secret"`
 	Payload map[string]any `json:"payload"`
 	// v2 向量携 method+path 绑定前缀（1.2.0 起）；v1 向量缺省为 nil
-	Binding *SignBinding   `json:"binding"`
-	Base    string         `json:"base"`
-	Sign    string         `json:"sign"`
+	Binding *SignBinding `json:"binding"`
+	Base    string       `json:"base"`
+	Sign    string       `json:"sign"`
 }
 
 // loadVectors 读取仓库根的 test-vectors.json（go 子目录的上一级），
