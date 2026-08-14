@@ -88,9 +88,11 @@ foreach ($doc->vectors as $vec) {
     $secret = (string) $vec->secret;
     // 顶层 stdClass → 关联数组（嵌套对象保持 stdClass、嵌套数组保持 array）
     $payload = (array) $vec->payload;
+    // v2 向量携 binding（method+path 绑定前缀，1.2.0 起）；v1 向量无该字段 → null
+    $binding = isset($vec->binding) ? (array) $vec->binding : null;
 
-    $base = Signer::buildSignBase($payload, $secret);
-    $sign = Signer::sign($payload, $secret);
+    $base = Signer::buildSignBase($payload, $secret, $binding);
+    $sign = Signer::sign($payload, $secret, $binding);
 
     check("vector[$vname] base", $vec->base, $base);
     check("vector[$vname] sign", $vec->sign, $sign);

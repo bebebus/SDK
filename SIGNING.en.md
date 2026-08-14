@@ -2,7 +2,7 @@
 
 # Signing Specification (single source of truth for the SDKs in all languages)
 
-Both requests and callbacks of the merchant OpenAPI are signed with **HMAC-SHA256**, output as **lowercase hexadecimal**. The algorithm defined in this file is **byte-for-byte identical** to the server's signing implementation; the signers of all five SDKs must reproduce the `base` and `sign` in [`test-vectors.json`](./test-vectors.json), otherwise they are considered non-compliant.
+Both requests and callbacks of the merchant OpenAPI are signed with **HMAC-SHA256**, output as **lowercase hexadecimal**. The algorithm defined in this file is **byte-for-byte identical** to the server's signing implementation; the signers of all five SDKs must reproduce the `base` and `sign` in [`test-vectors.json`](./test-vectors.json) (including v2 binding vectors carrying a `binding` field — since 1.2.0), otherwise they are considered non-compliant.
 
 > Signing is the only part of the entire SDK where "not a single byte may be wrong". Most cross-language failures come from two places: **nested JSON serialization** and **scalar-to-string coercion**; be sure to check the "cross-language pitfalls" below item by item.
 
@@ -28,7 +28,7 @@ Input: the key-value table `payload` made up of business fields (including commo
    /api/open/v2/merchant/pay/create
    k1=v1&k2=v2&...&secret=<secret>
    ```
-   The canonical path is the full pathname (no host/query). **v1 has no such prefix**, so the base string is byte-identical to 1.1.x. **Callback verification remains body-only.**
+   The canonical path is the full pathname (no host/query). **the HTTP method is always normalized to uppercase** (a lowercase `post` input is signed as `POST`); **v1 has no such prefix**, so the base string is byte-identical to 1.1.x. **Callback verification remains body-only.**
 
 Put the computed `sign` back into the request body and send it together.
 

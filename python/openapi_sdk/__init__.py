@@ -28,8 +28,8 @@ __all__ = [
     "OpenApiError",
 ]
 
-# [L20] 版本号单一事实源：从已安装包元数据（pyproject 的 version=1.1.2）派生，
-# 避免与 pyproject 自相矛盾；源码直跑（未安装）时取不到则兜底 '1.1.2'。
+# [L20] 版本号单一事实源：从已安装包元数据（pyproject 的 version）派生，
+# 避免与 pyproject 自相矛盾；源码直跑（未安装）时取不到则兜底（须随发版同步）。
 try:
     from importlib.metadata import PackageNotFoundError
     from importlib.metadata import version as _pkg_version
@@ -37,6 +37,6 @@ try:
     try:
         __version__ = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        __version__ = "1.1.2"
+        __version__ = "1.2.0"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    __version__ = "1.1.2"
+    __version__ = "1.2.0"

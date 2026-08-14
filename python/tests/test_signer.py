@@ -48,14 +48,15 @@ class TestSignVectors(unittest.TestCase):
             name = vec["name"]
             payload = vec["payload"]
             secret = vec["secret"]
+            binding = vec.get("binding")  # v2 向量携 method+path 绑定；v1 无
             with self.subTest(vector=name):
-                base = build_sign_base(payload, secret)
+                base = build_sign_base(payload, secret, binding)
                 self.assertEqual(
                     base,
                     vec["base"],
                     msg=f"向量 {name} 的 base 不一致",
                 )
-                sig = sign(payload, secret)
+                sig = sign(payload, secret, binding)
                 self.assertEqual(
                     sig,
                     vec["sign"],

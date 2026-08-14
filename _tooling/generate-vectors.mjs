@@ -30,9 +30,15 @@ function signValue(v) {
   if (typeof v === 'object') return stableStringify(v);
   return String(v);
 }
-function buildBase(data, secret) {
+function buildBase(data, secret, binding = null) {
   const keys = Object.keys(data).filter((k) => k !== 'sign' && data[k] != null).sort();
-  return keys.map((k) => `${k}=${signValue(data[k])}`).join('&') + `&secret=${secret}`;
+  const body = keys.map((k) => `${k}=${signValue(data[k])}`).join('&') + `&secret=${secret}`;
+  if (!binding) return body;
+  // v2 请求绑定（服务端 OpenAPI 2.1.0 起）：大写METHOD\n + 规范路径\n + canonical body
+  const method = String(binding.method || '').trim().toUpperCase();
+  const path = String(binding.path || '').trim();
+  if (!method || !path) throw new Error('binding 需要 method 与 path');
+  return `${method}\n${path}\n${body}`;
 }
 function hmac(base, secret) {
   return crypto.createHmac('sha256', secret).update(base, 'utf8').digest('hex');
@@ -124,6 +130,31 @@ const VECTORS = [
     payload: { api_key: 'k', extra: { a: { z: [{ y: 1, x: 2 }], m: '中' } } },
   },
   {
+    name: 'v2_binding_minimal_method_lowercase',
+    desc: 'v2 绑定最小锚点 + method 小写归一：binding.method 为小写 post，实现须归一大写（基串前缀 POST\\n路径\\n）；与五语言 1.2.0 各自内嵌锚点同值',
+    secret: 's',
+    payload: { a: 1 },
+    binding: { method: 'post', path: '/api/open/v2/merchant/pay/create' },
+  },
+  {
+    name: 'v2_binding_pay_create',
+    desc: 'v2 绑定 + 真实代收载荷：与 pay_create_scalars 同 payload，仅多绑定前缀（对照可见前缀差异）',
+    secret: SECRET,
+    payload: {
+      merchant_no: 'M00000001', api_key: 'ak_demo_key', timestamp: 1736073600,
+      out_order_no: '202501010001', amount: 10000, currency: 'PHP',
+      pay_method: 'gcash', country: 'PH', notify_url: 'https://merchant.example.com/api/notify/pay',
+    },
+    binding: { method: 'POST', path: '/api/open/v2/merchant/pay/create' },
+  },
+  {
+    name: 'v2_binding_nested_extra',
+    desc: 'v2 绑定 + 嵌套 object/array extra：绑定前缀与稳定 JSON 序列化叠加场景',
+    secret: 'sec',
+    payload: { merchant_no: 'M1', api_key: 'ak', timestamp: 1700000000, amount: 12345, extra: { b: 2, a: [1, 'x'] } },
+    binding: { method: 'POST', path: '/api/open/v2/merchant/pay/create' },
+  },
+  {
     name: 'empty_and_nested_containers',
     desc: '空对象 {} 与空数组 [] 的区分：顶层空对象 extra={}，嵌套空对象 a={}、嵌套空数组 b=[]、非空数组 c=[1]（钉死 PHP 等语言的 object/list 边界，防空对象签名分叉）',
     secret: SECRET,
@@ -132,8 +163,12 @@ const VECTORS = [
 ];
 
 const vectors = VECTORS.map((v) => {
-  const base = buildBase(v.payload, v.secret);
-  return { name: v.name, desc: v.desc, secret: v.secret, payload: v.payload, base, sign: hmac(base, v.secret) };
+  const base = buildBase(v.payload, v.secret, v.binding || null);
+  const out = { name: v.name, desc: v.desc, secret: v.secret, payload: v.payload };
+  if (v.binding) out.binding = v.binding;
+  out.base = base;
+  out.sign = hmac(base, v.secret);
+  return out;
 });
 
 const doc = {
@@ -147,6 +182,7 @@ const doc = {
     json_escape: '嵌套 JSON 序列化须对齐 JS JSON.stringify：不转义 / ，不转义非 ASCII，不做 HTML(<>&) 转义；转义 " \\ 及控制字符(\\b\\f\\n\\r\\t 与其余 \\u00XX)',
     boolean: '布尔统一序列化为 true/false（顶层强转也须如此，勿用各语言默认 cast）',
     join: 'key=value 用 & 连接，末尾追加 &secret=<secret>',
+    binding: 'v2（/api/open/v2）请求绑定：基串 = 大写METHOD + "\\n" + 规范路径 + "\\n" + canonical body（路径为完整 pathname，不含 host/query；method 小写须归一大写）；v1 无前缀。向量含 binding 字段时各语言须以绑定口径复现',
     hmac: 'HMAC-SHA256(base, key=secret)，输出十六进制小写',
     secret: 'pay 类接口/回调用 api_secret_pay；payout 类用 api_secret_payout',
   },

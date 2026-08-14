@@ -62,9 +62,16 @@ public class VectorTest {
             Map<String, Object> payload = (Map<String, Object>) v.get("payload");
             String expectedBase = (String) v.get("base");
             String expectedSign = (String) v.get("sign");
+            // v2 向量携 binding（method+path 绑定前缀，1.2.0 起）；v1 向量无该字段 → null
+            SignBinding binding = null;
+            Object b = v.get("binding");
+            if (b instanceof Map) {
+                Map<String, Object> bm = (Map<String, Object>) b;
+                binding = new SignBinding((String) bm.get("method"), (String) bm.get("path"));
+            }
 
-            String actualBase = Signer.buildSignBase(payload, secret);
-            String actualSign = Signer.sign(payload, secret);
+            String actualBase = Signer.buildSignBase(payload, secret, binding);
+            String actualSign = Signer.sign(payload, secret, binding);
 
             assertEquals("[" + name + "] base", expectedBase, actualBase);
             assertEquals("[" + name + "] sign", expectedSign, actualSign);
