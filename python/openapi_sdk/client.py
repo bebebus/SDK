@@ -29,7 +29,7 @@ from .exceptions import ApiError, TransportError
 __all__ = ["Client"]
 
 # [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
-# 不再硬编码；源码直跑（未安装）取不到则兜底 '1.1.0'。
+# 不再硬编码；源码直跑（未安装）取不到则兜底 '1.1.2'。
 try:
     from importlib.metadata import PackageNotFoundError
     from importlib.metadata import version as _pkg_version
@@ -37,9 +37,9 @@ try:
     try:
         _SDK_VERSION = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        _SDK_VERSION = "1.1.0"
+        _SDK_VERSION = "1.1.2"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    _SDK_VERSION = "1.1.0"
+    _SDK_VERSION = "1.1.2"
 
 _JSON_HEADERS = {
     "Content-Type": "application/json",
