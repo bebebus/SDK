@@ -49,6 +49,7 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -142,6 +143,9 @@ jobs:
       - name: Publish npm package with provenance
         if: ${{ inputs.publish_registries == true }}
         working-directory: nodejs
+        env:
+          # Automation 令牌（仓库 secret）：免 OTP；provenance 由 OIDC id-token 提供
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
         run: npm publish --provenance --access public
 
       - name: Publish Python package to PyPI
@@ -149,6 +153,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: python/dist/
+          skip-existing: true
 
       - name: Sync PHP mirror and Packagist
         if: ${{ inputs.publish_registries == true }}
@@ -156,12 +161,17 @@ jobs:
           PHP_MIRROR_TOKEN: ${{ secrets.PHP_MIRROR_TOKEN }}
         run: |
           set -euo pipefail
+          version="${RELEASE_VERSION#v}"
+          tag="v${version}"
+          # 幂等守卫：镜像仓已有该 tag（如手工同步过）则跳过，保证发布 run 可安全重跑
+          if git ls-remote --tags https://github.com/bebebus/merchant-openapi-sdk-php.git "refs/tags/${tag}" | grep -q "${tag}"; then
+            echo "PHP mirror already has tag ${tag}; skipping."
+            exit 0
+          fi
           if [ -z "${PHP_MIRROR_TOKEN:-}" ]; then
             echo '::error::publish_registries=true requires the PHP_MIRROR_TOKEN secret.'
             exit 1
           fi
-          version="${RELEASE_VERSION#v}"
-          tag="v${version}"
           mirror="https://x-access-token:${PHP_MIRROR_TOKEN}@github.com/bebebus/merchant-openapi-sdk-php.git"
           split="$(git subtree split --prefix=php | tail -n 1)"
           git push "$mirror" "${split}:refs/heads/main"
