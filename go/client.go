@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -168,7 +169,7 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 		return nil, c.baseURLErr
 	}
 	secret := c.secretFor(kind)
-	body := c.buildBody(params, secret)
+	body := c.buildBody(params, secret, path)
 
 	raw, status, err := c.do(ctx, path, body)
 	if err != nil {
@@ -198,7 +199,7 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 
 // buildBody 注入通用字段并签名，返回最终请求体（含 sign）。
 // 过滤值为 nil 的字段（既不入体、也不参与签名）。
-func (c *Client) buildBody(params map[string]any, secret string) map[string]any {
+func (c *Client) buildBody(params map[string]any, secret, relPath string) map[string]any {
 	body := make(map[string]any, len(params)+5)
 	for k, v := range params {
 		if v == nil {
@@ -211,8 +212,20 @@ func (c *Client) buildBody(params map[string]any, secret string) map[string]any 
 	body["timestamp"] = nowUnix()
 	body["nonce"] = newNonce()
 
-	body["sign"] = Sign(body, secret)
+	body["sign"] = SignWithBinding(body, secret, requestBinding(c.baseURL, relPath))
 	return body
+}
+
+func requestBinding(baseURL, relPath string) *SignBinding {
+	joined := strings.TrimRight(baseURL, "/") + relPath
+	u, err := url.Parse(joined)
+	if err != nil {
+		return nil
+	}
+	if strings.HasPrefix(u.Path, "/api/open/v2/") {
+		return &SignBinding{Method: "POST", Path: u.Path}
+	}
+	return nil
 }
 
 // do 执行 POST application/json，返回原始响应体与状态码。

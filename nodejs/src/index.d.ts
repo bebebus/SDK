@@ -133,11 +133,14 @@ export class Client {
 
 // ---- 签名器（底层，按需直接使用）----
 
-/** 计算签名：HMAC-SHA256(base, key=secret) -> hex 小写。空密钥抛 TypeError。 */
-export function sign(payload: Record<string, unknown>, secret: string): string;
+/** v2 请求绑定：method 大写 + 规范路径（如 /api/open/v2/merchant/pay/create）。 */
+export type SignBinding = { method: string; path: string };
 
-/** 构造签名 base 串（不含 HMAC），便于逐字节断言。 */
-export function buildSignBase(payload: Record<string, unknown>, secret: string): string;
+/** 计算签名：HMAC-SHA256(base, key=secret) -> hex 小写。空密钥抛 TypeError。v2 传入 binding。 */
+export function sign(payload: Record<string, unknown>, secret: string, binding?: SignBinding): string;
+
+/** 构造签名 base 串（不含 HMAC），便于逐字节断言。v2 传入 binding。 */
+export function buildSignBase(payload: Record<string, unknown>, secret: string, binding?: SignBinding): string;
 
 /** 稳定 JSON 序列化（递归、key 升序、紧凑无空格），与跨语言实现逐字节一致。 */
 export function stableStringify(value: unknown): string;

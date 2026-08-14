@@ -7,6 +7,7 @@ This file summarizes user-visible changes for each SDK release. It is maintained
 - Default sandbox Base URL is now `http://127.0.0.1:3090/api/open/v2`.
 - Collection and payout create accept `channel_code` (recommended on v2) or `pay_method`. Existing `pay_method` callers stay valid.
 - `payMethodsQuery` on v2 returns two arrays: `pay_methods` (payment method + description) and `channel_codes` (group code + description). Obtain `channel_code` from the operations team.
+- v2 signing prepends `POST\\n` + canonical path + `\\n` to the existing canonical body (OpenAPI 2.1.0). v1 and callbacks stay body-only.
 - `groupsQuery` remains as a compatibility alias of `/merchant/groups/query`; new integrations should read `channel_codes` from `payMethodsQuery`.
 - Examples and interface docs use v2 + `channel_code`.
 - Upgrade impact: callers that relied on the sandbox path `/api/open/v1` should either keep passing an explicit v1 `baseUrl`, or move to v2. v1 `payMethodsQuery` still returns `data.methods`.

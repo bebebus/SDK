@@ -191,7 +191,7 @@ public final class Client {
         Map<String, Object> payload = buildPayload(params);
 
         // 2) 计算 sign 并放回
-        String sign = Signer.sign(payload, secret);
+        String sign = Signer.sign(payload, secret, requestBinding(config.baseUrl(), path));
         payload.put("sign", sign);
 
         // 3) 序列化请求体
@@ -228,6 +228,19 @@ public final class Client {
 
         // 5) 解析统一信封
         return parseEnvelope(raw);
+    }
+
+    static SignBinding requestBinding(String baseUrl, String relPath) {
+        try {
+            String joined = (baseUrl == null ? "" : baseUrl.replaceAll("/+$", "")) + relPath;
+            String pathname = URI.create(joined).getPath();
+            if (pathname != null && pathname.startsWith("/api/open/v2/")) {
+                return new SignBinding("POST", pathname);
+            }
+        } catch (IllegalArgumentException ignored) {
+            // 非法 URL 交给后续请求层报错。
+        }
+        return null;
     }
 
     /** 注入通用字段、过滤 null，返回 key 升序的有序 payload（不含 sign）。 */

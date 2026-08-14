@@ -22,6 +22,13 @@ Input: the key-value table `payload` made up of business fields (including commo
 5. **Compute sign**: `HMAC_SHA256(base, key=secret)`, output as a **lowercase hexadecimal** string.
 6. **Key selection**: pay-type endpoints and collection callbacks use `api_secret_pay`; payout-type endpoints and payout callbacks use `api_secret_payout`.
    (The HMAC key and the `&secret=` at the end of base use the **same** secret.)
+7. **v2 request binding** (mandatory when the Base URL path starts with `/api/open/v2/`): prepend two lines before the existing canonical body:
+   ```
+   POST
+   /api/open/v2/merchant/pay/create
+   k1=v1&k2=v2&...&secret=<secret>
+   ```
+   The canonical path is the full pathname (no host/query). **v1 has no such prefix**, so the base string is byte-identical to 1.1.x. **Callback verification remains body-only.**
 
 Put the computed `sign` back into the request body and send it together.
 

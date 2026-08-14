@@ -60,6 +60,23 @@ func TestVectorsBaseAndSign(t *testing.T) {
 	}
 }
 
+func TestV2RequestBindingPrefix(t *testing.T) {
+	payload := Payload{"a": 1}
+	binding := &SignBinding{Method: "POST", Path: "/api/open/v2/merchant/pay/create"}
+	got := BuildSignBaseWithBinding(payload, "s", binding)
+	want := "POST\n/api/open/v2/merchant/pay/create\na=1&secret=s"
+	if got != want {
+		t.Fatalf("base 不匹配\n期望: %q\n实际: %q", want, got)
+	}
+	gotSign := SignWithBinding(payload, "s", binding)
+	if gotSign != "1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b" {
+		t.Fatalf("sign 不匹配: %s", gotSign)
+	}
+	if BuildSignBase(payload, "s") != "a=1&secret=s" {
+		t.Fatalf("无 binding 时应保持 v1 口径")
+	}
+}
+
 // TestVerifyCallbackPositive 用向量构造一个带正确 sign 的回调，验签应通过。
 func TestVerifyCallbackPositive(t *testing.T) {
 	secret := "sk_test_0123456789abcdef0123456789abcdef"

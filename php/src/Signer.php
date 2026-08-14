@@ -24,7 +24,7 @@ final class Signer
      * @param array<string,mixed> $payload 业务字段键值表（不含 sign，含 null 的会被自动跳过）
      * @param string              $secret  与 base 末尾及 HMAC key 同一个 secret
      */
-    public static function buildSignBase(array $payload, string $secret): string
+    public static function buildSignBase(array $payload, string $secret, ?array $binding = null): string
     {
         // 过滤：排除 sign 字段与 null 值
         $filtered = [];
@@ -46,7 +46,25 @@ final class Signer
             $parts[] = $key . '=' . self::signValue($value);
         }
 
-        return implode('&', $parts) . '&secret=' . $secret;
+        return self::bindingPrefix($binding) . implode('&', $parts) . '&secret=' . $secret;
+    }
+
+    /**
+     * v2 请求绑定前缀。缺省 binding 时与 v1 基串逐字节一致。
+     *
+     * @param array{method?:string,path?:string}|null $binding
+     */
+    public static function bindingPrefix(?array $binding): string
+    {
+        if ($binding === null) {
+            return '';
+        }
+        $method = strtoupper(trim((string) ($binding['method'] ?? '')));
+        $path = trim((string) ($binding['path'] ?? ''));
+        if ($method === '' || $path === '') {
+            throw new \InvalidArgumentException('binding 必须同时提供 method 与 path');
+        }
+        return $method . "\n" . $path . "\n";
     }
 
     /**
@@ -57,13 +75,13 @@ final class Signer
      *
      * @param array<string,mixed> $payload
      */
-    public static function sign(array $payload, string $secret): string
+    public static function sign(array $payload, string $secret, ?array $binding = null): string
     {
         if (!self::isUsableSecret($secret)) {
             throw new \InvalidArgumentException('secret 不能为空：禁止使用空密钥签名');
         }
 
-        $base = self::buildSignBase($payload, $secret);
+        $base = self::buildSignBase($payload, $secret, $binding);
 
         return hash_hmac('sha256', $base, $secret);
     }

@@ -96,6 +96,16 @@ class TestScalarRules(unittest.TestCase):
         # ASCII：'A'(65) < 'a'(97) < 'b'(98)
         self.assertEqual(base, f"A=1&a=3&b=2&secret={self.SECRET}")
 
+    def test_v2_request_binding_prefix(self):
+        binding = {"method": "POST", "path": "/api/open/v2/merchant/pay/create"}
+        base = build_sign_base({"a": 1}, "s", binding)
+        self.assertEqual(base, "POST\n/api/open/v2/merchant/pay/create\na=1&secret=s")
+        self.assertEqual(
+            sign({"a": 1}, "s", binding),
+            "1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b",
+        )
+        self.assertEqual(build_sign_base({"a": 1}, "s"), "a=1&secret=s")
+
 
 class TestCallbackVerify(unittest.TestCase):
     """回调验签：正例 + 篡改一字节的反例。"""

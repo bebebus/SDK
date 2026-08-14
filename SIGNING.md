@@ -25,6 +25,13 @@
 5. **计算 sign**：`HMAC_SHA256(base, key=secret)`，输出**十六进制小写**字符串。
 6. **密钥选择**：pay 类接口与代收回调用 `api_secret_pay`；payout 类接口与代付回调用 `api_secret_payout`。
    （HMAC 的 key 与 base 末尾的 `&secret=` 用的是**同一个** secret。）
+7. **v2 请求绑定**（Base URL 路径以 `/api/open/v2/` 开头时强制）：在既有 canonical body 前加两行前缀：
+   ```
+   POST
+   /api/open/v2/merchant/pay/create
+   k1=v1&k2=v2&...&secret=<secret>
+   ```
+   规范路径为完整 pathname（不含 host/query）。**v1 无此前缀**，基串与 1.1.x 逐字节不变。**回调验签仍为 body-only。**
 
 把算出的 `sign` 放回请求体一起发送。
 

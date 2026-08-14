@@ -266,7 +266,7 @@ final class Client
     private function dispatch(string $path, array $params, string $secret): array
     {
         $payload = $this->buildPayload($params);
-        $payload['sign'] = Signer::sign($payload, $secret);
+        $payload['sign'] = Signer::sign($payload, $secret, self::requestBinding($this->config->baseUrl, $path));
 
         $url = $this->config->baseUrl . $path;
         $json = $this->encodeBody($payload);
@@ -274,6 +274,21 @@ final class Client
         [$status, $body] = $this->sendRaw($url, $json);
 
         return $this->parseEnvelope($status, $body);
+    }
+
+    /**
+     * v2 Base URL 时绑定 POST + 规范路径；v1 返回 null。
+     *
+     * @return array{method:string,path:string}|null
+     */
+    private static function requestBinding(string $baseUrl, string $relPath): ?array
+    {
+        $joined = rtrim($baseUrl, '/') . $relPath;
+        $path = (string) (parse_url($joined, PHP_URL_PATH) ?? '');
+        if (str_starts_with($path, '/api/open/v2/')) {
+            return ['method' => 'POST', 'path' => $path];
+        }
+        return null;
     }
 
     /**
