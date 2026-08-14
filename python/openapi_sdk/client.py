@@ -63,7 +63,7 @@ class Client:
         )
         client = Client(cfg)
         resp = client.pay_create(out_order_no="ORD1", amount=10000,
-                                 currency="PHP", pay_method="gcash",
+                                 currency="PHP", channel_code="GcashBig",
                                  notify_url="https://m.example.com/cb")
     """
 
@@ -110,21 +110,30 @@ class Client:
         out_order_no: str,
         amount: int,
         currency: str,
-        pay_method: str,
-        notify_url: str,
+        pay_method: Optional[str] = None,
+        notify_url: Optional[str] = None,
         country: Optional[str] = None,
         return_url: Optional[str] = None,
         subject: Optional[str] = None,
         remark: Optional[str] = None,
         client_ip: Optional[str] = None,
         extra: Optional[Mapping[str, Any]] = None,
+        channel_code: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """POST /merchant/pay/create — 代收下单。"""
+        """POST /merchant/pay/create — 代收下单。
+
+        v2 传 ``channel_code`` 或 ``pay_method``（二选一）；v1 仍要求 ``pay_method``。
+        """
+        if not notify_url:
+            raise TypeError("notify_url is required")
+        if not channel_code and not pay_method:
+            raise TypeError("provide channel_code or pay_method")
         body = {
             "out_order_no": out_order_no,
             "amount": amount,
             "currency": currency,
             "pay_method": pay_method,
+            "channel_code": channel_code,
             "notify_url": notify_url,
             "country": country,
             "return_url": return_url,
@@ -149,6 +158,21 @@ class Client:
     def pay_methods_query(self, country: Optional[str] = None) -> Dict[str, Any]:
         """POST /merchant/pay-methods/query — 可用支付方式。"""
         return self._call_pay("/merchant/pay-methods/query", {"country": country})
+
+    def groups_query(
+        self,
+        biz_type: Optional[str] = None,
+        currency: Optional[str] = None,
+        country: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """POST /merchant/groups/query — 可用渠道编码（v2）。
+
+        返回的 ``channel_code`` 即 ``pay_create`` / ``payout_create`` 的合法取值。
+        """
+        return self._call_pay(
+            "/merchant/groups/query",
+            {"biz_type": biz_type, "currency": currency, "country": country},
+        )
 
     def balance_query(self, currency: Optional[str] = None) -> Dict[str, Any]:
         """POST /merchant/balance/query — 余额查询。"""
@@ -181,9 +205,9 @@ class Client:
         out_payout_no: str,
         amount: int,
         currency: str,
-        pay_method: str,
-        notify_url: str,
-        account_no: str,
+        pay_method: Optional[str] = None,
+        notify_url: Optional[str] = None,
+        account_no: Optional[str] = None,
         country: Optional[str] = None,
         account_name: Optional[str] = None,
         bank_code: Optional[str] = None,
@@ -191,13 +215,24 @@ class Client:
         remark: Optional[str] = None,
         client_ip: Optional[str] = None,
         extra: Optional[Mapping[str, Any]] = None,
+        channel_code: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """POST /merchant/payout/create — 代付下单。"""
+        """POST /merchant/payout/create — 代付下单。
+
+        v2 传 ``channel_code`` 或 ``pay_method``（二选一）。
+        """
+        if not notify_url:
+            raise TypeError("notify_url is required")
+        if not account_no:
+            raise TypeError("account_no is required")
+        if not channel_code and not pay_method:
+            raise TypeError("provide channel_code or pay_method")
         body = {
             "out_payout_no": out_payout_no,
             "amount": amount,
             "currency": currency,
             "pay_method": pay_method,
+            "channel_code": channel_code,
             "notify_url": notify_url,
             "account_no": account_no,
             "country": country,

@@ -46,7 +46,7 @@ function makeClient(baseUrl) {
 
 test('Environment 预设：PRODUCTION 无内置 URL，SANDBOX 为本地基址', () => {
   assert.equal(Environment.PRODUCTION, null);
-  assert.equal(Environment.SANDBOX, 'http://127.0.0.1:3090/api/open/v1');
+  assert.equal(Environment.SANDBOX, 'http://127.0.0.1:3090/api/open/v2');
 });
 
 test('选 PRODUCTION 且不传 baseUrl 抛清晰错误', () => {
@@ -88,7 +88,7 @@ test('SANDBOX 预设基址仍为 127.0.0.1', () => {
     apiKey: 'k',
     environment: Environment.SANDBOX,
   });
-  assert.equal(c.baseUrl, 'http://127.0.0.1:3090/api/open/v1');
+  assert.equal(c.baseUrl, 'http://127.0.0.1:3090/api/open/v2');
 });
 
 test('payCreate：注入通用字段/timestamp/nonce，过滤 null，签名用 pay 密钥，命中正确 path', async () => {
@@ -252,12 +252,13 @@ test('响应非合法 JSON 抛 TransportError', async () => {
   }
 });
 
-test('全部 11 个端点方法均存在', () => {
+test('全部签名业务端点方法均存在', () => {
   const client = makeClient('http://127.0.0.1:1/api/open/v1');
   const methods = [
     'payCreate',
     'payQuery',
     'payMethodsQuery',
+    'groupsQuery',
     'balanceQuery',
     'payTestComplete',
     'payoutCreate',

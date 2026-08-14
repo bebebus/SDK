@@ -21,7 +21,7 @@ func TestEnvironmentBaseURL(t *testing.T) {
 		t.Errorf("production 应无内置基址，实际: %s", got)
 	}
 	// Sandbox 预设仍为本地端口 127.0.0.1。
-	if sandboxBaseURL != "http://127.0.0.1:3090/api/open/v1" {
+	if sandboxBaseURL != "http://127.0.0.1:3090/api/open/v2" {
 		t.Errorf("sandbox 预设常量被改动: %s", sandboxBaseURL)
 	}
 	if got := Sandbox.BaseURL(); got != sandboxBaseURL {

@@ -30,7 +30,7 @@ func main() {
 		"out_order_no": "202501010001", // 商户订单号（幂等键，唯一）。
 		"amount":       10000,          // 最小单位整数，10000 = 1 元。
 		"currency":     "PHP",
-		"pay_method":   "gcash",
+		"channel_code": "GcashBig",
 		"country":      "PH",
 		"notify_url":   "https://merchant.example.com/api/notify/pay",
 		"subject":      "测试商品",

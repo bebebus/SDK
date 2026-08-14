@@ -47,7 +47,7 @@ const { data, raw } = await client.payCreate({
   out_order_no: 'ORDER_' + Date.now(),
   amount: 10000,
   currency: 'PHP',
-  pay_method: 'gcash',
+  channel_code: 'GcashBig',
   country: 'PH',
   notify_url: 'https://merchant.example.com/api/notify/pay',
 });
@@ -72,7 +72,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | 预设 | Base URL |
 |------|----------|
 | `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v1`，并显式传入 `baseUrl` |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
+| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
 
 ## 全部 11 个端点
 
@@ -81,6 +81,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `payCreate(params)` | `/merchant/pay/create` | pay |
 | `payQuery(params)` | `/merchant/pay/query` | pay |
 | `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
+| `groupsQuery(params?)` | `/merchant/groups/query` | pay（v2） |
 | `balanceQuery(params?)` | `/merchant/balance/query` | pay |
 | `payTestComplete(params)` | `/merchant/pay/test/complete` | pay（仅测试密钥） |
 | `payoutCreate(params)` | `/merchant/payout/create` | payout |

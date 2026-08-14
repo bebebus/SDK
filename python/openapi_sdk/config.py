@@ -4,7 +4,7 @@
 - ``Config``：商户号 + API Key + 双密钥 + 基址 + 超时。
 
 正式环境（PRODUCTION）没有内置基址：请向服务商获取正式地址
-（``https://api.<domain>/api/open/v1``），并显式传入 ``base_url``。
+（``https://api.<domain>/api/open/v2``），并显式传入 ``base_url``。
 沙箱（SANDBOX）保留本地预设基址，便于本地联调。
 """
 
@@ -30,7 +30,7 @@ class Environment(Enum):
     """
 
     PRODUCTION = ""
-    SANDBOX = "http://127.0.0.1:3090/api/open/v1"
+    SANDBOX = "http://127.0.0.1:3090/api/open/v2"
 
     @property
     def base_url(self) -> str:
@@ -75,7 +75,7 @@ class Config:
         if not resolved:
             raise ValueError(
                 "baseUrl is required: obtain the production URL from your service "
-                "provider (e.g. https://api.<domain>/api/open/v1)"
+                "provider (e.g. https://api.<domain>/api/open/v2)"
             )
         resolved = resolved.rstrip("/")
         # [D] 传输层 fail-closed：

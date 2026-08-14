@@ -8,8 +8,8 @@ For signing, see [`SIGNING.md`](./SIGNING.en.md). This file defines the environm
 
 | Environment | Base URL | Description |
 |------|----------|------|
-| Production | **No built-in default; baseUrl must be passed explicitly** | Obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v1`) |
-| Sandbox (test/local) | `http://127.0.0.1:3090/api/open/v1` | Self-hosted / integration testing; you can also use "production baseUrl + test key" as a sandbox (orders created with a test key are flagged `is_test`, do not touch real money, and can call `*/test/complete`) |
+| Production | **No built-in default; baseUrl must be passed explicitly** | Obtain the production address from your service provider. New integrations should use `https://api.<service_domain>/api/open/v2`; existing ones may keep `/api/open/v1` |
+| Sandbox (test/local) | `http://127.0.0.1:3090/api/open/v2` | Self-hosted / integration testing; you can also use "production baseUrl + test key" as a sandbox (orders created with a test key are flagged `is_test`, do not touch real money, and can call `*/test/complete`) |
 
 SDK design: `Environment.SANDBOX` embeds the local preset base URL; `Environment.PRODUCTION` (the default) **embeds no host name** and requires `baseUrl` (obtain it from your service provider) to be passed explicitly, otherwise construction throws an error. All requests are `POST`, `Content-Type: application/json`, with a JSON request body.
 
@@ -43,7 +43,8 @@ Request (common fields +):
 | `out_order_no` | string | Yes | Merchant order number (idempotency key, unique) |
 | `amount` | int | Yes | Amount as a minor-unit integer, `[1, 1e12]` |
 | `currency` | string | Yes | Currency code (e.g. PHP/USDT) |
-| `pay_method` | string | Yes | Pay method (gcash/maya/trc20…, see pay-methods/query) |
+| `channel_code` | string | Conditional | **Recommended on v2.** Product/rate-group code from `groups/query`. Provide this or `pay_method` |
+| `pay_method` | string | Conditional | On v2 may be sent alone for smart routing; **required on v1**. Pay method (gcash/maya/trc20…, see pay-methods/query) |
 | `country` | string | No | Country ISO code; required for fiat, may be empty for cryptocurrency |
 | `notify_url` | string | Yes | Callback address |
 | `return_url` | string | No | Frontend redirect address |
@@ -61,6 +62,10 @@ Response `data`: `order_no, out_order_no, amount, currency, status(pending|succe
 ### POST `/merchant/pay-methods/query` — available pay methods (key: pay)
 Request: `country` (optional filter).
 Response `data.methods[]`: `{pay_method, name, country(nullable), currency(nullable)}`.
+
+### POST `/merchant/groups/query` — available channel codes (key: pay, **v2 only**)
+Request: `biz_type` (`pay`/`payout`, optional), `currency` (optional), `country` (optional).
+Response `data.groups[]`: `{channel_code, name, pay_method, country, currency, biz_type}`. `channel_code` is the valid v2 create-order value.
 
 ### POST `/merchant/balance/query` — balance query (key: pay)
 Request: `currency` (optional filter).
@@ -80,7 +85,8 @@ Request (common fields +):
 | `out_payout_no` | string | Yes | Merchant payout number (idempotency key, unique) |
 | `amount` | int | Yes | Amount as a minor-unit integer, `[1, 1e12]` |
 | `currency` | string | Yes | Currency code |
-| `pay_method` | string | Yes | Pay method |
+| `channel_code` | string | Conditional | **Recommended on v2.** Product-line code from `groups/query`. Provide this or `pay_method` |
+| `pay_method` | string | Conditional | On v2 may be sent alone for smart routing; **required on v1** |
 | `country` | string | No | Country ISO code; required for fiat |
 | `notify_url` | string | Yes | Callback address |
 | `account_no` | string | Yes | Payee account/address (card number/wallet address, etc.) |

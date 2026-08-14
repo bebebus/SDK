@@ -8,7 +8,7 @@ use Merchant\Openapi\Exception\ApiException;
 use Merchant\Openapi\Exception\TransportException;
 
 /**
- * 商户支付 OpenAPI 客户端，覆盖全部 11 个端点。
+ * 商户支付 OpenAPI 客户端，覆盖全部签名业务端点。
  *
  * 通用约定：
  *  - 每请求自动注入 merchant_no / api_key / timestamp(Unix 秒) / nonce(唯一随机串)。
@@ -50,8 +50,8 @@ final class Client
      * 代收下单 POST /merchant/pay/create。
      *
      * @param array{
-     *   out_order_no:string, amount:int, currency:string, pay_method:string,
-     *   notify_url:string, country?:string|null, return_url?:string|null,
+     *   out_order_no:string, amount:int, currency:string, notify_url:string,
+     *   channel_code?:string, pay_method?:string, country?:string|null, return_url?:string|null,
      *   subject?:string|null, remark?:string|null, client_ip?:string|null, extra?:array<string,mixed>|null
      * } $params
      * @return array<string,mixed> data
@@ -84,6 +84,18 @@ final class Client
     }
 
     /**
+     * 可用渠道编码 POST /merchant/groups/query（v2）。
+     * 返回的 channel_code 即 payCreate / payoutCreate 的合法取值。
+     *
+     * @param array{biz_type?:string|null, currency?:string|null, country?:string|null} $params
+     * @return array<string,mixed> data（含 groups[]）
+     */
+    public function groupsQuery(array $params = []): array
+    {
+        return $this->callPay('/merchant/groups/query', $params);
+    }
+
+    /**
      * 余额查询 POST /merchant/balance/query。currency 可选过滤。
      *
      * @param array{currency?:string|null} $params
@@ -112,8 +124,8 @@ final class Client
      * 代付下单 POST /merchant/payout/create。
      *
      * @param array{
-     *   out_payout_no:string, amount:int, currency:string, pay_method:string,
-     *   notify_url:string, account_no:string, country?:string|null, account_name?:string|null,
+     *   out_payout_no:string, amount:int, currency:string, notify_url:string, account_no:string,
+     *   channel_code?:string, pay_method?:string, country?:string|null, account_name?:string|null,
      *   bank_code?:string|null, bank_name?:string|null, remark?:string|null,
      *   client_ip?:string|null, extra?:array<string,mixed>|null
      * } $params

@@ -8,8 +8,8 @@
 
 | 环境 | Base URL | 说明 |
 |------|----------|------|
-| 正式（production） | **无内置默认值，必须显式传 baseUrl** | 正式环境地址请向服务商获取（形如 `https://api.<service_domain>/api/open/v1`） |
-| 测试/本地（sandbox） | `http://127.0.0.1:3090/api/open/v1` | 自建/联调；亦可用「正式 baseUrl + 测试密钥」做沙箱（测试密钥下单标记 `is_test`，不动真钱，可调 `*/test/complete`） |
+| 正式（production） | **无内置默认值，必须显式传 baseUrl** | 正式环境地址请向服务商获取。新对接用 `https://api.<service_domain>/api/open/v2`；存量可用 `/api/open/v1` |
+| 测试/本地（sandbox） | `http://127.0.0.1:3090/api/open/v2` | 自建/联调；亦可用「正式 baseUrl + 测试密钥」做沙箱（测试密钥下单标记 `is_test`，不动真钱，可调 `*/test/complete`） |
 
 SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODUCTION`（默认）**不内置任何主机名**，必须显式传入 `baseUrl`（请向服务商获取），否则构造时报错。所有请求 `POST`，`Content-Type: application/json`，请求体为 JSON。
 
@@ -43,7 +43,8 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | `out_order_no` | string | 是 | 商户订单号（幂等键，唯一） |
 | `amount` | int | 是 | 金额最小单位整数，`[1, 1e12]` |
 | `currency` | string | 是 | 币种码（如 PHP/USDT） |
-| `pay_method` | string | 是 | 支付方式（gcash/maya/trc20…，见 pay-methods/query） |
+| `channel_code` | string | 条件 | **v2 推荐**。产品线/费率组编码，取值见 `groups/query`。与 `pay_method` 二选一必传 |
+| `pay_method` | string | 条件 | v2 可只传此项走智能选路；**v1 必填**。支付方式（gcash/maya/trc20…，见 pay-methods/query） |
 | `country` | string | 否 | 国家 ISO 码；法币必填、加密货币可空 |
 | `notify_url` | string | 是 | 回调地址 |
 | `return_url` | string | 否 | 前端回跳地址 |
@@ -61,6 +62,10 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 ### POST `/merchant/pay-methods/query` — 可用支付方式（密钥：pay）
 请求：`country`（可选过滤）。
 响应 `data.methods[]`：`{pay_method, name, country(可空), currency(可空)}`。
+
+### POST `/merchant/groups/query` — 可用渠道编码（密钥：pay，**仅 v2**）
+请求：`biz_type`（`pay`/`payout`，可选）、`currency`（可选）、`country`（可选）。
+响应 `data.groups[]`：`{channel_code, name, pay_method, country, currency, biz_type}`。`channel_code` 即 v2 下单合法取值。
 
 ### POST `/merchant/balance/query` — 余额查询（密钥：pay）
 请求：`currency`（可选过滤）。
@@ -80,7 +85,8 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | `out_payout_no` | string | 是 | 商户代付单号（幂等键，唯一） |
 | `amount` | int | 是 | 金额最小单位整数，`[1, 1e12]` |
 | `currency` | string | 是 | 币种码 |
-| `pay_method` | string | 是 | 支付方式 |
+| `channel_code` | string | 条件 | **v2 推荐**。产品线编码，取值见 `groups/query`。与 `pay_method` 二选一必传 |
+| `pay_method` | string | 条件 | v2 可只传此项走智能选路；**v1 必填** |
 | `country` | string | 否 | 国家 ISO 码；法币必填 |
 | `notify_url` | string | 是 | 回调地址 |
 | `account_no` | string | 是 | 收款账号/地址（卡号/钱包地址等） |

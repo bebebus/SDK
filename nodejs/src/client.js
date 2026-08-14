@@ -1,4 +1,4 @@
-// 商户支付 OpenAPI 客户端：实现全部 11 个端点。
+// 商户支付 OpenAPI 客户端：实现全部签名业务端点。
 // HTTP 仅用 node:http / node:https；签名用 node:crypto（经 signer.js）。
 import http from 'node:http';
 import https from 'node:https';
@@ -146,8 +146,9 @@ export class Client {
 
   // ---- 代收（Pay，密钥：api_secret_pay）----
 
-  // 代收下单。params: { out_order_no, amount(int), currency, pay_method, notify_url,
-  //   country?, return_url?, subject?, remark?, client_ip?, extra? }
+  // 代收下单。params: { out_order_no, amount(int), currency, notify_url,
+  //   channel_code? | pay_method?, country?, return_url?, subject?, remark?, client_ip?, extra? }
+  // v2：channel_code 与 pay_method 二选一；v1 仍要求 pay_method。
   payCreate(params) {
     return this._post('/merchant/pay/create', params, 'pay');
   }
@@ -162,6 +163,12 @@ export class Client {
     return this._post('/merchant/pay-methods/query', params, 'pay');
   }
 
+  // 可用渠道编码（v2）。params: { biz_type?, currency?, country? }
+  // 返回的 channel_code 即 payCreate / payoutCreate 的合法取值。
+  groupsQuery(params = {}) {
+    return this._post('/merchant/groups/query', params, 'pay');
+  }
+
   // 余额查询。params: { currency? }
   balanceQuery(params = {}) {
     return this._post('/merchant/balance/query', params, 'pay');
@@ -174,8 +181,8 @@ export class Client {
 
   // ---- 代付（Payout，密钥：api_secret_payout）----
 
-  // 代付下单。params: { out_payout_no, amount(int), currency, pay_method, notify_url, account_no,
-  //   country?, account_name?, bank_code?, bank_name?, remark?, client_ip?, extra? }
+  // 代付下单。params: { out_payout_no, amount(int), currency, notify_url, account_no,
+  //   channel_code? | pay_method?, country?, account_name?, bank_code?, bank_name?, remark?, client_ip?, extra? }
   payoutCreate(params) {
     return this._post('/merchant/payout/create', params, 'payout');
   }

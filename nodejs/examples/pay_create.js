@@ -22,7 +22,7 @@ async function main() {
       out_order_no: outOrderNo,
       amount: 10000, // 1 元（最小单位整数）
       currency: 'PHP',
-      pay_method: 'gcash',
+      channel_code: 'GcashBig',
       country: 'PH',
       notify_url: 'https://merchant.example.com/api/notify/pay',
       subject: '测试商品',

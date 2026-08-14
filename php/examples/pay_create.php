@@ -35,7 +35,7 @@ try {
         'out_order_no' => 'DEMO' . time(),
         'amount' => 10000,
         'currency' => 'PHP',
-        'pay_method' => 'gcash',
+        'channel_code' => 'GcashBig',
         'country' => 'PH',
         'notify_url' => 'https://merchant.example.com/api/notify/pay',
         'subject' => '订单/支付 <demo>',

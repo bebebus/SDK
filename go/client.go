@@ -62,8 +62,8 @@ func NewClient(cfg Config) *Client {
 
 // ===================== 代收（Pay，密钥 api_secret_pay） =====================
 
-// PayCreate 代收下单。params 为业务字段（out_order_no/amount/currency/pay_method/notify_url 等），
-// 通用字段与签名由 SDK 自动注入。值为 nil 的字段不入请求体也不参与签名。
+// PayCreate 代收下单。params 为业务字段（out_order_no/amount/currency/notify_url，
+// 以及 v2 的 channel_code 或 pay_method 等），通用字段与签名由 SDK 自动注入。
 func (c *Client) PayCreate(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay/create", params, usePay)
 }
@@ -76,6 +76,12 @@ func (c *Client) PayQuery(ctx context.Context, params map[string]any) (*Response
 // PayMethodsQuery 可用支付方式。params 可含 country 过滤（可空）。
 func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
+}
+
+// GroupsQuery 可用渠道编码（v2）。params 可含 biz_type / currency / country。
+// 返回的 channel_code 即 PayCreate / PayoutCreate 的合法取值。
+func (c *Client) GroupsQuery(ctx context.Context, params map[string]any) (*Response, error) {
+	return c.call(ctx, "/merchant/groups/query", params, usePay)
 }
 
 // BalanceQuery 余额查询。params 可含 currency 过滤（可空）。
@@ -91,8 +97,8 @@ func (c *Client) PayTestComplete(ctx context.Context, params map[string]any) (*R
 
 // ===================== 代付（Payout，密钥 api_secret_payout） =====================
 
-// PayoutCreate 代付下单。params 为业务字段（out_payout_no/amount/currency/pay_method/
-// notify_url/account_no 等，银行类必填 bank_code）。
+// PayoutCreate 代付下单。params 为业务字段（out_payout_no/amount/currency/
+// notify_url/account_no，以及 v2 的 channel_code 或 pay_method；银行类必填 bank_code）。
 func (c *Client) PayoutCreate(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/payout/create", params, usePayout)
 }

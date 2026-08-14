@@ -47,7 +47,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 
 ## 涵盖的接口（每语言均实现）
 
-**代收**：`payCreate`（下单）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
+**代收**：`payCreate`（下单，v2 传 `channel_code` 或 `pay_method`）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`groupsQuery`（可用渠道编码，v2）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
 **代付**：`payoutCreate`、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）
 **回调**：`verifyPayCallback` / `verifyPayoutCallback`（验签，时序安全比较）
 
@@ -60,9 +60,9 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 | 预设 | 基址 |
 |------|------|
 | `PRODUCTION`（正式） | **无内置默认值，必须显式传 baseUrl** |
-| `SANDBOX`（测试/本地） | `http://127.0.0.1:3090/api/open/v1` |
+| `SANDBOX`（测试/本地） | `http://127.0.0.1:3090/api/open/v2` |
 
-> 正式环境地址请向你的服务商获取（形如 `https://api.<service_domain>/api/open/v1`）。SDK **不内置任何正式主机名**：选 `PRODUCTION`（默认）时必须通过 `baseUrl` 显式传入，否则构造时报错。
+> 正式环境地址请向你的服务商获取（新对接形如 `https://api.<service_domain>/api/open/v2`；存量可用 `/api/open/v1`）。SDK **不内置任何正式主机名**：选 `PRODUCTION`（默认）时必须通过 `baseUrl` 显式传入，否则构造时报错。
 > 「测试密钥沙箱」可用上述正式 baseUrl + 测试密钥（测试单标记 `is_test`，不动真钱，可调 `*/test/complete`）。
 
 ## 快速开始（以 Node.js 为例，其余语言见各自 README）
@@ -75,15 +75,15 @@ const client = new Client(new Config({
   apiKey: process.env.API_KEY,
   apiSecretPay: process.env.API_SECRET_PAY,
   apiSecretPayout: process.env.API_SECRET_PAYOUT,
-  // 正式环境必须显式传 baseUrl（请向服务商获取：https://api.<service_domain>/api/open/v1）
+  // 正式环境必须显式传 baseUrl（请向服务商获取：https://api.<service_domain>/api/open/v2）
   baseUrl: process.env.API_BASE_URL,
   // 本地联调可改用：environment: Environment.SANDBOX,
 }));
 
-// 代收下单（金额为最小单位整数，10000 = 1 元）
+// 代收下单（v2：channel_code 钉产品线；金额为最小单位整数，10000 = 1 元）
 const { data } = await client.payCreate({
   out_order_no: 'order-' + Date.now(),
-  amount: 10000, currency: 'PHP', pay_method: 'gcash', country: 'PH',
+  amount: 10000, currency: 'PHP', channel_code: 'GcashBig', country: 'PH',
   notify_url: 'https://merchant.example.com/api/notify/pay',
 });
 console.log(data.order_no, data.pay_url);

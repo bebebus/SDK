@@ -118,7 +118,7 @@ test('[D] localhost/127.0.0.1/::1 放行 http', () => {
 
 test('[D] SANDBOX 预设（http 127.0.0.1）仍可构造', () => {
   const c = new Config({ merchantNo: 'M', apiKey: 'k', environment: Environment.SANDBOX });
-  assert.equal(c.baseUrl, 'http://127.0.0.1:3090/api/open/v1');
+  assert.equal(c.baseUrl, 'http://127.0.0.1:3090/api/open/v2');
 });
 
 test('[D] 非法 URL baseUrl 被拒绝', () => {

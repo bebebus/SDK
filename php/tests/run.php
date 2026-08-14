@@ -211,7 +211,7 @@ checkTrue('PRODUCTION 缺 baseUrl 抛 InvalidArgumentException', $prodThrew);
 
 // SANDBOX 预设仍内置本地基址
 $cfgSand = new Config('M', 'k', 'p', 'q', Environment::SANDBOX);
-check('SANDBOX 基址', 'http://127.0.0.1:3090/api/open/v1', $cfgSand->baseUrl);
+check('SANDBOX 基址', 'http://127.0.0.1:3090/api/open/v2', $cfgSand->baseUrl);
 
 /* ---- 用注入的 HTTP 桩验证：请求构建（通用字段/nonce/签名/null 过滤）+ 信封解析 + 密钥选择 ---- */
 
@@ -241,7 +241,7 @@ $data = $stubClient->payCreate([
 ]);
 
 check('stub payCreate 返回 data', ['echo' => true], $data);
-check('stub payCreate URL', 'http://127.0.0.1:3090/api/open/v1/merchant/pay/create', $captured['url']);
+check('stub payCreate URL', 'http://127.0.0.1:3090/api/open/v2/merchant/pay/create', $captured['url']);
 checkTrue('stub 通用字段 merchant_no', $captured['body']['merchant_no'] === 'M00000001');
 checkTrue('stub 通用字段 api_key', $captured['body']['api_key'] === 'ak_demo_key');
 checkTrue('stub 通用字段 timestamp 是整数', is_int($captured['body']['timestamp']));

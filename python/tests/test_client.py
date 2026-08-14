@@ -60,7 +60,7 @@ class TestEnvironmentAndConfig(unittest.TestCase):
         self.assertEqual(Environment.PRODUCTION.base_url, "")
         # SANDBOX 仍为本地预设基址。
         self.assertEqual(
-            Environment.SANDBOX.base_url, "http://127.0.0.1:3090/api/open/v1"
+            Environment.SANDBOX.base_url, "http://127.0.0.1:3090/api/open/v2"
         )
 
     def test_production_without_base_url_raises(self):
@@ -94,7 +94,7 @@ class TestEnvironmentAndConfig(unittest.TestCase):
             api_secret_payout="o",
             environment=Environment.SANDBOX,
         )
-        self.assertEqual(cfg.base_url, "http://127.0.0.1:3090/api/open/v1")
+        self.assertEqual(cfg.base_url, "http://127.0.0.1:3090/api/open/v2")
 
     def test_default_environment_is_production(self):
         # 默认环境仍是 PRODUCTION（于是默认就要求显式传 base_url）。
@@ -250,12 +250,13 @@ class TestEnvelopeHandling(unittest.TestCase):
 
 
 class TestAllEndpointsCallable(unittest.TestCase):
-    """确认 11 个端点方法都存在且能构建请求（路径正确）。"""
+    """确认签名业务端点方法都存在且能构建请求（路径正确）。"""
 
     EXPECTED = {
         "pay_create": "/merchant/pay/create",
         "pay_query": "/merchant/pay/query",
         "pay_methods_query": "/merchant/pay-methods/query",
+        "groups_query": "/merchant/groups/query",
         "balance_query": "/merchant/balance/query",
         "pay_test_complete": "/merchant/pay/test/complete",
         "payout_create": "/merchant/payout/create",
@@ -274,8 +275,8 @@ class TestAllEndpointsCallable(unittest.TestCase):
                 msg=f"缺少端点方法 {name}",
             )
 
-    def test_eleven_endpoints(self):
-        self.assertEqual(len(self.EXPECTED), 11)
+    def test_endpoint_count(self):
+        self.assertEqual(len(self.EXPECTED), 12)
 
 
 if __name__ == "__main__":
