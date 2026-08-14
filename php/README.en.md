@@ -101,8 +101,8 @@ new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v2');
 |------|------|------|
 | `payCreate($params)` | `/merchant/pay/create` | pay |
 | `payQuery($params)` | `/merchant/pay/query` | pay |
-| `payMethodsQuery($params = [])` | `/merchant/pay-methods/query` | pay |
-| `groupsQuery($params = [])` | `/merchant/groups/query` | pay (v2) |
+| `payMethodsQuery($params = [])` | `/merchant/pay-methods/query` | pay; v2 returns `pay_methods` + `channel_codes` |
+| `groupsQuery($params = [])` | `/merchant/groups/query` | pay (compatibility alias) |
 | `balanceQuery($params = [])` | `/merchant/balance/query` | pay |
 | `payTestComplete($params)` | `/merchant/pay/test/complete` (test secret only) | pay |
 | `payoutCreate($params)` | `/merchant/payout/create` | payout |

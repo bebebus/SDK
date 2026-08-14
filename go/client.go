@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
 // Version 是 SDK 版本号单一事实源：UA 由它派生（不再硬编码）。
 // release.sh 发版打 tag go/vX.Y.Z 时，同步 sed 此常量保持一致。
-const Version = "1.1.2"
+const Version = "1.2.0"
 
 // secretKind 标记某端点该用哪把密钥。
 type secretKind int
@@ -73,13 +74,14 @@ func (c *Client) PayQuery(ctx context.Context, params map[string]any) (*Response
 	return c.call(ctx, "/merchant/pay/query", params, usePay)
 }
 
-// PayMethodsQuery 可用支付方式。params 可含 country 过滤（可空）。
+// PayMethodsQuery 可用支付方式 / 分组编码。params 可含 country / biz_type / currency。
+// v2 返回 pay_methods 与 channel_codes；v1 仍为 methods。
 func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
 }
 
-// GroupsQuery 可用渠道编码（v2）。params 可含 biz_type / currency / country。
-// 返回的 channel_code 即 PayCreate / PayoutCreate 的合法取值。
+// GroupsQuery 兼容别名，仍打 /merchant/groups/query。
+// 新对接请用 PayMethodsQuery 读取 channel_codes。
 func (c *Client) GroupsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/groups/query", params, usePay)
 }
@@ -167,7 +169,7 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 		return nil, c.baseURLErr
 	}
 	secret := c.secretFor(kind)
-	body := c.buildBody(params, secret)
+	body := c.buildBody(params, secret, path)
 
 	raw, status, err := c.do(ctx, path, body)
 	if err != nil {
@@ -197,7 +199,7 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 
 // buildBody 注入通用字段并签名，返回最终请求体（含 sign）。
 // 过滤值为 nil 的字段（既不入体、也不参与签名）。
-func (c *Client) buildBody(params map[string]any, secret string) map[string]any {
+func (c *Client) buildBody(params map[string]any, secret, relPath string) map[string]any {
 	body := make(map[string]any, len(params)+5)
 	for k, v := range params {
 		if v == nil {
@@ -210,8 +212,20 @@ func (c *Client) buildBody(params map[string]any, secret string) map[string]any 
 	body["timestamp"] = nowUnix()
 	body["nonce"] = newNonce()
 
-	body["sign"] = Sign(body, secret)
+	body["sign"] = SignWithBinding(body, secret, requestBinding(c.baseURL, relPath))
 	return body
+}
+
+func requestBinding(baseURL, relPath string) *SignBinding {
+	joined := strings.TrimRight(baseURL, "/") + relPath
+	u, err := url.Parse(joined)
+	if err != nil {
+		return nil
+	}
+	if strings.HasPrefix(u.Path, "/api/open/v2/") {
+		return &SignBinding{Method: "POST", Path: u.Path}
+	}
+	return nil
 }
 
 // do 执行 POST application/json，返回原始响应体与状态码。

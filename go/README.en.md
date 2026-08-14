@@ -73,8 +73,8 @@ func main() {
 |------|------|------|------|
 | collection | `PayCreate` | `/merchant/pay/create` | pay |
 | collection | `PayQuery` | `/merchant/pay/query` | pay |
-| collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
-| collection | `GroupsQuery` | `/merchant/groups/query` | pay (v2) |
+| collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay; v2 returns `pay_methods` + `channel_codes` |
+| collection | `GroupsQuery` | `/merchant/groups/query` | pay (compatibility alias) |
 | collection | `BalanceQuery` | `/merchant/balance/query` | pay |
 | collection | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
 | payout | `PayoutCreate` | `/merchant/payout/create` | payout |

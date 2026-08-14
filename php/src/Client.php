@@ -23,7 +23,7 @@ final class Client
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 composer.json 一致）。
      */
-    public const VERSION = '1.1.2';
+    public const VERSION = '1.2.0';
 
     /** @var callable(string,string,int):array{status:int,body:string} 注入的 HTTP 执行器（默认 cURL） */
     private $httpExecutor;
@@ -73,10 +73,11 @@ final class Client
     }
 
     /**
-     * 可用支付方式 POST /merchant/pay-methods/query。country 可选过滤。
+     * 可用支付方式 / 分组编码 POST /merchant/pay-methods/query。
+     * v2 返回 pay_methods 与 channel_codes；v1 仍为 methods。
      *
-     * @param array{country?:string|null} $params
-     * @return array<string,mixed> data（含 methods[]）
+     * @param array{country?:string|null, biz_type?:string|null, currency?:string|null} $params
+     * @return array<string,mixed>
      */
     public function payMethodsQuery(array $params = []): array
     {
@@ -84,11 +85,11 @@ final class Client
     }
 
     /**
-     * 可用渠道编码 POST /merchant/groups/query（v2）。
-     * 返回的 channel_code 即 payCreate / payoutCreate 的合法取值。
+     * 兼容别名 POST /merchant/groups/query。
+     * 新对接请用 payMethodsQuery 读取 channel_codes。
      *
      * @param array{biz_type?:string|null, currency?:string|null, country?:string|null} $params
-     * @return array<string,mixed> data（含 groups[]）
+     * @return array<string,mixed>
      */
     public function groupsQuery(array $params = []): array
     {
@@ -265,7 +266,7 @@ final class Client
     private function dispatch(string $path, array $params, string $secret): array
     {
         $payload = $this->buildPayload($params);
-        $payload['sign'] = Signer::sign($payload, $secret);
+        $payload['sign'] = Signer::sign($payload, $secret, self::requestBinding($this->config->baseUrl, $path));
 
         $url = $this->config->baseUrl . $path;
         $json = $this->encodeBody($payload);
@@ -273,6 +274,21 @@ final class Client
         [$status, $body] = $this->sendRaw($url, $json);
 
         return $this->parseEnvelope($status, $body);
+    }
+
+    /**
+     * v2 Base URL 时绑定 POST + 规范路径；v1 返回 null。
+     *
+     * @return array{method:string,path:string}|null
+     */
+    private static function requestBinding(string $baseUrl, string $relPath): ?array
+    {
+        $joined = rtrim($baseUrl, '/') . $relPath;
+        $path = (string) (parse_url($joined, PHP_URL_PATH) ?? '');
+        if (str_starts_with($path, '/api/open/v2/')) {
+            return ['method' => 'POST', 'path' => $path];
+        }
+        return null;
     }
 
     /**

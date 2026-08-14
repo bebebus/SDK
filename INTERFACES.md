@@ -43,7 +43,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | `out_order_no` | string | 是 | 商户订单号（幂等键，唯一） |
 | `amount` | int | 是 | 金额最小单位整数，`[1, 1e12]` |
 | `currency` | string | 是 | 币种码（如 PHP/USDT） |
-| `channel_code` | string | 条件 | **v2 推荐**。产品线/费率组编码，取值见 `groups/query`。与 `pay_method` 二选一必传 |
+| `channel_code` | string | 条件 | **v2 推荐**。支付分组编码，请向运营团队获取；也可见 `pay-methods/query` 的 `channel_codes`。与 `pay_method` 二选一必传 |
 | `pay_method` | string | 条件 | v2 可只传此项走智能选路；**v1 必填**。支付方式（gcash/maya/trc20…，见 pay-methods/query） |
 | `country` | string | 否 | 国家 ISO 码；法币必填、加密货币可空 |
 | `notify_url` | string | 是 | 回调地址 |
@@ -59,13 +59,13 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 请求：`order_no` 或 `out_order_no`（**二选一，至少一个**）。
 响应 `data`：`order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(始终为 null；订单查询和业务关联请使用 order_no 或 out_order_no), paid_at(可空), notify_status(pending|success|failed)`。
 
-### POST `/merchant/pay-methods/query` — 可用支付方式（密钥：pay）
-请求：`country`（可选过滤）。
-响应 `data.methods[]`：`{pay_method, name, country(可空), currency(可空)}`。
+### POST `/merchant/pay-methods/query` — 可用支付方式 / 分组编码（密钥：pay）
+请求：`country`（可选）；**v2** 还可传 `biz_type`（`pay`/`payout`）、`currency`。
+响应：
+- **v2** 分两个数组：`data.pay_methods[]` `{pay_method, name, country, currency, biz_type}`；`data.channel_codes[]` `{channel_code, name, country, currency, biz_type}`。`name` 为描述。`channel_code` 请向运营团队确认应使用哪一个。
+- **v1** 仍为 `data.methods[]` `{pay_method, name, country(可空), currency(可空)}`。
 
-### POST `/merchant/groups/query` — 可用渠道编码（密钥：pay，**仅 v2**）
-请求：`biz_type`（`pay`/`payout`，可选）、`currency`（可选）、`country`（可选）。
-响应 `data.groups[]`：`{channel_code, name, pay_method, country, currency, biz_type}`。`channel_code` 即 v2 下单合法取值。
+> `groups/query` 已并入本接口，不再作为对外主路径。存量 SDK 的 `groupsQuery` 仍可打到兼容别名，新对接请用本接口读 `channel_codes`。
 
 ### POST `/merchant/balance/query` — 余额查询（密钥：pay）
 请求：`currency`（可选过滤）。
@@ -85,7 +85,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | `out_payout_no` | string | 是 | 商户代付单号（幂等键，唯一） |
 | `amount` | int | 是 | 金额最小单位整数，`[1, 1e12]` |
 | `currency` | string | 是 | 币种码 |
-| `channel_code` | string | 条件 | **v2 推荐**。产品线编码，取值见 `groups/query`。与 `pay_method` 二选一必传 |
+| `channel_code` | string | 条件 | **v2 推荐**。支付分组编码，请向运营团队获取；也可见 `pay-methods/query` 的 `channel_codes`。与 `pay_method` 二选一必传 |
 | `pay_method` | string | 条件 | v2 可只传此项走智能选路；**v1 必填** |
 | `country` | string | 否 | 国家 ISO 码；法币必填 |
 | `notify_url` | string | 是 | 回调地址 |

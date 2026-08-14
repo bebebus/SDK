@@ -17,6 +17,7 @@ import json
 import secrets
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 from contextlib import suppress
@@ -27,6 +28,15 @@ from .config import Config, Environment
 from .exceptions import ApiError, TransportError
 
 __all__ = ["Client"]
+
+
+def _request_binding(base_url: str, rel_path: str) -> Optional[Dict[str, str]]:
+    """v2 Base URL 时绑定 POST + 规范路径；v1 返回 None。"""
+    joined = str(base_url or "").rstrip("/") + rel_path
+    path = urllib.parse.urlparse(joined).path
+    if path.startswith("/api/open/v2/"):
+        return {"method": "POST", "path": path}
+    return None
 
 # [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
 # 不再硬编码；源码直跑（未安装）取不到则兜底 '1.1.2'。
@@ -155,9 +165,21 @@ class Client:
             {"order_no": order_no, "out_order_no": out_order_no},
         )
 
-    def pay_methods_query(self, country: Optional[str] = None) -> Dict[str, Any]:
-        """POST /merchant/pay-methods/query — 可用支付方式。"""
-        return self._call_pay("/merchant/pay-methods/query", {"country": country})
+    def pay_methods_query(
+        self,
+        country: Optional[str] = None,
+        biz_type: Optional[str] = None,
+        currency: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """POST /merchant/pay-methods/query — 可用支付方式 / 分组编码。
+
+        v2 返回 ``pay_methods`` 与 ``channel_codes`` 两个数组；v1 仍为 ``methods``。
+        ``biz_type`` / ``currency`` 仅 v2 接受。
+        """
+        return self._call_pay(
+            "/merchant/pay-methods/query",
+            {"country": country, "biz_type": biz_type, "currency": currency},
+        )
 
     def groups_query(
         self,
@@ -165,9 +187,9 @@ class Client:
         currency: Optional[str] = None,
         country: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """POST /merchant/groups/query — 可用渠道编码（v2）。
+        """兼容别名：POST /merchant/groups/query。
 
-        返回的 ``channel_code`` 即 ``pay_create`` / ``payout_create`` 的合法取值。
+        新对接请用 ``pay_methods_query`` 读取 ``channel_codes``。
         """
         return self._call_pay(
             "/merchant/groups/query",
@@ -354,7 +376,7 @@ class Client:
         return data if isinstance(data, dict) else {}
 
     def _build_payload(
-        self, body: Mapping[str, Any], secret: str
+        self, body: Mapping[str, Any], secret: str, binding: Optional[Mapping[str, Any]] = None
     ) -> Dict[str, Any]:
         """注入通用字段、剔除 None、计算签名，返回最终请求体。"""
         payload: Dict[str, Any] = {}
@@ -366,7 +388,7 @@ class Client:
         payload["api_key"] = self._config.api_key
         payload["timestamp"] = int(time.time())
         payload["nonce"] = self._gen_nonce()
-        payload["sign"] = signer.sign(payload, secret)
+        payload["sign"] = signer.sign(payload, secret, binding)
         return payload
 
     @staticmethod
@@ -377,7 +399,7 @@ class Client:
     def _request(
         self, path: str, body: Mapping[str, Any], secret: str
     ) -> Dict[str, Any]:
-        payload = self._build_payload(body, secret)
+        payload = self._build_payload(body, secret, _request_binding(self._config.base_url, path))
         url = self._config.base_url + path
         # allow_nan=False：NaN/Infinity 非法且与签名 base 分叉，序列化阶段即拒绝。
         data = json.dumps(

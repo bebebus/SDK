@@ -80,7 +80,7 @@ func TestBuildBodyInjectsCommonFields(t *testing.T) {
 		"out_order_no": "202501010001",
 		"amount":       10000,
 		"return_url":   nil, // 应被过滤。
-	}, c.cfg.SecretPay)
+	}, c.cfg.SecretPay, "/merchant/pay/create")
 
 	if body["merchant_no"] != "M00000001" || body["api_key"] != "ak_demo_key" {
 		t.Errorf("通用字段缺失: %+v", body)

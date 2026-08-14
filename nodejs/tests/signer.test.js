@@ -69,6 +69,15 @@ test('verifyCallback 反例：篡改 sign 自身一字节后失败', () => {
   assert.equal(verifyCallback(tampered, secret), false);
 });
 
+test('v2 请求绑定：基串前缀 METHOD\\npath\\n，缺省 binding 仍为 v1 口径', () => {
+  const payload = { a: 1 };
+  const secret = 's';
+  const binding = { method: 'POST', path: '/api/open/v2/merchant/pay/create' };
+  assert.equal(buildSignBase(payload, secret, binding), 'POST\n/api/open/v2/merchant/pay/create\na=1&secret=s');
+  assert.equal(sign(payload, secret, binding), '1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b');
+  assert.equal(buildSignBase(payload, secret), 'a=1&secret=s');
+});
+
 test('verifyCallback 反例：用错密钥（代付密钥验代收回调）失败', () => {
   const payPayload = { merchant_no: 'M00000001', amount: 10000, status: 'success' };
   payPayload.sign = sign(payPayload, 'secret_pay');

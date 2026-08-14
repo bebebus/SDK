@@ -68,8 +68,8 @@ System.out.println(resp.dataAsMap().get("order_no"));
 |------|------|------|------|
 | Create collection | `payCreate` | `/merchant/pay/create` | pay |
 | Query collection | `payQuery` | `/merchant/pay/query` | pay |
-| Payment methods | `payMethodsQuery` | `/merchant/pay-methods/query` | pay |
-| Channel codes | `groupsQuery` | `/merchant/groups/query` | pay (v2) |
+| Payment methods / group codes | `payMethodsQuery` | `/merchant/pay-methods/query` | pay; v2 returns `pay_methods` + `channel_codes` |
+| Group codes (compat alias) | `groupsQuery` | `/merchant/groups/query` | pay |
 | Balance | `balanceQuery` | `/merchant/balance/query` | pay |
 | Complete collection test | `payTestComplete` | `/merchant/pay/test/complete` | pay (test secret only) |
 | Create payout | `payoutCreate` | `/merchant/payout/create` | payout |

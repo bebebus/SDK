@@ -30,7 +30,7 @@ public final class Client {
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 pom.xml &lt;version&gt; 一致）。
      */
-    public static final String VERSION = "1.1.2";
+    public static final String VERSION = "1.2.0";
 
     private final Config config;
     private final HttpClient http;
@@ -67,14 +67,14 @@ public final class Client {
         return call("/merchant/pay/query", params, Secret.PAY);
     }
 
-    /** 可用支付方式 POST /merchant/pay-methods/query（密钥：pay）。params: country 可选。 */
+    /** 可用支付方式 / 分组编码 POST /merchant/pay-methods/query。v2 返回 pay_methods 与 channel_codes；v1 仍为 methods。 */
     public ApiResponse payMethodsQuery(Map<String, Object> params) {
         return call("/merchant/pay-methods/query", params, Secret.PAY);
     }
 
     /**
-     * 可用渠道编码 POST /merchant/groups/query（密钥：pay，v2）。
-     * params: biz_type / currency / country 可选。返回的 channel_code 即下单合法取值。
+     * 兼容别名 POST /merchant/groups/query。
+     * 新对接请用 payMethodsQuery 读取 channel_codes。
      */
     public ApiResponse groupsQuery(Map<String, Object> params) {
         return call("/merchant/groups/query", params, Secret.PAY);
@@ -191,7 +191,7 @@ public final class Client {
         Map<String, Object> payload = buildPayload(params);
 
         // 2) 计算 sign 并放回
-        String sign = Signer.sign(payload, secret);
+        String sign = Signer.sign(payload, secret, requestBinding(config.baseUrl(), path));
         payload.put("sign", sign);
 
         // 3) 序列化请求体
@@ -228,6 +228,19 @@ public final class Client {
 
         // 5) 解析统一信封
         return parseEnvelope(raw);
+    }
+
+    static SignBinding requestBinding(String baseUrl, String relPath) {
+        try {
+            String joined = (baseUrl == null ? "" : baseUrl.replaceAll("/+$", "")) + relPath;
+            String pathname = URI.create(joined).getPath();
+            if (pathname != null && pathname.startsWith("/api/open/v2/")) {
+                return new SignBinding("POST", pathname);
+            }
+        } catch (IllegalArgumentException ignored) {
+            // 非法 URL 交给后续请求层报错。
+        }
+        return null;
     }
 
     /** 注入通用字段、过滤 null，返回 key 升序的有序 payload（不含 sign）。 */

@@ -1,5 +1,6 @@
 import cloud.cniia.openapi.sdk.Json;
 import cloud.cniia.openapi.sdk.Signer;
+import cloud.cniia.openapi.sdk.SignBinding;
 import cloud.cniia.openapi.sdk.Config;
 import cloud.cniia.openapi.sdk.Client;
 import cloud.cniia.openapi.sdk.Environment;
@@ -227,6 +228,18 @@ public class VectorTest {
         np.put("amount", 500L);
         assertEquals("null 过滤 base",
                 "a=1&amount=500&secret=sk", Signer.buildSignBase(np, "sk"));
+
+        Map<String, Object> bindPayload = new LinkedHashMap<>();
+        bindPayload.put("a", 1);
+        SignBinding binding = new SignBinding("POST", "/api/open/v2/merchant/pay/create");
+        assertEquals("v2 binding 前缀",
+                "POST\n/api/open/v2/merchant/pay/create\na=1&secret=s",
+                Signer.buildSignBase(bindPayload, "s", binding));
+        assertEquals("v2 binding sign",
+                "1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b",
+                Signer.sign(bindPayload, "s", binding));
+        assertEquals("无 binding 保持 v1",
+                "a=1&secret=s", Signer.buildSignBase(bindPayload, "s"));
     }
 
     // ---------------- 断言工具 ----------------
