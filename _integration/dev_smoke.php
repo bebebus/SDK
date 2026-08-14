@@ -30,7 +30,12 @@ function ok(string $n, bool $c, string $extra = ''): void {
 echo "[PHP] base=$base merchant=$mno tag=$tag\n";
 
 // 1. pay-methods/query
-try { $d = $client->payMethodsQuery(['country' => 'PH']); $m = $d['methods'] ?? []; ok('pay-methods/query', count($m) > 0, implode(',', array_column($m, 'pay_method'))); }
+try {
+    $d = $client->payMethodsQuery(['country' => 'PH']);
+    $m = $d['pay_methods'] ?? $d['methods'] ?? [];
+    $c = $d['channel_codes'] ?? [];
+    ok('pay-methods/query', count($m) > 0 || count($c) > 0, 'methods=' . implode(',', array_column($m, 'pay_method')) . ' channels=' . implode(',', array_column($c, 'channel_code')));
+}
 catch (\Throwable $e) { ok('pay-methods/query', false, get_class($e) . ' ' . $e->getMessage()); }
 
 // 2. balance/query

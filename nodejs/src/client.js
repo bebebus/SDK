@@ -158,13 +158,13 @@ export class Client {
     return this._post('/merchant/pay/query', params, 'pay');
   }
 
-  // 可用支付方式。params: { country? }
+  // 可用支付方式 / 分组编码。params: { country?, biz_type?, currency? }
+  // v2 返回 data.pay_methods[] 与 data.channel_codes[]；v1 仍为 data.methods[]。
   payMethodsQuery(params = {}) {
     return this._post('/merchant/pay-methods/query', params, 'pay');
   }
 
-  // 可用渠道编码（v2）。params: { biz_type?, currency?, country? }
-  // 返回的 channel_code 即 payCreate / payoutCreate 的合法取值。
+  // 兼容别名：仍打 /merchant/groups/query。新对接请用 payMethodsQuery 的 channel_codes。
   groupsQuery(params = {}) {
     return this._post('/merchant/groups/query', params, 'pay');
   }

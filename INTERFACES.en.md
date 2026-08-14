@@ -43,7 +43,7 @@ Request (common fields +):
 | `out_order_no` | string | Yes | Merchant order number (idempotency key, unique) |
 | `amount` | int | Yes | Amount as a minor-unit integer, `[1, 1e12]` |
 | `currency` | string | Yes | Currency code (e.g. PHP/USDT) |
-| `channel_code` | string | Conditional | **Recommended on v2.** Product/rate-group code from `groups/query`. Provide this or `pay_method` |
+| `channel_code` | string | Conditional | **Recommended on v2.** Payment group code; obtain it from the operations team, or see `channel_codes` from `pay-methods/query`. Provide this or `pay_method` |
 | `pay_method` | string | Conditional | On v2 may be sent alone for smart routing; **required on v1**. Pay method (gcash/maya/trc20…, see pay-methods/query) |
 | `country` | string | No | Country ISO code; required for fiat, may be empty for cryptocurrency |
 | `notify_url` | string | Yes | Callback address |
@@ -59,13 +59,13 @@ Response `data`: `order_no, out_order_no, amount(int), currency, pay_url(nullabl
 Request: `order_no` or `out_order_no` (**either one, at least one**).
 Response `data`: `order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(always null; use order_no or out_order_no for order queries and correlation), paid_at(nullable), notify_status(pending|success|failed)`.
 
-### POST `/merchant/pay-methods/query` — available pay methods (key: pay)
-Request: `country` (optional filter).
-Response `data.methods[]`: `{pay_method, name, country(nullable), currency(nullable)}`.
+### POST `/merchant/pay-methods/query` — available pay methods / group codes (key: pay)
+Request: `country` (optional); **v2** also accepts `biz_type` (`pay`/`payout`) and `currency`.
+Response:
+- **v2** returns two arrays: `data.pay_methods[]` `{pay_method, name, country, currency, biz_type}` and `data.channel_codes[]` `{channel_code, name, country, currency, biz_type}`. `name` is the description. Confirm with the operations team which `channel_code` to use.
+- **v1** still returns `data.methods[]` `{pay_method, name, country(nullable), currency(nullable)}`.
 
-### POST `/merchant/groups/query` — available channel codes (key: pay, **v2 only**)
-Request: `biz_type` (`pay`/`payout`, optional), `currency` (optional), `country` (optional).
-Response `data.groups[]`: `{channel_code, name, pay_method, country, currency, biz_type}`. `channel_code` is the valid v2 create-order value.
+> `groups/query` has been merged into this endpoint and is no longer the documented primary path. Existing `groupsQuery` calls still hit a compatibility alias; new integrations should read `channel_codes` here.
 
 ### POST `/merchant/balance/query` — balance query (key: pay)
 Request: `currency` (optional filter).
@@ -85,7 +85,7 @@ Request (common fields +):
 | `out_payout_no` | string | Yes | Merchant payout number (idempotency key, unique) |
 | `amount` | int | Yes | Amount as a minor-unit integer, `[1, 1e12]` |
 | `currency` | string | Yes | Currency code |
-| `channel_code` | string | Conditional | **Recommended on v2.** Product-line code from `groups/query`. Provide this or `pay_method` |
+| `channel_code` | string | Conditional | **Recommended on v2.** Payment group code; obtain it from the operations team, or see `channel_codes` from `pay-methods/query`. Provide this or `pay_method` |
 | `pay_method` | string | Conditional | On v2 may be sent alone for smart routing; **required on v1** |
 | `country` | string | No | Country ISO code; required for fiat |
 | `notify_url` | string | Yes | Callback address |

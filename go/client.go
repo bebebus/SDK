@@ -73,13 +73,14 @@ func (c *Client) PayQuery(ctx context.Context, params map[string]any) (*Response
 	return c.call(ctx, "/merchant/pay/query", params, usePay)
 }
 
-// PayMethodsQuery 可用支付方式。params 可含 country 过滤（可空）。
+// PayMethodsQuery 可用支付方式 / 分组编码。params 可含 country / biz_type / currency。
+// v2 返回 pay_methods 与 channel_codes；v1 仍为 methods。
 func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
 }
 
-// GroupsQuery 可用渠道编码（v2）。params 可含 biz_type / currency / country。
-// 返回的 channel_code 即 PayCreate / PayoutCreate 的合法取值。
+// GroupsQuery 兼容别名，仍打 /merchant/groups/query。
+// 新对接请用 PayMethodsQuery 读取 channel_codes。
 func (c *Client) GroupsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/groups/query", params, usePay)
 }

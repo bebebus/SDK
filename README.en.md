@@ -45,7 +45,7 @@ npm / PyPI / Packagist / Go are published to their respective package indexes (s
 
 ## Covered Endpoints (implemented in every language)
 
-**Collection**: `payCreate` (create order), `payQuery` (query order), `payMethodsQuery` (available pay methods), `balanceQuery` (balance), `payTestComplete` (complete test order, test key only)
+**Collection**: `payCreate` (create order), `payQuery` (query order), `payMethodsQuery` (v2 returns `pay_methods` + `channel_codes`), `groupsQuery` (compatibility alias), `balanceQuery` (balance), `payTestComplete` (complete test order, test key only)
 **Payout**: `payoutCreate`, `payoutQuery`, `payoutBanksQuery` (available banks), `payoutProofQuery` (proof), `payoutReceiptQuery` (receipt), `payoutTestComplete` (complete test order, test key only)
 **Callback**: `verifyPayCallback` / `verifyPayoutCallback` (callback signature verification, constant-time comparison)
 

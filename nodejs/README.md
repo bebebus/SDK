@@ -80,8 +80,8 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v2' });
 |------|------|------|
 | `payCreate(params)` | `/merchant/pay/create` | pay |
 | `payQuery(params)` | `/merchant/pay/query` | pay |
-| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
-| `groupsQuery(params?)` | `/merchant/groups/query` | pay（v2） |
+| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay；v2 返回 `pay_methods` + `channel_codes` |
+| `groupsQuery(params?)` | `/merchant/groups/query` | pay（兼容别名） |
 | `balanceQuery(params?)` | `/merchant/balance/query` | pay |
 | `payTestComplete(params)` | `/merchant/pay/test/complete` | pay（仅测试密钥） |
 | `payoutCreate(params)` | `/merchant/payout/create` | payout |

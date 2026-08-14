@@ -24,8 +24,13 @@ print(f"[Python] base={base} merchant={mno} tag={tag}")
 # 1. pay-methods/query
 try:
     d = client.pay_methods_query(country="PH")
-    methods = d.get("methods", [])
-    ok("pay-methods/query", len(methods) > 0, ",".join(m["pay_method"] for m in methods))
+    methods = d.get("pay_methods") or d.get("methods") or []
+    channels = d.get("channel_codes") or []
+    ok(
+        "pay-methods/query",
+        len(methods) > 0 or len(channels) > 0,
+        "methods=" + ",".join(m["pay_method"] for m in methods) + " channels=" + ",".join(c["channel_code"] for c in channels),
+    )
 except Exception as e:  # noqa: BLE001
     ok("pay-methods/query", False, f"{type(e).__name__} {e}")
 

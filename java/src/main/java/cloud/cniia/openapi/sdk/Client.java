@@ -67,14 +67,14 @@ public final class Client {
         return call("/merchant/pay/query", params, Secret.PAY);
     }
 
-    /** 可用支付方式 POST /merchant/pay-methods/query（密钥：pay）。params: country 可选。 */
+    /** 可用支付方式 / 分组编码 POST /merchant/pay-methods/query。v2 返回 pay_methods 与 channel_codes；v1 仍为 methods。 */
     public ApiResponse payMethodsQuery(Map<String, Object> params) {
         return call("/merchant/pay-methods/query", params, Secret.PAY);
     }
 
     /**
-     * 可用渠道编码 POST /merchant/groups/query（密钥：pay，v2）。
-     * params: biz_type / currency / country 可选。返回的 channel_code 即下单合法取值。
+     * 兼容别名 POST /merchant/groups/query。
+     * 新对接请用 payMethodsQuery 读取 channel_codes。
      */
     public ApiResponse groupsQuery(Map<String, Object> params) {
         return call("/merchant/groups/query", params, Secret.PAY);

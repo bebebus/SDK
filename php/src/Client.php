@@ -73,10 +73,11 @@ final class Client
     }
 
     /**
-     * 可用支付方式 POST /merchant/pay-methods/query。country 可选过滤。
+     * 可用支付方式 / 分组编码 POST /merchant/pay-methods/query。
+     * v2 返回 pay_methods 与 channel_codes；v1 仍为 methods。
      *
-     * @param array{country?:string|null} $params
-     * @return array<string,mixed> data（含 methods[]）
+     * @param array{country?:string|null, biz_type?:string|null, currency?:string|null} $params
+     * @return array<string,mixed>
      */
     public function payMethodsQuery(array $params = []): array
     {
@@ -84,11 +85,11 @@ final class Client
     }
 
     /**
-     * 可用渠道编码 POST /merchant/groups/query（v2）。
-     * 返回的 channel_code 即 payCreate / payoutCreate 的合法取值。
+     * 兼容别名 POST /merchant/groups/query。
+     * 新对接请用 payMethodsQuery 读取 channel_codes。
      *
      * @param array{biz_type?:string|null, currency?:string|null, country?:string|null} $params
-     * @return array<string,mixed> data（含 groups[]）
+     * @return array<string,mixed>
      */
     public function groupsQuery(array $params = []): array
     {

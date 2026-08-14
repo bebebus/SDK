@@ -68,8 +68,8 @@ System.out.println(resp.dataAsMap().get("order_no"));
 |------|------|------|------|
 | 代收下单 | `payCreate` | `/merchant/pay/create` | pay |
 | 代收查单 | `payQuery` | `/merchant/pay/query` | pay |
-| 支付方式 | `payMethodsQuery` | `/merchant/pay-methods/query` | pay |
-| 渠道编码 | `groupsQuery` | `/merchant/groups/query` | pay（v2） |
+| 支付方式 / 分组编码 | `payMethodsQuery` | `/merchant/pay-methods/query` | pay；v2 返回 `pay_methods` + `channel_codes` |
+| 分组编码（兼容别名） | `groupsQuery` | `/merchant/groups/query` | pay |
 | 余额 | `balanceQuery` | `/merchant/balance/query` | pay |
 | 代收测试完成 | `payTestComplete` | `/merchant/pay/test/complete` | pay（仅测试密钥）|
 | 代付下单 | `payoutCreate` | `/merchant/payout/create` | payout |

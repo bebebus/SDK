@@ -155,9 +155,21 @@ class Client:
             {"order_no": order_no, "out_order_no": out_order_no},
         )
 
-    def pay_methods_query(self, country: Optional[str] = None) -> Dict[str, Any]:
-        """POST /merchant/pay-methods/query — 可用支付方式。"""
-        return self._call_pay("/merchant/pay-methods/query", {"country": country})
+    def pay_methods_query(
+        self,
+        country: Optional[str] = None,
+        biz_type: Optional[str] = None,
+        currency: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """POST /merchant/pay-methods/query — 可用支付方式 / 分组编码。
+
+        v2 返回 ``pay_methods`` 与 ``channel_codes`` 两个数组；v1 仍为 ``methods``。
+        ``biz_type`` / ``currency`` 仅 v2 接受。
+        """
+        return self._call_pay(
+            "/merchant/pay-methods/query",
+            {"country": country, "biz_type": biz_type, "currency": currency},
+        )
 
     def groups_query(
         self,
@@ -165,9 +177,9 @@ class Client:
         currency: Optional[str] = None,
         country: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """POST /merchant/groups/query — 可用渠道编码（v2）。
+        """兼容别名：POST /merchant/groups/query。
 
-        返回的 ``channel_code`` 即 ``pay_create`` / ``payout_create`` 的合法取值。
+        新对接请用 ``pay_methods_query`` 读取 ``channel_codes``。
         """
         return self._call_pay(
             "/merchant/groups/query",
