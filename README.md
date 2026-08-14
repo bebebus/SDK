@@ -47,7 +47,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 
 ## 涵盖的接口（每语言均实现）
 
-**代收**：`payCreate`（下单，v2 传 `channel_code` 或 `pay_method`）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`groupsQuery`（可用渠道编码，v2）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
+**代收**：`payCreate`（下单，v2 传 `channel_code` 或 `pay_method`）、`payQuery`（查单）、`payMethodsQuery`（v2 返回 `pay_methods` + `channel_codes` 两个数组）、`groupsQuery`（兼容别名）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
 **代付**：`payoutCreate`、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）
 **回调**：`verifyPayCallback` / `verifyPayoutCallback`（验签，时序安全比较）
 

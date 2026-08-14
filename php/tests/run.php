@@ -186,6 +186,18 @@ check(
 // 整数顶层
 check('整数顶层', 'n=10000&secret=s', Signer::buildSignBase(['n' => 10000], 's'));
 
+// v2 请求绑定前缀
+check(
+    'v2 binding 前缀',
+    "POST\n/api/open/v2/merchant/pay/create\na=1&secret=s",
+    Signer::buildSignBase(['a' => 1], 's', ['method' => 'POST', 'path' => '/api/open/v2/merchant/pay/create'])
+);
+check(
+    'v2 binding sign',
+    '1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b',
+    Signer::sign(['a' => 1], 's', ['method' => 'POST', 'path' => '/api/open/v2/merchant/pay/create'])
+);
+
 // 空对象（stdClass）→ {}，与空数组 [] → [] 区分（HIGH 项回归）
 check('空对象 stdClass → {}', 'extra={}&secret=s', Signer::buildSignBase(['extra' => new \stdClass()], 's'));
 check('空数组 [] → []', 'extra=[]&secret=s', Signer::buildSignBase(['extra' => []], 's'));
@@ -254,14 +266,14 @@ checkFalse('stub null 字段 subject 被过滤', array_key_exists('subject', $ca
 $bodyNoSign = $captured['body'];
 $receivedSign = $bodyNoSign['sign'];
 unset($bodyNoSign['sign']);
-check('stub payCreate sign 用 pay 密钥', Signer::sign($bodyNoSign, $paySecret), $receivedSign);
+check('stub payCreate sign 用 pay 密钥', Signer::sign($bodyNoSign, $paySecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/pay/create']), $receivedSign);
 
 $stubClient->groupsQuery(['biz_type' => 'pay', 'currency' => 'PHP', 'country' => 'PH']);
 check('stub groupsQuery URL', 'http://127.0.0.1:3090/api/open/v2/merchant/groups/query', $captured['url']);
 $groupsBody = $captured['body'];
 $groupsSign = $groupsBody['sign'];
 unset($groupsBody['sign']);
-check('stub groupsQuery sign 用 pay 密钥', Signer::sign($groupsBody, $paySecret), $groupsSign);
+check('stub groupsQuery sign 用 pay 密钥', Signer::sign($groupsBody, $paySecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/groups/query']), $groupsSign);
 
 // nonce 每请求唯一
 $firstNonce = $captured['body']['nonce'];
@@ -283,7 +295,7 @@ $stubClient->payoutCreate([
 $pbody = $captured['body'];
 $psign = $pbody['sign'];
 unset($pbody['sign']);
-check('stub payoutCreate sign 用 payout 密钥', Signer::sign($pbody, $payoutSecret), $psign);
+check('stub payoutCreate sign 用 payout 密钥', Signer::sign($pbody, $payoutSecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/payout/create']), $psign);
 
 // receipt inline 归一为整数 1/0
 $stubClient->payoutReceiptQuery(['out_payout_no' => 'WD1', 'inline' => true]);

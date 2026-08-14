@@ -7,6 +7,19 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 import { sign, verifyCallback as verifyCallbackSig } from './signer.js';
+
+// v2 Base URL 的 pathname 以 /api/open/v2/ 开头时，签名须绑定 METHOD + 规范路径。
+function requestBinding(baseUrl, relPath) {
+  try {
+    const pathname = new URL(String(baseUrl || '').replace(/\/+$/, '') + relPath).pathname;
+    if (pathname.startsWith('/api/open/v2/')) {
+      return { method: 'POST', path: pathname };
+    }
+  } catch {
+    // 非法 URL 交给后续请求层报错。
+  }
+  return undefined;
+}
 import { ApiError, TransportError } from './errors.js';
 
 // [L19] SDK 版本单一事实源：从 package.json 派生（而非硬编码）。
@@ -45,7 +58,7 @@ export class Client {
 
   // 构造请求体：注入通用字段 + timestamp + 唯一 nonce，过滤 null/undefined，再用指定密钥签名。
   // secret：'pay' | 'payout'，决定用 api_secret_pay 还是 api_secret_payout。
-  _buildBody(params, secretKind) {
+  _buildBody(params, secretKind, binding) {
     const secret = secretKind === 'payout' ? this.config.apiSecretPayout : this.config.apiSecretPay;
     if (!secret) {
       throw new TypeError(
@@ -62,14 +75,14 @@ export class Client {
       nonce: randomUUID(),
     };
     const body = dropNullish(merged);
-    body.sign = sign(body, secret);
+    body.sign = sign(body, secret, binding);
     return body;
   }
 
   // 发起 POST application/json 请求，解析统一信封 {code,message,data}。
   // 返回 { data, raw }；code !== 0 抛 ApiError；HTTP/网络错误抛 TransportError。
   async _post(path, params, secretKind) {
-    const body = this._buildBody(params, secretKind);
+    const body = this._buildBody(params, secretKind, requestBinding(this.config.baseUrl, path));
     const payload = JSON.stringify(body);
     const url = new URL(this.config.baseUrl + path);
     const lib = url.protocol === 'https:' ? https : http;
@@ -158,13 +171,13 @@ export class Client {
     return this._post('/merchant/pay/query', params, 'pay');
   }
 
-  // 可用支付方式。params: { country? }
+  // 可用支付方式 / 分组编码。params: { country?, biz_type?, currency? }
+  // v2 返回 data.pay_methods[] 与 data.channel_codes[]；v1 仍为 data.methods[]。
   payMethodsQuery(params = {}) {
     return this._post('/merchant/pay-methods/query', params, 'pay');
   }
 
-  // 可用渠道编码（v2）。params: { biz_type?, currency?, country? }
-  // 返回的 channel_code 即 payCreate / payoutCreate 的合法取值。
+  // 兼容别名：仍打 /merchant/groups/query。新对接请用 payMethodsQuery 的 channel_codes。
   groupsQuery(params = {}) {
     return this._post('/merchant/groups/query', params, 'pay');
   }

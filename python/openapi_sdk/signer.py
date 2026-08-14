@@ -77,7 +77,22 @@ def _value_for_sign(v: Any) -> str:
     return str(v)
 
 
-def build_sign_base(payload: Mapping[str, Any], secret: str) -> str:
+def _binding_prefix(binding: Mapping[str, Any] | None) -> str:
+    """v2 请求绑定前缀：``METHOD\\npath\\n``。缺省时与 v1 基串逐字节一致。"""
+    if not binding:
+        return ""
+    method = str(binding.get("method") or "").strip().upper()
+    path = str(binding.get("path") or "").strip()
+    if not method or not path:
+        raise ValueError("binding 必须同时提供 method 与 path")
+    return f"{method}\n{path}\n"
+
+
+def build_sign_base(
+    payload: Mapping[str, Any],
+    secret: str,
+    binding: Mapping[str, Any] | None = None,
+) -> str:
     """构造签名 base 字符串（不计算 HMAC，便于逐字节断言）。
 
     步骤：
@@ -85,6 +100,7 @@ def build_sign_base(payload: Mapping[str, Any], secret: str) -> str:
     2. 剩余字段按键名 ASCII（码点）升序排序。
     3. 每个字段拼成 ``key=value``，用 ``&`` 连接。
     4. 末尾追加 ``&secret=<secret>``。
+    5. v2 时在最前面加 ``METHOD\\npath\\n`` 绑定前缀。
 
     ``secret`` 为空串/纯空白/非字符串时抛 ``ValueError``：从根上禁止空密钥签名。
     """
@@ -93,16 +109,21 @@ def build_sign_base(payload: Mapping[str, Any], secret: str) -> str:
     keys = sorted(k for k, v in payload.items() if k != "sign" and v is not None)
     parts = [f"{k}={_value_for_sign(payload[k])}" for k in keys]
     parts.append(f"secret={secret}")
-    return "&".join(parts)
+    return _binding_prefix(binding) + "&".join(parts)
 
 
-def sign(payload: Mapping[str, Any], secret: str) -> str:
+def sign(
+    payload: Mapping[str, Any],
+    secret: str,
+    binding: Mapping[str, Any] | None = None,
+) -> str:
     """对 payload 计算签名，返回十六进制小写字符串。
 
     ``secret`` 为空（空串/纯空白/非字符串）时抛 ``ValueError``，
     在计算任何 HMAC 之前拒绝，从根上禁止空密钥签名。
+    v2 传入 ``binding={"method","path"}``。
     """
-    base = build_sign_base(payload, secret)
+    base = build_sign_base(payload, secret, binding)
     return hmac.new(
         secret.encode("utf-8"),
         base.encode("utf-8"),

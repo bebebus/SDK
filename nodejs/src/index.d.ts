@@ -99,9 +99,9 @@ export class Client {
   payCreate(params: Params): Promise<ApiResult>;
   /** 代收查单 POST /merchant/pay/query（order_no 或 out_order_no 二选一）。 */
   payQuery(params: Params): Promise<ApiResult>;
-  /** 可用支付方式 POST /merchant/pay-methods/query。 */
+  /** 可用支付方式 / 分组编码 POST /merchant/pay-methods/query。v2 返回 pay_methods 与 channel_codes。 */
   payMethodsQuery(params?: Params): Promise<ApiResult>;
-  /** 可用渠道编码 POST /merchant/groups/query（v2；返回 channel_code）。 */
+  /** 兼容别名 POST /merchant/groups/query。新对接请用 payMethodsQuery 的 channel_codes。 */
   groupsQuery(params?: Params): Promise<ApiResult>;
   /** 余额查询 POST /merchant/balance/query。 */
   balanceQuery(params?: Params): Promise<ApiResult>;
@@ -133,11 +133,14 @@ export class Client {
 
 // ---- 签名器（底层，按需直接使用）----
 
-/** 计算签名：HMAC-SHA256(base, key=secret) -> hex 小写。空密钥抛 TypeError。 */
-export function sign(payload: Record<string, unknown>, secret: string): string;
+/** v2 请求绑定：method 大写 + 规范路径（如 /api/open/v2/merchant/pay/create）。 */
+export type SignBinding = { method: string; path: string };
 
-/** 构造签名 base 串（不含 HMAC），便于逐字节断言。 */
-export function buildSignBase(payload: Record<string, unknown>, secret: string): string;
+/** 计算签名：HMAC-SHA256(base, key=secret) -> hex 小写。空密钥抛 TypeError。v2 传入 binding。 */
+export function sign(payload: Record<string, unknown>, secret: string, binding?: SignBinding): string;
+
+/** 构造签名 base 串（不含 HMAC），便于逐字节断言。v2 传入 binding。 */
+export function buildSignBase(payload: Record<string, unknown>, secret: string, binding?: SignBinding): string;
 
 /** 稳定 JSON 序列化（递归、key 升序、紧凑无空格），与跨语言实现逐字节一致。 */
 export function stableStringify(value: unknown): string;

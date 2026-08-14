@@ -73,8 +73,8 @@ func main() {
 |------|------|------|------|
 | 代收 | `PayCreate` | `/merchant/pay/create` | pay |
 | 代收 | `PayQuery` | `/merchant/pay/query` | pay |
-| 代收 | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
-| 代收 | `GroupsQuery` | `/merchant/groups/query` | pay（v2） |
+| 代收 | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay；v2 返回 `pay_methods` + `channel_codes` |
+| 代收 | `GroupsQuery` | `/merchant/groups/query` | pay（兼容别名） |
 | 代收 | `BalanceQuery` | `/merchant/balance/query` | pay |
 | 代收 | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
 | 代付 | `PayoutCreate` | `/merchant/payout/create` | payout |

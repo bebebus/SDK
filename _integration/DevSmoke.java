@@ -37,10 +37,15 @@ public class DevSmoke {
         // 1. pay-methods/query
         try {
             ApiResponse r = client.payMethodsQuery(map("country", "PH"));
-            List<?> methods = (List<?>) r.dataAsMap().get("methods");
+            Map<String, Object> data = r.dataAsMap();
+            List<?> methods = (List<?>) (data.get("pay_methods") != null ? data.get("pay_methods") : data.get("methods"));
+            List<?> channels = (List<?>) data.get("channel_codes");
             StringBuilder sb = new StringBuilder();
-            for (Object o : methods) sb.append(((Map<?, ?>) o).get("pay_method")).append(",");
-            ok("pay-methods/query", methods != null && !methods.isEmpty(), sb.toString());
+            if (methods != null) for (Object o : methods) sb.append(((Map<?, ?>) o).get("pay_method")).append(",");
+            sb.append(" channels=");
+            if (channels != null) for (Object o : channels) sb.append(((Map<?, ?>) o).get("channel_code")).append(",");
+            boolean okQuery = (methods != null && !methods.isEmpty()) || (channels != null && !channels.isEmpty());
+            ok("pay-methods/query", okQuery, sb.toString());
         } catch (Exception e) { ok("pay-methods/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
         // 2. balance/query

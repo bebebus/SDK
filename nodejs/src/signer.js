@@ -104,23 +104,35 @@ function isBlankSecret(secret) {
   return typeof secret !== 'string' || secret.trim() === '';
 }
 
+// v2 请求绑定前缀：POST\n + 规范路径 + \n。缺省 binding 时与 v1 基串逐字节一致。
+export function bindingPrefix(binding) {
+  if (!binding) return '';
+  const method = String(binding.method || '').trim().toUpperCase();
+  const path = String(binding.path || '').trim();
+  if (!method || !path) {
+    throw new TypeError('Sign: binding requires method and path');
+  }
+  return `${method}\n${path}\n`;
+}
+
 // 构造签名 base 字符串（不含 HMAC 计算），便于逐字节断言。
-export function buildSignBase(payload, secret) {
+// binding 可选：{ method, path }。v2 必须带；v1 / 回调不传。
+export function buildSignBase(payload, secret, binding) {
   const keys = Object.keys(payload)
     .filter((k) => k !== 'sign' && payload[k] !== null && payload[k] !== undefined)
     .sort();
   const pairs = keys.map((k) => `${k}=${valueForSign(payload[k])}`);
   pairs.push(`secret=${secret}`);
-  return pairs.join('&');
+  return bindingPrefix(binding) + pairs.join('&');
 }
 
 // 计算签名：HMAC-SHA256(base, key=secret) -> hex 小写。
-export function sign(payload, secret) {
+export function sign(payload, secret, binding) {
   // [A 空密钥 fail-closed] 空/全空白/非字符串密钥一律拒绝，从根上禁止空密钥签名。
   if (isBlankSecret(secret)) {
     throw new TypeError('Sign: secret must be a non-empty string');
   }
-  const base = buildSignBase(payload, secret);
+  const base = buildSignBase(payload, secret, binding);
   return createHmac('sha256', secret).update(base, 'utf8').digest('hex');
 }
 

@@ -79,8 +79,8 @@ config = Config(
 |------|------|
 | `pay_create(...)` | `/merchant/pay/create` |
 | `pay_query(order_no=, out_order_no=)` | `/merchant/pay/query` |
-| `pay_methods_query(country=)` | `/merchant/pay-methods/query` |
-| `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query`（v2） |
+| `pay_methods_query(country=, biz_type=, currency=)` | `/merchant/pay-methods/query`（v2 返回 `pay_methods` + `channel_codes`） |
+| `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query`（兼容别名） |
 | `balance_query(currency=)` | `/merchant/balance/query` |
 | `pay_test_complete(result=, ...)` | `/merchant/pay/test/complete`（仅测试密钥） |
 

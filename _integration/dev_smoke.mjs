@@ -19,7 +19,13 @@ console.log(`[Node] base=${env.PP_BASE} merchant=${env.PP_MNO} tag=${tag}`);
 
 // 1. pay-methods/query
 let methods = [];
-try { const r = await client.payMethodsQuery({ country: 'PH' }); methods = r.data.methods || []; ok('pay-methods/query', methods.length > 0, methods.map(m => m.pay_method).join(',')); }
+try {
+  const r = await client.payMethodsQuery({ country: 'PH' });
+  const d = r.data || {};
+  methods = d.pay_methods || d.methods || [];
+  const channels = d.channel_codes || [];
+  ok('pay-methods/query', methods.length > 0 || channels.length > 0, `methods=${methods.map((m) => m.pay_method).join(',')} channels=${channels.map((c) => c.channel_code).join(',')}`);
+}
 catch (e) { ok('pay-methods/query', false, `${e.name} ${e.code ?? ''} ${e.message}`); }
 
 // 2. balance/query
