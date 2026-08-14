@@ -143,10 +143,12 @@ jobs:
       - name: Publish npm package with provenance
         if: ${{ inputs.publish_registries == true }}
         working-directory: nodejs
-        env:
-          # Automation 令牌（仓库 secret）：免 OTP；provenance 由 OIDC id-token 提供
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-        run: npm publish --provenance --access public
+        # npm Trusted Publishing（OIDC 免令牌，npm 侧已将本 workflow+environment=release 配为
+        # Trusted Publisher）：不注入任何 token——残留 token 会抢占认证并触发 EOTP。
+        # OIDC 交换需 npm CLI ≥ 11.5.1，Node 22 自带 10.x → 先升级 CLI。
+        run: |
+          npm install -g npm@latest
+          npm publish --provenance --access public
 
       - name: Publish Python package to PyPI
         if: ${{ inputs.publish_registries == true }}
