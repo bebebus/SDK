@@ -106,9 +106,25 @@ jobs:
           find dist -maxdepth 1 -type f -print | sort
 
       - name: Generate build provenance
+        id: provenance
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: 'dist/*'
+
+      # GitHub 会把证明保存到 Attestations API；同时导出为 Release 附件，
+      # 便于离线验证，也让 OpenSSF Scorecard 能识别签名与 SLSA provenance。
+      - name: Export release signature and provenance
+        env:
+          ATTESTATION_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_VERSION#v}"
+          signature="dist/bebebus-sdk-${version}.sigstore.json"
+          provenance="dist/bebebus-sdk-${version}.intoto.jsonl"
+          cp "$ATTESTATION_BUNDLE" "$signature"
+          jq -ce '.dsseEnvelope' "$ATTESTATION_BUNDLE" > "$provenance"
+          test -s "$signature"
+          test -s "$provenance"
 
       - name: Create GitHub Release
         env:
