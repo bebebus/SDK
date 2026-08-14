@@ -8,7 +8,7 @@
 签名、HTTP、JSON、测试框架全部用官方内建，**无需 `npm install`**。
 
 - 签名算法：HMAC-SHA256 → hex 小写，见仓库根 [`SIGNING.md`](../SIGNING.md)
-- 接口契约：环境/鉴权/11 端点/回调/错误码，见 [`INTERFACES.md`](../INTERFACES.md)
+- 接口契约：环境/鉴权/12 个签名端点/回调/错误码，见 [`INTERFACES.md`](../INTERFACES.md)
 - 标准答案向量：[`test-vectors.json`](../test-vectors.json)
 
 ## 引入（无需安装依赖）
@@ -38,11 +38,11 @@ const client = new Client(new Config({
   apiKey: 'ak_xxx',
   apiSecretPay: 'sk_pay_xxx',       // pay 类接口 / 代收·退款回调
   apiSecretPayout: 'sk_payout_xxx', // payout 类接口 / 代付回调
-  // PRODUCTION 无内置 URL，必须显式传入服务商提供的 baseUrl
-  baseUrl: 'https://api.<service_domain>/api/open/v1',
+  // PRODUCTION 无内置 URL；新对接用 /api/open/v2（channel_code 仅 v2 合法）
+  baseUrl: 'https://api.<service_domain>/api/open/v2',
 }));
 
-// 代收下单（金额是最小单位整数，10000 = 1 元）
+// 代收下单（v2：channel_code 钉产品线；金额是最小单位整数，10000 = 1 元）
 const { data, raw } = await client.payCreate({
   out_order_no: 'ORDER_' + Date.now(),
   amount: 10000,
@@ -62,19 +62,19 @@ console.log(data.pay_url, raw.code);
 import { Config, Environment } from './src/index.js';
 
 // 预设：正式（无内置 URL，必须显式传 baseUrl，否则抛错）
-new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1' });
+new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v2' });
 // 预设：本地/沙箱
 new Config({ /* ... */ environment: Environment.SANDBOX });
 // 自定义（服务商提供的地址或自定义端口）—— baseUrl 优先于 environment
-new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
+new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v2' });
 ```
 
 | 预设 | Base URL |
 |------|----------|
-| `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v1`，并显式传入 `baseUrl` |
+| `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v2`，并显式传入 `baseUrl` |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
 
-## 全部 11 个端点
+## 全部 12 个端点
 
 | 方法 | 端点 | 密钥 |
 |------|------|------|

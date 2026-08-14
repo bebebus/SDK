@@ -42,7 +42,7 @@ type Client struct {
 //
 // 注意：Production 没有内置 URL。若选用 Production 又未提供 BaseURL，构造不会
 // panic，但首个请求会返回 ErrBaseURLRequired（正式基址请向服务商获取，
-// 形如 https://api.<service_domain>/api/open/v1）。
+// 形如 https://api.<service_domain>/api/open/v2）。
 func NewClient(cfg Config) *Client {
 	base, err := cfg.resolveBaseURL()
 	return &Client{

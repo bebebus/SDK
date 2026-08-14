@@ -4,7 +4,7 @@
 
 [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 11 个端点 + HMAC-SHA256 签名 + 回调验签。
+零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 12 个签名端点 + HMAC-SHA256 签名 + 回调验签。
 仅使用 PHP 标准库与核心扩展（`ext-curl`、`ext-json`），**不依赖 composer 安装任何包**（如 Guzzle/PHPUnit 等一概不用）。
 
 签名算法以仓库根的 [`SIGNING.md`](../SIGNING.md) 为单一事实源，并通过 [`test-vectors.json`](../test-vectors.json) 跨语言向量逐字节校验。
@@ -58,7 +58,7 @@ $config = new Config(
     apiSecretPay: 'sk_pay_xxx',       // 代收类与代收/退款回调用
     apiSecretPayout: 'sk_payout_xxx', // 代付类与代付回调用
     environment: Environment::PRODUCTION,
-    baseUrl: 'https://api.<service_domain>/api/open/v1', // 正式必传：请向服务商获取
+    baseUrl: 'https://api.<service_domain>/api/open/v2', // 正式必传：新对接用 v2
 );
 
 $client = new Client($config);
@@ -69,7 +69,7 @@ try {
         'out_order_no' => 'ORDER20250101',
         'amount'       => 10000,
         'currency'     => 'PHP',
-        'pay_method'   => 'gcash',
+        'channel_code' => 'GcashBig',
         'country'      => 'PH',
         'notify_url'   => 'https://merchant.example.com/api/notify/pay',
     ]);
@@ -85,23 +85,24 @@ try {
 
 ```php
 // 预设：正式（无内置地址，必须显式传 baseUrl，否则构造时抛错）
-new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1');
-// 预设：本地/沙箱（http://127.0.0.1:3090/api/open/v1）
+new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v2');
+// 预设：本地/沙箱（http://127.0.0.1:3090/api/open/v2）
 new Config(..., environment: Environment::SANDBOX);
 
 // 自定义基址覆盖（服务商提供的地址 / 自建端口），优先级高于 environment
-new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
+new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v2');
 ```
 
-> `PRODUCTION` **不内置任何正式地址**：正式地址请向服务商获取（形如 `https://api.<service_domain>/api/open/v1`），必须用 `baseUrl` 显式传入。选 `PRODUCTION` 而不传 `baseUrl` 会在构造 `Config` 时抛 `InvalidArgumentException`。
+> `PRODUCTION` **不内置任何正式地址**：正式地址请向服务商获取（形如 `https://api.<service_domain>/api/open/v2`），必须用 `baseUrl` 显式传入。选 `PRODUCTION` 而不传 `baseUrl` 会在构造 `Config` 时抛 `InvalidArgumentException`。
 
-## 端点方法（全 11 个）
+## 端点方法（全 12 个）
 
 | 方法 | 端点 | 密钥 |
 |------|------|------|
 | `payCreate($params)` | `/merchant/pay/create` | pay |
 | `payQuery($params)` | `/merchant/pay/query` | pay |
 | `payMethodsQuery($params = [])` | `/merchant/pay-methods/query` | pay |
+| `groupsQuery($params = [])` | `/merchant/groups/query` | pay（v2） |
 | `balanceQuery($params = [])` | `/merchant/balance/query` | pay |
 | `payTestComplete($params)` | `/merchant/pay/test/complete`（仅测试密钥） | pay |
 | `payoutCreate($params)` | `/merchant/payout/create` | payout |

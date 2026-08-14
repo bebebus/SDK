@@ -186,6 +186,14 @@ class TestKeySelectionAndShaping(unittest.TestCase):
         client.balance_query()
         self.assertEqual(self.capture.calls[-1]["secret"], "sk_pay_secret")
 
+    def test_groups_query_path_and_pay_secret(self):
+        client = _make_client()
+        client.groups_query(biz_type="pay", currency="PHP", country="PH")
+        call = self.capture.calls[-1]
+        self.assertEqual(call["path"], "/merchant/groups/query")
+        self.assertEqual(call["secret"], "sk_pay_secret")
+        self.assertEqual(call["body"]["biz_type"], "pay")
+
     def test_receipt_inline_true_sent_as_int_1(self):
         client = _make_client()
         client.payout_receipt_query(out_payout_no="WD1", inline=True)

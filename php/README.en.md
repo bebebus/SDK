@@ -4,7 +4,7 @@
 
 [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A zero-dependency PHP 8 SDK covering all 11 endpoints of the Merchant Payment OpenAPI + HMAC-SHA256 signing + callback signature verification.
+A zero-dependency PHP 8 SDK covering all 12 signed endpoints of the Merchant Payment OpenAPI + HMAC-SHA256 signing + callback signature verification.
 It uses only the PHP standard library and core extensions (`ext-curl`, `ext-json`), and **does not depend on any composer-installed package** (Guzzle, PHPUnit, etc. are all avoided).
 
 The signing algorithm uses [`SIGNING.md`](../SIGNING.en.md) at the repository root as its single source of truth, and is verified byte-for-byte across languages via the [`test-vectors.json`](../test-vectors.json) signature test vectors.
@@ -58,7 +58,7 @@ $config = new Config(
     apiSecretPay: 'sk_pay_xxx',       // for collection-type calls and collection/refund callbacks
     apiSecretPayout: 'sk_payout_xxx', // for payout-type calls and payout callbacks
     environment: Environment::PRODUCTION,
-    baseUrl: 'https://api.<service_domain>/api/open/v1', // required in production: obtain it from your service provider
+    baseUrl: 'https://api.<service_domain>/api/open/v2', // required in production: use v2 for new integrations
 );
 
 $client = new Client($config);
@@ -69,7 +69,7 @@ try {
         'out_order_no' => 'ORDER20250101',
         'amount'       => 10000,
         'currency'     => 'PHP',
-        'pay_method'   => 'gcash',
+        'channel_code' => 'GcashBig',
         'country'      => 'PH',
         'notify_url'   => 'https://merchant.example.com/api/notify/pay',
     ]);
@@ -85,23 +85,24 @@ try {
 
 ```php
 // Preset: production (no built-in address; you must pass baseUrl explicitly, or construction throws)
-new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1');
-// Preset: local/sandbox (http://127.0.0.1:3090/api/open/v1)
+new Config(..., environment: Environment::PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v2');
+// Preset: local/sandbox (http://127.0.0.1:3090/api/open/v2)
 new Config(..., environment: Environment::SANDBOX);
 
 // Custom base URL override (service-provider URL / self-hosted port); takes precedence over environment
-new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
+new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v2');
 ```
 
-> `PRODUCTION` **has no built-in production address**: obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v1`) and pass it explicitly via `baseUrl`. Choosing `PRODUCTION` without passing `baseUrl` throws an `InvalidArgumentException` when constructing `Config`.
+> `PRODUCTION` **has no built-in production address**: obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v2`) and pass it explicitly via `baseUrl`. Choosing `PRODUCTION` without passing `baseUrl` throws an `InvalidArgumentException` when constructing `Config`.
 
-## Endpoint Methods (all 11)
+## Endpoint Methods (all 12)
 
 | Method | Endpoint | Secret |
 |------|------|------|
 | `payCreate($params)` | `/merchant/pay/create` | pay |
 | `payQuery($params)` | `/merchant/pay/query` | pay |
 | `payMethodsQuery($params = [])` | `/merchant/pay-methods/query` | pay |
+| `groupsQuery($params = [])` | `/merchant/groups/query` | pay (v2) |
 | `balanceQuery($params = [])` | `/merchant/balance/query` | pay |
 | `payTestComplete($params)` | `/merchant/pay/test/complete` (test secret only) | pay |
 | `payoutCreate($params)` | `/merchant/payout/create` | payout |

@@ -1,4 +1,4 @@
-"""商户支付 OpenAPI 客户端：覆盖全部 11 个端点。
+"""商户支付 OpenAPI 客户端：覆盖全部 12 个签名业务端点。
 
 仅用标准库：urllib.request（HTTP）、json、uuid、time、secrets。
 

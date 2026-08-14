@@ -2,7 +2,7 @@
 
 # Merchant Payment OpenAPI — Java SDK
 
-A Java client with zero third-party dependencies, covering all **11 endpoints** of the merchant payment OpenAPI, implementing HMAC-SHA256 request signing and callback signature verification.
+A Java client with zero third-party dependencies, covering all **12 signed endpoints** of the merchant payment OpenAPI, implementing HMAC-SHA256 request signing and callback signature verification.
 
 - **JDK**: 17+ (uses `java.net.http.HttpClient`, `javax.crypto.Mac`, `MessageDigest.isEqual`, all from the standard library).
 - **Dependencies**: none. HTTP, JSON, HMAC, and tests all use JDK built-ins, **without pulling in any library through a package manager** (no Jackson/Gson/OkHttp/JUnit).
@@ -54,7 +54,7 @@ Map<String, Object> params = new LinkedHashMap<>();
 params.put("out_order_no", "202501010001");
 params.put("amount", 10000L);                      // smallest-unit integer: 10000 = 1.00
 params.put("currency", "PHP");
-params.put("pay_method", "gcash");
+params.put("channel_code", "GcashBig");
 params.put("country", "PH");
 params.put("notify_url", "https://merchant.example.com/api/notify/pay");
 
@@ -62,13 +62,14 @@ ApiResponse resp = client.payCreate(params);       // automatically injects time
 System.out.println(resp.dataAsMap().get("order_no"));
 ```
 
-### All 11 endpoints (client methods)
+### All 12 endpoints (client methods)
 
 | Business | Method | Endpoint | Secret |
 |------|------|------|------|
 | Create collection | `payCreate` | `/merchant/pay/create` | pay |
 | Query collection | `payQuery` | `/merchant/pay/query` | pay |
 | Payment methods | `payMethodsQuery` | `/merchant/pay-methods/query` | pay |
+| Channel codes | `groupsQuery` | `/merchant/groups/query` | pay (v2) |
 | Balance | `balanceQuery` | `/merchant/balance/query` | pay |
 | Complete collection test | `payTestComplete` | `/merchant/pay/test/complete` | pay (test secret only) |
 | Create payout | `payoutCreate` | `/merchant/payout/create` | payout |
@@ -98,16 +99,16 @@ Each method accepts a `Map<String, Object>` of business fields:
 // PRODUCTION has no built-in base URL: obtain the production address from your service provider, so baseUrl must be passed explicitly
 Config.builder()
       .environment(Environment.PRODUCTION)
-      .baseUrl("https://api.<service_domain>/api/open/v1")        // required, otherwise build() throws
+      .baseUrl("https://api.<service_domain>/api/open/v2")        // required, otherwise build() throws
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 
 // SANDBOX uses the built-in local address
-Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.0.1:3090/api/open/v1
+Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.0.1:3090/api/open/v2
 
 // Custom base URL override: takes priority over environment; a trailing slash is stripped
 Config.builder()
-      .baseUrl("https://api.<service_domain>/api/open/v1")
+      .baseUrl("https://api.<service_domain>/api/open/v2")
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 ```

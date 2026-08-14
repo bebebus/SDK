@@ -256,6 +256,13 @@ $receivedSign = $bodyNoSign['sign'];
 unset($bodyNoSign['sign']);
 check('stub payCreate sign 用 pay 密钥', Signer::sign($bodyNoSign, $paySecret), $receivedSign);
 
+$stubClient->groupsQuery(['biz_type' => 'pay', 'currency' => 'PHP', 'country' => 'PH']);
+check('stub groupsQuery URL', 'http://127.0.0.1:3090/api/open/v2/merchant/groups/query', $captured['url']);
+$groupsBody = $captured['body'];
+$groupsSign = $groupsBody['sign'];
+unset($groupsBody['sign']);
+check('stub groupsQuery sign 用 pay 密钥', Signer::sign($groupsBody, $paySecret), $groupsSign);
+
 // nonce 每请求唯一
 $firstNonce = $captured['body']['nonce'];
 $stubClient->payQuery(['out_order_no' => '202501010001']);

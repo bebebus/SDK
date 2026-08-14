@@ -129,6 +129,24 @@ test('payCreate：注入通用字段/timestamp/nonce，过滤 null，签名用 p
   }
 });
 
+test('groupsQuery：走 /merchant/groups/query 且用 pay 密钥', async () => {
+  let captured = null;
+  const { server, baseUrl } = await startStub((url, body) => {
+    captured = { url, body };
+    return { code: 0, message: 'ok', data: { groups: [] } };
+  });
+  try {
+    const client = makeClient(baseUrl);
+    await client.groupsQuery({ biz_type: 'pay', currency: 'PHP', country: 'PH' });
+    assert.equal(captured.url, '/api/open/v1/merchant/groups/query');
+    assert.equal(captured.body.biz_type, 'pay');
+    const { sign: gotSign, ...rest } = captured.body;
+    assert.equal(gotSign, sign(rest, SECRET_PAY));
+  } finally {
+    server.close();
+  }
+});
+
 test('每请求 nonce 唯一', async () => {
   const seen = [];
   const { server, baseUrl } = await startStub((url, body) => {

@@ -39,7 +39,7 @@ public class CallbackVerifyExample {
         Config config = Config.builder()
                 .environment(Environment.PRODUCTION)
                 // PRODUCTION 无内置基址：正式地址请向服务商获取，必须显式提供
-                .baseUrl("https://api.<service_domain>/api/open/v1")
+                .baseUrl("https://api.<service_domain>/api/open/v2")
                 .merchantNo("M00000001")
                 .apiKey("ak_demo_key")
                 .apiSecretPay(API_SECRET_PAY)

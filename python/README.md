@@ -61,17 +61,17 @@ except TransportError as e:  # HTTP / 网络 / 超时
 | `Environment.PRODUCTION` | 无内置基址，**必须显式传 `base_url`** |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
 
-正式环境地址请向服务商获取（`https://api.<service_domain>/api/open/v1`），用 `base_url=` 显式传入。选 `PRODUCTION` 又不传 `base_url` 会抛 `ValueError`（提示 `baseUrl is required`）：
+正式环境地址请向服务商获取（新对接 `https://api.<service_domain>/api/open/v2`），用 `base_url=` 显式传入。选 `PRODUCTION` 又不传 `base_url` 会抛 `ValueError`（提示 `baseUrl is required`）：
 
 ```python
 config = Config(
     merchant_no="M00000001", api_key="ak_xxx",
     api_secret_pay="...", api_secret_payout="...",
-    base_url="https://api.service.example.com/api/open/v1",  # 正式环境必传
+    base_url="https://api.service.example.com/api/open/v2",  # 正式环境必传
 )
 ```
 
-## 全部 11 个端点
+## 全部 12 个端点
 
 代收（密钥 `api_secret_pay`，自动选用）：
 
