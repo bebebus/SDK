@@ -1,6 +1,8 @@
 # 发布到包索引
 
-五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `1.1.2`。
+五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `1.2.0`。
+
+> ⚠️ **发版必须在 `main` 上执行**（release.sh 假定 push origin main）：v1.2.0 曾从 feature 分支打 tag 发布，随后 PR squash 合并导致已发布 tag（v1.2.0 / go/v1.2.0）指向的提交游离于 main 历史之外（仅由 tag 保活，包索引不受影响）。此后规则：先以 merge/squash 合入 main，**在 main 的合并结果上打 tag 再发**；若 PR 采用 squash，绝不可在分支侧提前打 tag。
 
 **仅以下 4 套上架公共包索引；Java 不发 Maven，只做源码引入**（把 `java/src/main/java` 加入工程或自行 `pom.xml` 打 jar）。故 `release.sh` 的发布闭环**不含 Java**。
 

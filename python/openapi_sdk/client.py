@@ -39,7 +39,7 @@ def _request_binding(base_url: str, rel_path: str) -> Optional[Dict[str, str]]:
     return None
 
 # [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
-# 不再硬编码；源码直跑（未安装）取不到则兜底 '1.1.2'。
+# 不再硬编码；源码直跑（未安装）取不到则兜底（须随发版同步）。
 try:
     from importlib.metadata import PackageNotFoundError
     from importlib.metadata import version as _pkg_version
@@ -47,9 +47,9 @@ try:
     try:
         _SDK_VERSION = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        _SDK_VERSION = "1.1.2"
+        _SDK_VERSION = "1.2.0"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    _SDK_VERSION = "1.1.2"
+    _SDK_VERSION = "1.2.0"
 
 _JSON_HEADERS = {
     "Content-Type": "application/json",

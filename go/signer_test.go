@@ -18,6 +18,8 @@ type vector struct {
 	Desc    string         `json:"desc"`
 	Secret  string         `json:"secret"`
 	Payload map[string]any `json:"payload"`
+	// v2 向量携 method+path 绑定前缀（1.2.0 起）；v1 向量缺省为 nil
+	Binding *SignBinding   `json:"binding"`
 	Base    string         `json:"base"`
 	Sign    string         `json:"sign"`
 }
@@ -48,11 +50,11 @@ func TestVectorsBaseAndSign(t *testing.T) {
 	for _, v := range loadVectors(t) {
 		v := v
 		t.Run(v.Name, func(t *testing.T) {
-			gotBase := BuildSignBase(v.Payload, v.Secret)
+			gotBase := BuildSignBaseWithBinding(v.Payload, v.Secret, v.Binding)
 			if gotBase != v.Base {
 				t.Errorf("base 不匹配\n期望: %s\n实际: %s", v.Base, gotBase)
 			}
-			gotSign := Sign(v.Payload, v.Secret)
+			gotSign := SignWithBinding(v.Payload, v.Secret, v.Binding)
 			if gotSign != v.Sign {
 				t.Errorf("sign 不匹配\n期望: %s\n实际: %s", v.Sign, gotSign)
 			}

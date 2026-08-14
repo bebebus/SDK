@@ -17,13 +17,15 @@ test('test-vectors.json 已加载且非空', () => {
 });
 
 for (const v of vectors) {
+  // v2 向量携 binding（method+path 绑定前缀，1.2.0 起）；v1 向量无该字段 → null
+  const binding = v.binding ?? null;
   test(`vector: ${v.name} — buildSignBase 与服务端逐字节一致`, () => {
-    const base = buildSignBase(v.payload, v.secret);
+    const base = buildSignBase(v.payload, v.secret, binding);
     assert.equal(base, v.base, `base mismatch for ${v.name}`);
   });
 
   test(`vector: ${v.name} — sign 与标准答案一致`, () => {
-    const s = sign(v.payload, v.secret);
+    const s = sign(v.payload, v.secret, binding);
     assert.equal(s, v.sign, `sign mismatch for ${v.name}`);
   });
 }

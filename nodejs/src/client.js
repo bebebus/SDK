@@ -24,7 +24,7 @@ import { ApiError, TransportError } from './errors.js';
 
 // [L19] SDK 版本单一事实源：从 package.json 派生（而非硬编码）。
 // 优先读 npm 注入的 process.env.npm_package_version（npm scripts 场景），
-// 否则解析同包 package.json；任何读取失败兜底 '1.1.2'，绝不让 UA 构造抛错。
+// 否则解析同包 package.json；任何读取失败兜底（须随发版同步），绝不让 UA 构造抛错。
 const SDK_VERSION = (() => {
   if (process.env.npm_package_version) return process.env.npm_package_version;
   try {
@@ -34,7 +34,7 @@ const SDK_VERSION = (() => {
   } catch {
     // ignore：读不到就走兜底版本号。
   }
-  return '1.1.2';
+  return '1.2.0';
 })();
 const USER_AGENT = `openapi-sdk-nodejs/${SDK_VERSION}`;
 
