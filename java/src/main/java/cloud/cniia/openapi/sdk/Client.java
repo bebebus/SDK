@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 商户支付 OpenAPI 客户端，覆盖全部 11 个端点。
+ * 商户支付 OpenAPI 客户端，覆盖全部签名业务端点。
  *
  * <p>每个请求自动注入通用字段（merchant_no / api_key / timestamp / nonce），按密钥归属选 pay/payout
  * 密钥计算 sign，POST {@code application/json}，解析统一信封；{@code code != 0} 抛 {@link ApiException}，
@@ -55,8 +55,8 @@ public final class Client {
 
     /**
      * 代收下单 POST /merchant/pay/create（密钥：pay）。
-     * @param params 业务字段：out_order_no, amount(int), currency, pay_method, notify_url 必填；
-     *               country, return_url, subject, remark, client_ip, extra 可选；值为 null 的字段不发送也不签名。
+     * @param params 业务字段：out_order_no, amount(int), currency, notify_url 必填；
+     *               v2 传 channel_code 或 pay_method；country, return_url, subject, remark, client_ip, extra 可选。
      */
     public ApiResponse payCreate(Map<String, Object> params) {
         return call("/merchant/pay/create", params, Secret.PAY);
@@ -70,6 +70,14 @@ public final class Client {
     /** 可用支付方式 POST /merchant/pay-methods/query（密钥：pay）。params: country 可选。 */
     public ApiResponse payMethodsQuery(Map<String, Object> params) {
         return call("/merchant/pay-methods/query", params, Secret.PAY);
+    }
+
+    /**
+     * 可用渠道编码 POST /merchant/groups/query（密钥：pay，v2）。
+     * params: biz_type / currency / country 可选。返回的 channel_code 即下单合法取值。
+     */
+    public ApiResponse groupsQuery(Map<String, Object> params) {
+        return call("/merchant/groups/query", params, Secret.PAY);
     }
 
     /** 余额查询 POST /merchant/balance/query（密钥：pay）。params: currency 可选。 */
@@ -91,7 +99,8 @@ public final class Client {
 
     /**
      * 代付下单 POST /merchant/payout/create（密钥：payout）。
-     * params: out_payout_no, amount(int), currency, pay_method, notify_url, account_no 必填；
+     * params: out_payout_no, amount(int), currency, notify_url, account_no 必填；
+     *         v2 传 channel_code 或 pay_method；
      *         country, account_name, bank_code, bank_name, remark, client_ip, extra 可选。
      */
     public ApiResponse payoutCreate(Map<String, Object> params) {

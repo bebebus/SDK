@@ -24,7 +24,7 @@ $config = new Config(
     apiSecretPay: getenv('PP_API_SECRET_PAY') ?: 'sk_test_pay',
     apiSecretPayout: getenv('PP_API_SECRET_PAYOUT') ?: 'sk_test_payout',
     environment: Environment::SANDBOX, // 正式用 Environment::PRODUCTION + 显式 baseUrl
-    // baseUrl: 'https://api.<domain>/api/open/v1', // 正式地址请向服务商获取后显式传入
+    // baseUrl: 'https://api.<domain>/api/open/v2', // 正式地址请向服务商获取后显式传入（channel_code 仅 v2）
 );
 
 $client = new Client($config);
@@ -35,7 +35,7 @@ try {
         'out_order_no' => 'DEMO' . time(),
         'amount' => 10000,
         'currency' => 'PHP',
-        'pay_method' => 'gcash',
+        'channel_code' => 'GcashBig',
         'country' => 'PH',
         'notify_url' => 'https://merchant.example.com/api/notify/pay',
         'subject' => '订单/支付 <demo>',

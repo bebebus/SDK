@@ -6,7 +6,7 @@
 export const Environment: {
   /** 正式：无内置 URL，构造 Config 时必须显式传 baseUrl（请向服务商获取）。 */
   readonly PRODUCTION: null;
-  /** 本地/联调：http://127.0.0.1:3090/api/open/v1 */
+  /** 本地/联调：http://127.0.0.1:3090/api/open/v2 */
   readonly SANDBOX: string;
 };
 
@@ -88,19 +88,21 @@ export type Params = Record<string, unknown>;
 /** 回调键值表（含 sign 字段）。 */
 export type CallbackPayload = Record<string, unknown>;
 
-/** 商户支付 OpenAPI 客户端：覆盖全部 11 个签名业务端点 + 回调验签。 */
+/** 商户支付 OpenAPI 客户端：覆盖全部签名业务端点 + 回调验签。 */
 export class Client {
   constructor(config: Config);
   readonly config: Config;
 
   // ---- 代收（Pay，密钥 api_secret_pay）----
 
-  /** 代收下单 POST /merchant/pay/create。 */
+  /** 代收下单 POST /merchant/pay/create。v2 传 channel_code 或 pay_method。 */
   payCreate(params: Params): Promise<ApiResult>;
   /** 代收查单 POST /merchant/pay/query（order_no 或 out_order_no 二选一）。 */
   payQuery(params: Params): Promise<ApiResult>;
   /** 可用支付方式 POST /merchant/pay-methods/query。 */
   payMethodsQuery(params?: Params): Promise<ApiResult>;
+  /** 可用渠道编码 POST /merchant/groups/query（v2；返回 channel_code）。 */
+  groupsQuery(params?: Params): Promise<ApiResult>;
   /** 余额查询 POST /merchant/balance/query。 */
   balanceQuery(params?: Params): Promise<ApiResult>;
   /** 代收测试单完成 POST /merchant/pay/test/complete（仅测试密钥）。 */

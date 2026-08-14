@@ -2,6 +2,14 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
+## Unreleased — OpenAPI v2 group-code ordering
+
+- Default sandbox Base URL is now `http://127.0.0.1:3090/api/open/v2`.
+- Added `groupsQuery` / `groups_query` / `GroupsQuery` to list authorized `channel_code` values.
+- Collection and payout create accept `channel_code` (recommended on v2) or `pay_method`. Existing `pay_method` callers stay valid.
+- Examples and interface docs use v2 + `channel_code`.
+- Upgrade impact: callers that relied on the sandbox path `/api/open/v1` should either keep passing an explicit v1 `baseUrl`, or move to v2.
+
 ## v1.1.2 — Documentation and interface declaration updates
 
 - Reworked Chinese and English OpenAPI documentation from a merchant developer perspective.

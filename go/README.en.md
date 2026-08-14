@@ -4,7 +4,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A zero-dependency Go SDK covering all 11 endpoints of the Merchant OpenAPI (5 collection + 6 payout), including
+A zero-dependency Go SDK covering all 12 signed endpoints of the Merchant OpenAPI (6 collection + 6 payout), including
 HMAC-SHA256 signing, dual-environment configuration, and timing-safe callback signature verification. It uses only the Go standard library (`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`), with **no `require` at all**.
 
@@ -50,7 +50,7 @@ func main() {
         "out_order_no": "202501010001",
         "amount":       10000, // integer in the smallest unit, 10000 = 1.00
         "currency":     "PHP",
-        "pay_method":   "gcash",
+        "channel_code": "GcashBig",
         "country":      "PH",
         "notify_url":   "https://merchant.example.com/api/notify/pay",
     })
@@ -67,13 +67,14 @@ func main() {
 }
 ```
 
-### The 11 Endpoint Methods
+### The 12 Endpoint Methods
 
 | Category | Method | Endpoint | Secret |
 |------|------|------|------|
 | collection | `PayCreate` | `/merchant/pay/create` | pay |
 | collection | `PayQuery` | `/merchant/pay/query` | pay |
 | collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
+| collection | `GroupsQuery` | `/merchant/groups/query` | pay (v2) |
 | collection | `BalanceQuery` | `/merchant/balance/query` | pay |
 | collection | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
 | payout | `PayoutCreate` | `/merchant/payout/create` | payout |
@@ -91,18 +92,18 @@ is passed as a standalone boolean parameter, and the SDK automatically sends it 
 
 ```go
 // Preset: production (no built-in URL; BaseURL must be passed explicitly)
-openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
-// Preset: local sandbox (http://127.0.0.1:3090/api/open/v1)
+openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
+// Preset: local sandbox (http://127.0.0.1:3090/api/open/v2)
 openapi.NewClient(openapi.Config{Environment: openapi.Sandbox, /* ... */})
 // Custom base URL override (service-provider URL or another port) — takes precedence over Environment
-openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
+openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
 ```
 
 - `Production` → **no built-in URL**. Obtain the production base URL from your service provider, in the form
-  `https://api.<service_domain>/api/open/v1`, and provide it explicitly via `Config.BaseURL`.
+  `https://api.<service_domain>/api/open/v2`, and provide it explicitly via `Config.BaseURL`.
   If you choose `Production` but do not pass `BaseURL`, `NewClient` does not panic, but the first request returns
   `ErrBaseURLRequired` (a clear error).
-- `Sandbox` → `http://127.0.0.1:3090/api/open/v1`
+- `Sandbox` → `http://127.0.0.1:3090/api/open/v2`
 - `Config.Timeout` defaults to 30s.
 
 ## Callback Signature Verification and Acknowledgement

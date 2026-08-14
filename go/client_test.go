@@ -21,7 +21,7 @@ func TestEnvironmentBaseURL(t *testing.T) {
 		t.Errorf("production 应无内置基址，实际: %s", got)
 	}
 	// Sandbox 预设仍为本地端口 127.0.0.1。
-	if sandboxBaseURL != "http://127.0.0.1:3090/api/open/v1" {
+	if sandboxBaseURL != "http://127.0.0.1:3090/api/open/v2" {
 		t.Errorf("sandbox 预设常量被改动: %s", sandboxBaseURL)
 	}
 	if got := Sandbox.BaseURL(); got != sandboxBaseURL {
@@ -136,6 +136,40 @@ func TestReceiptInlineAsInteger(t *testing.T) {
 	}
 	if n, ok := captured["inline"].(json.Number); !ok || n.String() != "0" {
 		t.Errorf("inline=false 应以整数 0 发送，实际: %+v (%T)", captured["inline"], captured["inline"])
+	}
+}
+
+func TestGroupsQueryPathAndPaySecret(t *testing.T) {
+	var captured map[string]any
+	var gotPath string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		raw, _ := io.ReadAll(r.Body)
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.UseNumber()
+		var m map[string]any
+		_ = dec.Decode(&m)
+		captured = m
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"code":0,"message":"ok","data":{"groups":[]}}`)
+	}))
+	defer srv.Close()
+
+	c := NewClient(Config{BaseURL: srv.URL, SecretPay: "sk_pay"})
+	if _, err := c.GroupsQuery(context.Background(), map[string]any{"biz_type": "pay"}); err != nil {
+		t.Fatalf("GroupsQuery 失败: %v", err)
+	}
+	if gotPath != "/merchant/groups/query" {
+		t.Errorf("path 错误: %s", gotPath)
+	}
+	if captured["biz_type"] != "pay" {
+		t.Errorf("biz_type 未透传: %+v", captured)
+	}
+	gotSign, _ := captured["sign"].(string)
+	delete(captured, "sign")
+	want := Sign(captured, "sk_pay")
+	if gotSign != want {
+		t.Errorf("groupsQuery 应用 pay 密钥签名, got=%s want=%s", gotSign, want)
 	}
 }
 

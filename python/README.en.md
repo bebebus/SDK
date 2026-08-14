@@ -59,19 +59,19 @@ except TransportError as e:  # HTTP / network / timeout
 | Environment | Base URL |
 |------|------|
 | `Environment.PRODUCTION` | No built-in base URL; **`base_url` must be passed explicitly** |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
+| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
 
-Obtain the production address from your service provider (`https://api.<service_domain>/api/open/v1`) and pass it explicitly via `base_url=`. Choosing `PRODUCTION` without passing `base_url` raises a `ValueError` (with the message `baseUrl is required`):
+Obtain the production address from your service provider (`https://api.<service_domain>/api/open/v2`) and pass it explicitly via `base_url=`. Choosing `PRODUCTION` without passing `base_url` raises a `ValueError` (with the message `baseUrl is required`):
 
 ```python
 config = Config(
     merchant_no="M00000001", api_key="ak_xxx",
     api_secret_pay="...", api_secret_payout="...",
-    base_url="https://api.service.example.com/api/open/v1",  # required in production
+    base_url="https://api.service.example.com/api/open/v2",  # required in production
 )
 ```
 
-## All 11 endpoints
+## All 12 endpoints
 
 Collection (secret `api_secret_pay`, selected automatically):
 
@@ -80,6 +80,7 @@ Collection (secret `api_secret_pay`, selected automatically):
 | `pay_create(...)` | `/merchant/pay/create` |
 | `pay_query(order_no=, out_order_no=)` | `/merchant/pay/query` |
 | `pay_methods_query(country=)` | `/merchant/pay-methods/query` |
+| `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query` (v2) |
 | `balance_query(currency=)` | `/merchant/balance/query` |
 | `pay_test_complete(result=, ...)` | `/merchant/pay/test/complete` (test secret only) |
 

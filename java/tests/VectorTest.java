@@ -186,7 +186,7 @@ public class VectorTest {
         // PRODUCTION 无内置基址（按代理专有域名派生，必须显式传 baseUrl）
         assertTrue("PRODUCTION 无内置基址", Environment.PRODUCTION.baseUrl() == null);
         assertEquals("SANDBOX 基址",
-                "http://127.0.0.1:3090/api/open/v1",
+                "http://127.0.0.1:3090/api/open/v2",
                 Environment.SANDBOX.baseUrl());
 
         // 选 PRODUCTION 又不传 baseUrl → 抛清晰错误

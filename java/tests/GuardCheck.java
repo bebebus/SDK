@@ -115,7 +115,7 @@ public class GuardCheck {
                 .environment(Environment.SANDBOX)
                 .merchantNo("M1").apiKey("k").apiSecretPay("p").build();
         assertEquals("Config SANDBOX http 放行",
-                "http://127.0.0.1:3090/api/open/v1", sandboxCfg.baseUrl());
+                "http://127.0.0.1:3090/api/open/v2", sandboxCfg.baseUrl());
         // 一个伪装成 localhost 子串但实际是别的主机的地址应被拒绝
         assertThrows("Config localhost.evil.com http 拒绝", () -> Config.builder()
                 .baseUrl("http://localhost.evil.com/api/open/v1")

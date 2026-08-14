@@ -8,7 +8,7 @@ Zero dependencies: uses only the Node standard library (`node:http` / `node:http
 Signing, HTTP, JSON, and the test framework all rely on official built-ins, so **no `npm install` is required**.
 
 - Signing algorithm: HMAC-SHA256 → lowercase hex, see [`SIGNING.md`](../SIGNING.en.md) at the repo root
-- Interface contract: environments / authentication / 11 endpoints / callbacks / error codes, see [`INTERFACES.md`](../INTERFACES.en.md)
+- Interface contract: environments / authentication / 12 signed endpoints / callbacks / error codes, see [`INTERFACES.md`](../INTERFACES.en.md)
 - Reference vectors: [`test-vectors.json`](../test-vectors.json)
 
 ## Importing (no dependency install needed)
@@ -38,16 +38,16 @@ const client = new Client(new Config({
   apiKey: 'ak_xxx',
   apiSecretPay: 'sk_pay_xxx',       // pay endpoints / collection & refund callbacks
   apiSecretPayout: 'sk_payout_xxx', // payout endpoints / payout callbacks
-  // PRODUCTION has no built-in URL; you must explicitly pass the baseUrl obtained from your service provider
-  baseUrl: 'https://api.<service_domain>/api/open/v1',
+  // PRODUCTION has no built-in URL; new integrations use /api/open/v2 (channel_code is v2-only)
+  baseUrl: 'https://api.<service_domain>/api/open/v2',
 }));
 
-// Create a collection order (amount is an integer in the smallest unit, 10000 = 1 unit of currency)
+// Create a collection order (v2: pin a product line with channel_code)
 const { data, raw } = await client.payCreate({
   out_order_no: 'ORDER_' + Date.now(),
   amount: 10000,
   currency: 'PHP',
-  pay_method: 'gcash',
+  channel_code: 'GcashBig',
   country: 'PH',
   notify_url: 'https://merchant.example.com/api/notify/pay',
 });
@@ -62,25 +62,26 @@ Each method returns `{ data, raw }`: `data` is the `data` field inside the unifi
 import { Config, Environment } from './src/index.js';
 
 // Preset: production (no built-in URL; you must explicitly pass baseUrl, otherwise it throws)
-new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1' });
+new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v2' });
 // Preset: local/sandbox
 new Config({ /* ... */ environment: Environment.SANDBOX });
 // Custom (service-provider URL or custom port) — baseUrl takes precedence over environment
-new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
+new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v2' });
 ```
 
 | Preset | Base URL |
 |------|----------|
-| `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v1` from your service provider and pass it as `baseUrl` |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
+| `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v2` from your service provider and pass it as `baseUrl` |
+| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
 
-## All 11 endpoints
+## All 12 endpoints
 
 | Method | Endpoint | Secret |
 |------|------|------|
 | `payCreate(params)` | `/merchant/pay/create` | pay |
 | `payQuery(params)` | `/merchant/pay/query` | pay |
 | `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
+| `groupsQuery(params?)` | `/merchant/groups/query` | pay (v2) |
 | `balanceQuery(params?)` | `/merchant/balance/query` | pay |
 | `payTestComplete(params)` | `/merchant/pay/test/complete` | pay (test secret only) |
 | `payoutCreate(params)` | `/merchant/payout/create` | payout |

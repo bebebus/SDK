@@ -44,7 +44,7 @@ try:
     # 金额是最小单位整数：10000 = 1 元
     order = client.pay_create(
         out_order_no="ORD1", amount=10000, currency="PHP",
-        pay_method="gcash", country="PH",
+        channel_code="GcashBig", country="PH",
         notify_url="https://m.example.com/api/notify/pay",
     )
     print(order["pay_url"])
@@ -59,19 +59,19 @@ except TransportError as e:  # HTTP / 网络 / 超时
 | 环境 | 基址 |
 |------|------|
 | `Environment.PRODUCTION` | 无内置基址，**必须显式传 `base_url`** |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
+| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
 
-正式环境地址请向服务商获取（`https://api.<service_domain>/api/open/v1`），用 `base_url=` 显式传入。选 `PRODUCTION` 又不传 `base_url` 会抛 `ValueError`（提示 `baseUrl is required`）：
+正式环境地址请向服务商获取（新对接 `https://api.<service_domain>/api/open/v2`），用 `base_url=` 显式传入。选 `PRODUCTION` 又不传 `base_url` 会抛 `ValueError`（提示 `baseUrl is required`）：
 
 ```python
 config = Config(
     merchant_no="M00000001", api_key="ak_xxx",
     api_secret_pay="...", api_secret_payout="...",
-    base_url="https://api.service.example.com/api/open/v1",  # 正式环境必传
+    base_url="https://api.service.example.com/api/open/v2",  # 正式环境必传
 )
 ```
 
-## 全部 11 个端点
+## 全部 12 个端点
 
 代收（密钥 `api_secret_pay`，自动选用）：
 
@@ -80,6 +80,7 @@ config = Config(
 | `pay_create(...)` | `/merchant/pay/create` |
 | `pay_query(order_no=, out_order_no=)` | `/merchant/pay/query` |
 | `pay_methods_query(country=)` | `/merchant/pay-methods/query` |
+| `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query`（v2） |
 | `balance_query(currency=)` | `/merchant/balance/query` |
 | `pay_test_complete(result=, ...)` | `/merchant/pay/test/complete`（仅测试密钥） |
 

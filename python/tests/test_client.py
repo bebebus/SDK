@@ -60,7 +60,7 @@ class TestEnvironmentAndConfig(unittest.TestCase):
         self.assertEqual(Environment.PRODUCTION.base_url, "")
         # SANDBOX 仍为本地预设基址。
         self.assertEqual(
-            Environment.SANDBOX.base_url, "http://127.0.0.1:3090/api/open/v1"
+            Environment.SANDBOX.base_url, "http://127.0.0.1:3090/api/open/v2"
         )
 
     def test_production_without_base_url_raises(self):
@@ -94,7 +94,7 @@ class TestEnvironmentAndConfig(unittest.TestCase):
             api_secret_payout="o",
             environment=Environment.SANDBOX,
         )
-        self.assertEqual(cfg.base_url, "http://127.0.0.1:3090/api/open/v1")
+        self.assertEqual(cfg.base_url, "http://127.0.0.1:3090/api/open/v2")
 
     def test_default_environment_is_production(self):
         # 默认环境仍是 PRODUCTION（于是默认就要求显式传 base_url）。
@@ -186,6 +186,14 @@ class TestKeySelectionAndShaping(unittest.TestCase):
         client.balance_query()
         self.assertEqual(self.capture.calls[-1]["secret"], "sk_pay_secret")
 
+    def test_groups_query_path_and_pay_secret(self):
+        client = _make_client()
+        client.groups_query(biz_type="pay", currency="PHP", country="PH")
+        call = self.capture.calls[-1]
+        self.assertEqual(call["path"], "/merchant/groups/query")
+        self.assertEqual(call["secret"], "sk_pay_secret")
+        self.assertEqual(call["body"]["biz_type"], "pay")
+
     def test_receipt_inline_true_sent_as_int_1(self):
         client = _make_client()
         client.payout_receipt_query(out_payout_no="WD1", inline=True)
@@ -250,12 +258,13 @@ class TestEnvelopeHandling(unittest.TestCase):
 
 
 class TestAllEndpointsCallable(unittest.TestCase):
-    """确认 11 个端点方法都存在且能构建请求（路径正确）。"""
+    """确认签名业务端点方法都存在且能构建请求（路径正确）。"""
 
     EXPECTED = {
         "pay_create": "/merchant/pay/create",
         "pay_query": "/merchant/pay/query",
         "pay_methods_query": "/merchant/pay-methods/query",
+        "groups_query": "/merchant/groups/query",
         "balance_query": "/merchant/balance/query",
         "pay_test_complete": "/merchant/pay/test/complete",
         "payout_create": "/merchant/payout/create",
@@ -274,8 +283,8 @@ class TestAllEndpointsCallable(unittest.TestCase):
                 msg=f"缺少端点方法 {name}",
             )
 
-    def test_eleven_endpoints(self):
-        self.assertEqual(len(self.EXPECTED), 11)
+    def test_endpoint_count(self):
+        self.assertEqual(len(self.EXPECTED), 12)
 
 
 if __name__ == "__main__":

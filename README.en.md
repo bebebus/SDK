@@ -7,7 +7,7 @@
 
 Provides five SDKs in **PHP / Python / Java / Go / Node.js** for the merchant payment open API (collection / payout / callback).
 
-Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 11 signed business endpoints** (plus non-signed endpoints such as `/version`; 13 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
+Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 12 signed business endpoints** (plus non-signed endpoints such as `/version`; 13 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
 
 ## Directory Structure
 
@@ -15,7 +15,7 @@ Design principles: **zero third-party dependencies** (only each language's stand
 SDK/
 ├── README.md            # This file
 ├── SIGNING.md           # Authoritative signing algorithm description + per-language serialization pitfalls (required reading for implementation/debugging)
-├── INTERFACES.md        # Field-level request/response for the 11 signed business endpoints, callback fields, error codes
+├── INTERFACES.md        # Field-level request/response for the 12 signed business endpoints, callback fields, error codes
 ├── CONTRIBUTING.md      # Branch, pull request, testing, and release contribution requirements
 ├── RELEASE_NOTES.md     # Human-readable summaries for each user-facing release
 ├── test-vectors.json    # Cross-language signing test vectors (11 entries; asserted by all five test suites)
@@ -58,9 +58,9 @@ Each SDK provides two preset base URLs and supports a **custom baseUrl override*
 | Preset | Base URL |
 |------|------|
 | `PRODUCTION` | **No built-in default; baseUrl must be passed explicitly** |
-| `SANDBOX` (test/local) | `http://127.0.0.1:3090/api/open/v1` |
+| `SANDBOX` (test/local) | `http://127.0.0.1:3090/api/open/v2` |
 
-> Obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v1`). The SDK **does not embed any production host name**: when choosing `PRODUCTION` (the default) you must pass `baseUrl` explicitly, otherwise construction throws an error.
+> Obtain the production address from your service provider (new integrations should use `https://api.<service_domain>/api/open/v2`; existing ones may keep `/api/open/v1`). The SDK **does not embed any production host name**: when choosing `PRODUCTION` (the default) you must pass `baseUrl` explicitly, otherwise construction throws an error.
 > The "test key sandbox" can use the production baseUrl above + a test key (test orders are flagged `is_test`, do not touch real money, and can call `*/test/complete`).
 
 ## Quick Start (Node.js as an example; see each language's own README for the rest)
@@ -73,15 +73,15 @@ const client = new Client(new Config({
   apiKey: process.env.API_KEY,
   apiSecretPay: process.env.API_SECRET_PAY,
   apiSecretPayout: process.env.API_SECRET_PAYOUT,
-  // In production you must pass baseUrl explicitly (obtain it from your service provider: https://api.<service_domain>/api/open/v1)
+  // In production you must pass baseUrl explicitly (obtain it from your service provider: https://api.<service_domain>/api/open/v2)
   baseUrl: process.env.API_BASE_URL,
   // For local integration testing, switch to: environment: Environment.SANDBOX,
 }));
 
-// Create a collection order (amount is a minor-unit integer, 10000 = 1 unit)
+// Create a collection order (v2: pin a product line with channel_code; amount is a minor-unit integer)
 const { data } = await client.payCreate({
   out_order_no: 'order-' + Date.now(),
-  amount: 10000, currency: 'PHP', pay_method: 'gcash', country: 'PH',
+  amount: 10000, currency: 'PHP', channel_code: 'GcashBig', country: 'PH',
   notify_url: 'https://merchant.example.com/api/notify/pay',
 });
 console.log(data.order_no, data.pay_url);

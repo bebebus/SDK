@@ -21,7 +21,7 @@ import java.util.Map;
 public class PayCreateExample {
 
     public static void main(String[] args) {
-        // 沙箱环境（亦可通过 .baseUrl("https://api.<domain>/api/open/v1") 传入服务商提供的地址）
+        // 沙箱环境（亦可通过 .baseUrl("https://api.<domain>/api/open/v2") 传入服务商提供的地址）
         Config config = Config.builder()
                 .environment(Environment.SANDBOX)
                 .merchantNo("M00000001")
@@ -38,7 +38,7 @@ public class PayCreateExample {
         params.put("out_order_no", "202501010001");
         params.put("amount", 10000L);          // 最小单位整数：10000 = 1 元
         params.put("currency", "PHP");
-        params.put("pay_method", "gcash");
+        params.put("channel_code", "GcashBig");
         params.put("country", "PH");
         params.put("notify_url", "https://merchant.example.com/api/notify/pay");
         params.put("subject", "订单/支付 <A&B>");
