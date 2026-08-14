@@ -2,6 +2,14 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
+## v1.2.1 — Shared v2 signing vectors and release hygiene
+
+- `test-vectors.json` now carries three v2 binding vectors (minimal anchor with lowercase-method normalization, real collection payload, nested `extra`), cross-verified byte-for-byte against the server implementation; all five language test harnesses consume the `binding` field.
+- SIGNING.md (zh/en): explicit uppercase-method normalization rule; the shared vector file is again the single source of truth including v2.
+- PUBLISHING.md: releases must be tagged on `main` (postmortem of the orphaned v1.2.0 tags after a squash merge).
+- Source-run version fallbacks in Node.js/Python aligned; README Go install example points at the current tag.
+- No API endpoints, request parameters, signing algorithms, or business processing behavior changed. Installed 1.2.0 packages sign identically; this release aligns repository assets and metadata.
+
 ## v1.2.0 — OpenAPI v2 group-code ordering
 
 - Default sandbox Base URL is now `http://127.0.0.1:3090/api/open/v2`.
