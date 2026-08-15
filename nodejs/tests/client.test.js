@@ -284,10 +284,7 @@ test('v2 baseUrl：payCreate 仍打 v2 且签名带 METHOD+path 绑定', async (
     });
     assert.equal(captured.url, '/api/open/v2/merchant/pay/create');
     const { sign: gotSign, ...rest } = captured.body;
-    assert.equal(
-      gotSign,
-      sign(rest, SECRET_PAY, { method: 'POST', path: '/api/open/v2/merchant/pay/create' }),
-    );
+    assert.equal(gotSign, sign(rest, SECRET_PAY, { method: 'POST', path: '/api/open/v2/merchant/pay/create' }));
     // 反向锚：body-only 签名必不相等。
     assert.notEqual(gotSign, sign(rest, SECRET_PAY));
   } finally {
