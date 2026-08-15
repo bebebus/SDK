@@ -21,6 +21,7 @@ SDK/
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
 ├── RELEASE_NOTES.md     # 各版本面向用户的变更摘要
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
+├── appendix/            # 附录配置与国家/币种数据下载索引
 ├── _tooling/
 │   └── generate-vectors.mjs   # 向量生成器（经三处权威实现交叉校验后产出）
 ├── nodejs/   # Node.js (ESM)         —— node:https/http + node:crypto + node:test
@@ -90,6 +91,15 @@ console.log(data.order_no, data.pay_url);
 ```
 
 各语言对应的 `pay_create` / `payout_create` / `callback_verify` 可运行示例见 `<语言>/examples/`。
+
+## 附录数据（查看 / 下载）
+
+国家/币种字典与客户端配置模板以本仓库为唯一来源：
+
+- Node.js 数据：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
+- PHP 数据：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+
+完整索引见 [`appendix/README.md`](./appendix/README.md)。
 
 ## 回调（验签 + 处理片段）
 
