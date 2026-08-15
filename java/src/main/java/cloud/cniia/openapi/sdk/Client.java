@@ -30,7 +30,7 @@ public final class Client {
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 pom.xml &lt;version&gt; 一致）。
      */
-    public static final String VERSION = "1.2.1";
+    public static final String VERSION = "1.3.0";
 
     private final Config config;
     private final HttpClient http;
@@ -95,12 +95,15 @@ public final class Client {
 
     // ============================================================
     // 代付（Payout）
+    // 代付端点仅注册于 v1 Base（2026-08-15 拍板，v2 下 payout 路由一律 404）；
+    // 本 SDK 在 v2 baseUrl 下对本节方法自动回落 v1 基址并使用 body-only 签名
+    // （见 resolveRequestBase）。
     // ============================================================
 
     /**
      * 代付下单 POST /merchant/payout/create（密钥：payout）。
-     * params: out_payout_no, amount(int), currency, notify_url, account_no 必填；
-     *         v2 传 channel_code 或 pay_method；
+     * params: out_payout_no, amount(int), currency, notify_url, account_no, pay_method 必填
+     *         （不收 channel_code）；
      *         country, account_name, bank_code, bank_name, remark, client_ip, extra 可选。
      */
     public ApiResponse payoutCreate(Map<String, Object> params) {
@@ -187,18 +190,22 @@ public final class Client {
     private ApiResponse callRaw(String path, Map<String, Object> params, Secret which) {
         String secret = which == Secret.PAY ? config.requireSecretPay() : config.requireSecretPayout();
 
+        // 代付仅存在于 v1（2026-08-15 拍板）：v2 基址下 payout 请求自动回落 v1，
+        // 回落后 requestBinding 返回 null → body-only 签名；代收路径基址不变。
+        String base = resolveRequestBase(config.baseUrl(), path);
+
         // 1) 构建带通用字段的有序 payload（key 升序，便于阅读；签名器内部也会再排序）
         Map<String, Object> payload = buildPayload(params);
 
         // 2) 计算 sign 并放回
-        String sign = Signer.sign(payload, secret, requestBinding(config.baseUrl(), path));
+        String sign = Signer.sign(payload, secret, requestBinding(base, path));
         payload.put("sign", sign);
 
         // 3) 序列化请求体
         String body = Json.serialize(payload);
 
         // 4) 发送
-        String url = config.baseUrl() + path;
+        String url = base + path;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(config.timeout())
@@ -241,6 +248,37 @@ public final class Client {
             // 非法 URL 交给后续请求层报错。
         }
         return null;
+    }
+
+    /** 是否代付类端点（路径以 /merchant/payout 开头）。 */
+    static boolean isPayoutPath(String relPath) {
+        return relPath != null && relPath.startsWith("/merchant/payout");
+    }
+
+    /**
+     * 解析本次请求实际使用的基址。
+     *
+     * <p>契约：代付仅存在于 v1（2026-08-15 拍板）——服务端 v2 Base 下不再注册任何
+     * payout 路由（一律 404）。因此 v2 基址 + payout 路径时自动回落到对应 v1 基址
+     * （/api/open/v2 → /api/open/v1）；回落后 {@link #requestBinding} 对 v1 路径返回
+     * null，签名自然是 body-only（无 v2 绑定前缀）。代收路径基址不变。
+     */
+    static String resolveRequestBase(String baseUrl, String relPath) {
+        if (!isPayoutPath(relPath) || baseUrl == null) {
+            return baseUrl;
+        }
+        try {
+            String joined = baseUrl.replaceAll("/+$", "") + relPath;
+            String pathname = URI.create(joined).getPath();
+            if (pathname != null && pathname.startsWith("/api/open/v2/")) {
+                // 命中 v2 说明 base 的路径以 /api/open/v2 开头（host 不含斜杠，首个匹配必是路径首段）；
+                // 只替换版本号（首个匹配），host 与端口不变。
+                return baseUrl.replaceFirst("/api/open/v2", "/api/open/v1");
+            }
+        } catch (IllegalArgumentException ignored) {
+            // 非法 URL 交给后续请求层报错。
+        }
+        return baseUrl;
     }
 
     /** 注入通用字段、过滤 null，返回 key 升序的有序 payload（不含 sign）。 */

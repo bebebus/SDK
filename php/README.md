@@ -9,6 +9,15 @@
 
 签名算法以仓库根的 [`SIGNING.md`](../SIGNING.md) 为单一事实源，并通过 [`test-vectors.json`](../test-vectors.json) 跨语言向量逐字节校验。
 
+附录配置文件（可直接查看或下载）：
+
+- 客户端配置（PHP 数组）：[`appendix/config.example.php`](./appendix/config.example.php)
+  - 下载：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/config.example.php
+  - 文档站：https://openapi.overseas.cniia.cloud/sdk-config/config.example.php
+- 国家 / 币种附录（PHP 数组）：[`appendix/catalog.php`](./appendix/catalog.php)
+  - 下载：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+  - 文档站：https://openapi.overseas.cniia.cloud/appendix/catalog.php
+
 ## 环境要求
 
 - PHP >= 8.1

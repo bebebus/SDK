@@ -23,7 +23,7 @@ final class Client
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 composer.json 一致）。
      */
-    public const VERSION = '1.2.1';
+    public const VERSION = '1.3.0';
 
     /** @var callable(string,string,int):array{status:int,body:string} 注入的 HTTP 执行器（默认 cURL） */
     private $httpExecutor;
@@ -120,13 +120,17 @@ final class Client
     }
 
     // ====================== 代付（Payout，密钥 api_secret_payout）======================
+    // 代付端点仅注册于 v1 Base（2026-08-15 拍板，v2 下 payout 路由一律 404）；
+    // 本 SDK 在 v2 baseUrl 下对本节方法自动回落 v1 基址并使用 body-only 签名（见 resolveRequestBase）。
 
     /**
      * 代付下单 POST /merchant/payout/create。
      *
+     * v1 契约（代付仅存在于 v1，2026-08-15 拍板）：pay_method 必填，不收 channel_code/group_code。
+     *
      * @param array{
      *   out_payout_no:string, amount:int, currency:string, notify_url:string, account_no:string,
-     *   channel_code?:string, pay_method?:string, country?:string|null, account_name?:string|null,
+     *   pay_method:string, country?:string|null, account_name?:string|null,
      *   bank_code?:string|null, bank_name?:string|null, remark?:string|null,
      *   client_ip?:string|null, extra?:array<string,mixed>|null
      * } $params
@@ -265,10 +269,14 @@ final class Client
      */
     private function dispatch(string $path, array $params, string $secret): array
     {
-        $payload = $this->buildPayload($params);
-        $payload['sign'] = Signer::sign($payload, $secret, self::requestBinding($this->config->baseUrl, $path));
+        // 代付仅存在于 v1（2026-08-15 拍板）：v2 基址下 payout 请求自动回落 v1，
+        // 回落后 requestBinding 返回 null → body-only 签名；代收路径基址不变。
+        $base = self::resolveRequestBase($this->config->baseUrl, $path);
 
-        $url = $this->config->baseUrl . $path;
+        $payload = $this->buildPayload($params);
+        $payload['sign'] = Signer::sign($payload, $secret, self::requestBinding($base, $path));
+
+        $url = $base . $path;
         $json = $this->encodeBody($payload);
 
         [$status, $body] = $this->sendRaw($url, $json);
@@ -289,6 +297,37 @@ final class Client
             return ['method' => 'POST', 'path' => $path];
         }
         return null;
+    }
+
+    /**
+     * 是否代付类端点（路径以 /merchant/payout 开头）。
+     */
+    private static function isPayoutPath(string $relPath): bool
+    {
+        return str_starts_with($relPath, '/merchant/payout');
+    }
+
+    /**
+     * 解析本次请求实际使用的基址。
+     *
+     * 契约：代付仅存在于 v1（2026-08-15 拍板）——服务端 v2 Base 下不再注册任何
+     * payout 路由（一律 404）。因此 v2 基址 + payout 路径时自动回落到对应 v1
+     * 基址（/api/open/v2 → /api/open/v1）；回落后 requestBinding 对 v1 路径返回
+     * null，签名自然是 body-only（无 v2 绑定前缀）。代收路径基址不变。
+     */
+    private static function resolveRequestBase(string $baseUrl, string $relPath): string
+    {
+        if (!self::isPayoutPath($relPath)) {
+            return $baseUrl;
+        }
+        $joined = rtrim($baseUrl, '/') . $relPath;
+        $path = (string) (parse_url($joined, PHP_URL_PATH) ?? '');
+        if (str_starts_with($path, '/api/open/v2/')) {
+            // 命中 v2 说明 base 的路径以 /api/open/v2 开头（host 不含斜杠，首个匹配必是路径首段）；
+            // 只替换版本号（limit=1），host 与端口不变。
+            return (string) preg_replace('#/api/open/v2#', '/api/open/v1', $baseUrl, 1);
+        }
+        return $baseUrl;
     }
 
     /**

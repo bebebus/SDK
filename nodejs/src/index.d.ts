@@ -109,8 +109,9 @@ export class Client {
   payTestComplete(params: Params): Promise<ApiResult>;
 
   // ---- 代付（Payout，密钥 api_secret_payout）----
+  // 代付端点仅注册于 v1 Base（2026-08-15 拍板）；v2 baseUrl 下 SDK 自动回落 v1（body-only 签名）。
 
-  /** 代付下单 POST /merchant/payout/create。 */
+  /** 代付下单 POST /merchant/payout/create（pay_method 必填，不收 channel_code）。 */
   payoutCreate(params: Params): Promise<ApiResult>;
   /** 代付查单 POST /merchant/payout/query（payout_no 或 out_payout_no 二选一）。 */
   payoutQuery(params: Params): Promise<ApiResult>;
