@@ -21,6 +21,8 @@ $config = new Config(
     apiKey: getenv('PP_API_KEY') ?: 'ak_demo_key',
     apiSecretPay: getenv('PP_API_SECRET_PAY') ?: 'sk_test_pay',
     apiSecretPayout: getenv('PP_API_SECRET_PAYOUT') ?: 'sk_test_payout',
+    // SANDBOX 预设为 v2 基址亦可：代付仅存在于 v1（2026-08-15 拍板），
+    // payout 类方法会自动回落 v1 基址（body-only 签名），无需单独改基址。
     environment: Environment::SANDBOX,
 );
 

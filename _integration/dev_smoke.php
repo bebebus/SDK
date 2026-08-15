@@ -1,6 +1,8 @@
 <?php
 // PHP SDK × dev 环境联调。凭据从环境变量读取（PP_MNO/PP_KEY/PP_PAY/PP_POUT/PP_BASE）。
 // 序列与 dev_smoke.mjs 完全一致，便于跨语言对比。
+// 单 base 跑 pay+payout：PP_BASE 传 v2 亦可——代付仅存在于 v1（2026-08-15 拍板），
+// payout 类方法在 v2 基址下自动回落 v1（body-only 签名），无需拆双基址。
 declare(strict_types=1);
 
 require __DIR__ . '/../php/autoload.php';

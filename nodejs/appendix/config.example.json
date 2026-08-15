@@ -1,0 +1,9 @@
+{
+  "merchantNo": "<YOUR_MERCHANT_NO>",
+  "apiKey": "<YOUR_API_KEY>",
+  "apiSecretPay": "<YOUR_API_SECRET_PAY>",
+  "apiSecretPayout": "<YOUR_API_SECRET_PAYOUT>",
+  "baseUrl": "https://api.<service_domain>/api/open/v2",
+  "baseUrlPayout": "https://api.<service_domain>/api/open/v1",
+  "timeout": 30000
+}
