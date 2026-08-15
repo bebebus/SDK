@@ -8,12 +8,16 @@
 |------|------|------|------|
 | Node.js | JSON | [config.example.json](https://github.com/bebebus/SDK/blob/main/nodejs/appendix/config.example.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/config.example.json) |
 | PHP | 数组 | [config.example.php](https://github.com/bebebus/SDK/blob/main/php/appendix/config.example.php) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/config.example.php) |
+| Python | dict | [config.example.py](https://github.com/bebebus/SDK/blob/main/python/appendix/config.example.py) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/config.example.py) |
+| Go | Go | [config.example.go](https://github.com/bebebus/SDK/blob/main/go/appendix/config.example.go) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/config.example.go) |
+| Java | JSON | [config.example.json](https://github.com/bebebus/SDK/blob/main/java/appendix/config.example.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/config.example.json) |
 
 ## 国家 / 币种附录
 
 | 语言 | 格式 | 查看 | 下载 |
 |------|------|------|------|
-| Node.js / 通用 | JSON | [catalog.json](https://github.com/bebebus/SDK/blob/main/nodejs/appendix/catalog.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json) |
+| Node.js | JSON | [catalog.json](https://github.com/bebebus/SDK/blob/main/nodejs/appendix/catalog.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json) |
 | PHP | 数组 | [catalog.php](https://github.com/bebebus/SDK/blob/main/php/appendix/catalog.php) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php) |
-
-Python / Go / Java 请直接使用 JSON 附录。
+| Python | dict | [catalog.py](https://github.com/bebebus/SDK/blob/main/python/appendix/catalog.py) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py) |
+| Go | Go | [catalog.go](https://github.com/bebebus/SDK/blob/main/go/appendix/catalog.go) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go) |
+| Java | JSON | [catalog.json](https://github.com/bebebus/SDK/blob/main/java/appendix/catalog.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json) |
