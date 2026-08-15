@@ -47,3 +47,12 @@ class TestAppendix(unittest.TestCase):
         self.assertIn("PHP", ph["currencies"])
         usdt = next(c for c in currencies if c["code"] == "USDT")
         self.assertEqual(usdt["kind"], "crypto")
+
+    def test_error_codes(self) -> None:
+        with open(os.path.join(_APPENDIX, "error-codes.py"), encoding="utf-8") as fh:
+            errors = _assign_value(fh.read(), "ERROR_CODES")
+        codes = {e["code"] for e in errors}
+        self.assertIn("100001", codes)
+        self.assertIn("300404", codes)
+        self.assertEqual(next(e for e in errors if e["code"] == "100000")["retryable"], "depends")
+        self.assertTrue(all(e["http"] == 200 for e in errors))

@@ -21,3 +21,13 @@
 | Python | dict | [catalog.py](https://github.com/bebebus/SDK/blob/main/python/appendix/catalog.py) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py) |
 | Go | Go | [catalog.go](https://github.com/bebebus/SDK/blob/main/go/appendix/catalog.go) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go) |
 | Java | JSON | [catalog.json](https://github.com/bebebus/SDK/blob/main/java/appendix/catalog.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json) |
+
+## 错误码总表
+
+| 语言 | 格式 | 查看 | 下载 |
+|------|------|------|------|
+| Node.js | JSON | [error-codes.json](https://github.com/bebebus/SDK/blob/main/nodejs/appendix/error-codes.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/error-codes.json) |
+| PHP | 数组 | [error-codes.php](https://github.com/bebebus/SDK/blob/main/php/appendix/error-codes.php) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/error-codes.php) |
+| Python | dict | [error-codes.py](https://github.com/bebebus/SDK/blob/main/python/appendix/error-codes.py) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/error-codes.py) |
+| Go | Go | [error-codes.go](https://github.com/bebebus/SDK/blob/main/go/appendix/error-codes.go) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/error-codes.go) |
+| Java | JSON | [error-codes.json](https://github.com/bebebus/SDK/blob/main/java/appendix/error-codes.json) | [raw](https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/error-codes.json) |
