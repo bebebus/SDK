@@ -103,6 +103,11 @@ console.log(data.order_no, data.pay_url);
 - Python 数据：https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py
 - Go 数据：https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go
 - Java 数据：https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json
+- Node.js 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/error-codes.json
+- PHP 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/error-codes.php
+- Python 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/error-codes.py
+- Go 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/error-codes.go
+- Java 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/error-codes.json
 
 完整索引见 [`appendix/README.md`](./appendix/README.md)。
 

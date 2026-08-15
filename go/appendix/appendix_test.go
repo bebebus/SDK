@@ -57,3 +57,24 @@ func TestCatalogHasPHAndUSDT(t *testing.T) {
 		t.Fatal("missing USDT")
 	}
 }
+
+func TestErrorCodes(t *testing.T) {
+	if len(ErrorCodes) == 0 {
+		t.Fatal("empty ErrorCodes")
+	}
+	found := false
+	for _, e := range ErrorCodes {
+		if e.HTTP != 200 {
+			t.Fatalf("%s http=%d", e.Code, e.HTTP)
+		}
+		if e.Code == "100000" {
+			found = true
+			if e.Retryable != "depends" {
+				t.Fatalf("100000 retryable=%s", e.Retryable)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("missing 100000")
+	}
+}
