@@ -2,6 +2,16 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
+## v1.3.0 (unreleased) — Payout fully withdrawn from v2
+
+- Appendix config files you can view or download: Node.js JSON and PHP array templates under `nodejs/appendix/` and `php/appendix/` (client config + country/currency catalog). Download URLs are listed in the root README and on the public docs site.
+
+- Server contract (decided 2026-08-15): payout endpoints are registered only on the v1 base. On the v2 base every `payout/*` route — `payout/create`, `payout/query`, `payout/test/complete`, `payout/banks/query`, `payout/proof/query`, `payout/receipt/query`, and the receipt file — returns 404 (server v2 version 2.2.0).
+- All five SDKs: when the configured baseUrl is a v2 base, payout methods automatically fall back to the corresponding v1 base (`/api/open/v2` → `/api/open/v1`) and sign body-only (no v2 METHOD+path binding prefix). Collection (pay) behavior on v2 is unchanged.
+- **Breaking (Python)**: `payout_create` no longer accepts the `channel_code` parameter (removed from the signature and the request body); `pay_method` is now required and a missing `pay_method` raises `TypeError`. Callers passing `channel_code` will get a `TypeError` and must switch to `pay_method`.
+- Docs (INTERFACES/SIGNING/README, zh/en): payout contract restored to v1 semantics — `pay_method` required, `channel_code`/`group_code` not accepted; the `channel_codes` dictionary from `pay-methods/query` lists collection groups only.
+- Signing vectors are unchanged; payout vectors were already pure v1.
+
 ## v1.2.1 — Shared v2 signing vectors and release hygiene
 
 - `test-vectors.json` now carries three v2 binding vectors (minimal anchor with lowercase-method normalization, real collection payload, nested `extra`), cross-verified byte-for-byte against the server implementation; all five language test harnesses consume the `binding` field.

@@ -32,6 +32,7 @@
    k1=v1&k2=v2&...&secret=<secret>
    ```
    规范路径为完整 pathname（不含 host/query）；**HTTP method 一律归一为大写**（传入小写 `post` 亦按 `POST` 计入基串）。**v1 无此前缀**，基串与 1.1.x 逐字节不变。**回调验签仍为 body-only。**
+   **代付例外（2026-08-15 拍板）**：payout 端点仅存在于 v1，**不存在带 v2 绑定的 payout 请求**；SDK 在 v2 baseUrl 下对 payout 请求自动回落 v1 基址并使用 body-only 签名。
 
 把算出的 `sign` 放回请求体一起发送。
 

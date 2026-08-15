@@ -37,6 +37,7 @@ public class VectorTest {
         runVectorTests(json);
         runCallbackTests();
         runMiscTests();
+        runPayoutFallbackTests();
 
         System.out.println();
         System.out.println("================ 结果 ================");
@@ -247,6 +248,74 @@ public class VectorTest {
                 Signer.sign(bindPayload, "s", binding));
         assertEquals("无 binding 保持 v1",
                 "a=1&secret=s", Signer.buildSignBase(bindPayload, "s"));
+    }
+
+    // ---------------- 代付 v1 回落（契约：代付仅存在于 v1，2026-08-15 拍板） ----------------
+
+    /**
+     * 用 JDK 内建 HttpServer 起本地桩，验证：
+     * <ul>
+     *   <li>v2 baseUrl 下 payout 请求自动回落 v1 路径，且签名为 body-only（与独立复算一致）；</li>
+     *   <li>v2 baseUrl 下 pay 请求仍打 v2 路径并携带 METHOD+path 绑定签名（防回归反向锚）。</li>
+     * </ul>
+     */
+    private static void runPayoutFallbackTests() throws Exception {
+        System.out.println("\n--- 代付 v1 回落（v2 基址） ---");
+        String paySecret = "sk_pay_secret_aaaaaaaaaaaaaaaaaaaaaaaa";
+        String payoutSecret = "sk_payout_secret_bbbbbbbbbbbbbbbbbbbb";
+
+        final String[] capturedPath = new String[1];
+        final String[] capturedBody = new String[1];
+        com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(
+                new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            capturedPath[0] = exchange.getRequestURI().getPath();
+            capturedBody[0] = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+            byte[] resp = "{\"code\":0,\"message\":\"ok\",\"data\":{}}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, resp.length);
+            exchange.getResponseBody().write(resp);
+            exchange.close();
+        });
+        server.start();
+        try {
+            int port = server.getAddress().getPort();
+            Config cfg = Config.builder()
+                    .baseUrl("http://127.0.0.1:" + port + "/api/open/v2")
+                    .merchantNo("M00000001").apiKey("ak")
+                    .apiSecretPay(paySecret).apiSecretPayout(payoutSecret)
+                    .build();
+            Client client = new Client(cfg);
+
+            // 1) payout：v2 基址下自动回落 v1 + body-only 签名
+            Map<String, Object> payoutReq = new LinkedHashMap<>();
+            payoutReq.put("payout_no", "W1");
+            client.payoutQuery(payoutReq);
+            assertEquals("payout 回落 v1 路径", "/api/open/v1/merchant/payout/query", capturedPath[0]);
+            Map<String, Object> payoutSent = Json.parseObject(capturedBody[0]);
+            String payoutSign = (String) payoutSent.remove("sign");
+            assertEquals("payout body-only 签名（独立复算一致）",
+                    Signer.sign(payoutSent, payoutSecret), payoutSign);
+            // 反向锚：若仍按 v2 绑定基串计算则必不相等
+            assertTrue("payout 反例（v2 绑定签名必不相等）",
+                    !Signer.sign(payoutSent, payoutSecret,
+                            new SignBinding("POST", "/api/open/v2/merchant/payout/query")).equals(payoutSign));
+
+            // 2) pay：仍打 v2 + 绑定签名（防回归反向锚）
+            Map<String, Object> payReq = new LinkedHashMap<>();
+            payReq.put("order_no", "P1");
+            client.payQuery(payReq);
+            assertEquals("pay 仍打 v2 路径", "/api/open/v2/merchant/pay/query", capturedPath[0]);
+            Map<String, Object> paySent = Json.parseObject(capturedBody[0]);
+            String paySign = (String) paySent.remove("sign");
+            assertEquals("pay v2 绑定签名（独立复算一致）",
+                    Signer.sign(paySent, paySecret,
+                            new SignBinding("POST", "/api/open/v2/merchant/pay/query")), paySign);
+            assertTrue("pay 反例（body-only 签名必不相等）",
+                    !Signer.sign(paySent, paySecret).equals(paySign));
+        } finally {
+            server.stop(0);
+        }
     }
 
     // ---------------- 断言工具 ----------------

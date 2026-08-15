@@ -10,6 +10,11 @@
 - 签名算法：HMAC-SHA256 → hex 小写，见仓库根 [`SIGNING.md`](../SIGNING.md)
 - 接口契约：环境/鉴权/12 个签名端点/回调/错误码，见 [`INTERFACES.md`](../INTERFACES.md)
 - 标准答案向量：[`test-vectors.json`](../test-vectors.json)
+- 附录配置（可查看 / 下载）：[`appendix/config.example.json`](./appendix/config.example.json) · [`appendix/catalog.json`](./appendix/catalog.json)
+
+下载地址：
+- 配置模板：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/config.example.json （[文档站](https://openapi.overseas.cniia.cloud/sdk-config/config.example.json)）
+- 国家/币种附录：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json （[文档站](https://openapi.overseas.cniia.cloud/appendix/catalog.json)）
 
 ## 引入（无需安装依赖）
 

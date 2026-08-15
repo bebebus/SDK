@@ -7,6 +7,8 @@ const config = new Config({
   merchantNo: process.env.PP_MERCHANT_NO || 'M00000001',
   apiKey: process.env.PP_API_KEY || 'ak_demo_key',
   apiSecretPayout: process.env.PP_API_SECRET_PAYOUT || 'sk_test_payout',
+  // SANDBOX 预设为 v2 基址亦可：代付仅存在于 v1（2026-08-15 拍板），
+  // payout 类方法会自动回落 v1 基址（body-only 签名），无需单独改基址。
   environment: Environment.SANDBOX,
   baseUrl: process.env.PP_BASE_URL || undefined,
 });

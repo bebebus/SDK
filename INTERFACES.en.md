@@ -11,6 +11,8 @@ For signing, see [`SIGNING.md`](./SIGNING.en.md). This file defines the environm
 | Production | **No built-in default; baseUrl must be passed explicitly** | Obtain the production address from your service provider. New integrations should use `https://api.<service_domain>/api/open/v2`; existing ones may keep `/api/open/v1` |
 | Sandbox (test/local) | `http://127.0.0.1:3090/api/open/v2` | Self-hosted / integration testing; you can also use "production baseUrl + test key" as a sandbox (orders created with a test key are flagged `is_test`, do not touch real money, and can call `*/test/complete`) |
 
+> **Payout exception (decided 2026-08-15)**: payout endpoints are registered only on the **v1** base (`/api/open/v1`); on the v2 base every `payout/*` request (including the receipt file) returns 404. Under a v2 baseUrl the SDK **automatically falls back** to the corresponding v1 base for payout methods (`/api/open/v2` → `/api/open/v1`) and uses body-only signing (no v2 binding prefix), so callers do not need to split into two base URLs.
+
 SDK design: `Environment.SANDBOX` embeds the local preset base URL; `Environment.PRODUCTION` (the default) **embeds no host name** and requires `baseUrl` (obtain it from your service provider) to be passed explicitly, otherwise construction throws an error. All requests are `POST`, `Content-Type: application/json`, with a JSON request body.
 
 ## 2. Authentication and Common Fields
@@ -40,7 +42,7 @@ Request (common fields +):
 
 | Field | Type | Required | Description |
 |------|------|------|------|
-| `out_order_no` | string | Yes | Merchant order number (idempotency key, unique) |
+| `out_order_no` | string | Yes | Merchant order number (globally unique per merchant; duplicates are always rejected and never return the original order) |
 | `amount` | int | Yes | Amount as a minor-unit integer, `[1, 1e12]` |
 | `currency` | string | Yes | Currency code (e.g. PHP/USDT) |
 | `channel_code` | string | Conditional | **Recommended on v2.** Payment group code; obtain it from the operations team, or see `channel_codes` from `pay-methods/query`. Provide this or `pay_method` |
@@ -62,7 +64,7 @@ Response `data`: `order_no, out_order_no, amount, currency, status(pending|succe
 ### POST `/merchant/pay-methods/query` — available pay methods / group codes (key: pay)
 Request: `country` (optional); **v2** also accepts `biz_type` (`pay`/`payout`) and `currency`.
 Response:
-- **v2** returns two arrays: `data.pay_methods[]` `{pay_method, name, country, currency, biz_type}` and `data.channel_codes[]` `{channel_code, name, country, currency, biz_type}`. `name` is the description. Confirm with the operations team which `channel_code` to use.
+- **v2** returns two arrays: `data.pay_methods[]` `{pay_method, name, country, currency, biz_type}` and `data.channel_codes[]` `{channel_code, name, country, currency, biz_type}`. `name` is the description. Confirm with the operations team which `channel_code` to use. **The `channel_codes` dictionary lists collection (`biz_type=pay`) groups only** — payout creation does not accept `channel_code` (see §4).
 - **v1** still returns `data.methods[]` `{pay_method, name, country(nullable), currency(nullable)}`.
 
 > `groups/query` has been merged into this endpoint and is no longer the documented primary path. Existing `groupsQuery` calls still hit a compatibility alias; new integrations should read `channel_codes` here.
@@ -77,16 +79,17 @@ Response `data`: `order_no, out_order_no, amount, actual_amount, status`. Callin
 
 ## 4. Payout
 
+> **The endpoints in this section are registered only on the v1 base (decided 2026-08-15)**: on the v2 base every `payout/*` request returns 404. Under a v2 baseUrl the SDK automatically falls back to the v1 base for these methods (body-only signing, no v2 binding prefix). The payout contract follows v1 semantics: `pay_method` is required, and `channel_code`/`group_code` are not accepted.
+
 ### POST `/merchant/payout/create` — create a payout order (key: payout)
 Request (common fields +):
 
 | Field | Type | Required | Description |
 |------|------|------|------|
-| `out_payout_no` | string | Yes | Merchant payout number (idempotency key, unique) |
+| `out_payout_no` | string | Yes | Merchant payout number (globally unique per merchant; duplicates are always rejected and never return the original order) |
 | `amount` | int | Yes | Amount as a minor-unit integer, `[1, 1e12]` |
 | `currency` | string | Yes | Currency code |
-| `channel_code` | string | Conditional | **Recommended on v2.** Payment group code; obtain it from the operations team, or see `channel_codes` from `pay-methods/query`. Provide this or `pay_method` |
-| `pay_method` | string | Conditional | On v2 may be sent alone for smart routing; **required on v1** |
+| `pay_method` | string | Yes | **Required.** Pay method (bank/gcash/maya/trc20…, see pay-methods/query); `channel_code` is not accepted |
 | `country` | string | No | Country ISO code; required for fiat |
 | `notify_url` | string | Yes | Callback address |
 | `account_no` | string | Yes | Payee account/address (card number/wallet address, etc.) |
@@ -146,8 +149,8 @@ When an order reaches a terminal state, the service sends a JSON callback to `no
 | 100106 | Too many auth failures (rate limited; same merchant_no + IP fails auth 60 times within 60s) |
 | 200002 | Service account disabled |
 | 210002 | Merchant disabled |
-| 300101 | Collection idempotency conflict (out_order_no exists with mismatched params) |
-| 300201 | Payout order idempotency conflict |
+| 300101 | Duplicate collection order number (rejected whenever out_order_no already exists, regardless of parameter equality; query first when the result is unknown, and use a new number to re-submit) |
+| 300201 | Duplicate payout order number (rejected whenever out_payout_no already exists, regardless of parameter equality) |
 | 300301 | Order does not exist |
 | 300401 | Payment method unavailable / missing |
 | 300402 | Payment method configuration unavailable |
