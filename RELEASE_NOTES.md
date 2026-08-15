@@ -2,9 +2,9 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
-## v1.3.0 (unreleased) — Payout fully withdrawn from v2
+## v1.3.0 (2026-08-15) — Payout fully withdrawn from v2
 
-- Appendix config files you can view or download: Node.js JSON and PHP array templates under `nodejs/appendix/` and `php/appendix/` (client config + country/currency catalog). Download URLs are listed in the root README and on the public docs site.
+- Appendix config files you can view or download for all five languages: client config templates and country/currency catalogs under `<language>/appendix/` (Node.js/PHP/Python/Go/Java). Download URLs are listed in the root README and on the public docs site.
 
 - Server contract (decided 2026-08-15): payout endpoints are registered only on the v1 base. On the v2 base every `payout/*` route — `payout/create`, `payout/query`, `payout/test/complete`, `payout/banks/query`, `payout/proof/query`, `payout/receipt/query`, and the receipt file — returns 404 (server v2 version 2.2.0).
 - All five SDKs: when the configured baseUrl is a v2 base, payout methods automatically fall back to the corresponding v1 base (`/api/open/v2` → `/api/open/v1`) and sign body-only (no v2 METHOD+path binding prefix). Collection (pay) behavior on v2 is unchanged.

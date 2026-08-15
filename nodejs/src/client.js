@@ -59,7 +59,7 @@ const SDK_VERSION = (() => {
   } catch {
     // ignore：读不到就走兜底版本号。
   }
-  return '1.2.0';
+  return '1.3.0';
 })();
 const USER_AGENT = `openapi-sdk-nodejs/${SDK_VERSION}`;
 
