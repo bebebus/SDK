@@ -20,6 +20,31 @@ function requestBinding(baseUrl, relPath) {
   }
   return undefined;
 }
+
+// 是否代付类端点（路径以 /merchant/payout 开头）。
+function isPayoutPath(relPath) {
+  return String(relPath || '').startsWith('/merchant/payout');
+}
+
+// 解析本次请求实际使用的基址。
+// 契约：代付仅存在于 v1（2026-08-15 拍板）——服务端 v2 Base 下不再注册任何 payout 路由（一律 404）。
+// 因此 v2 基址 + payout 路径时自动回落到对应 v1 基址（/api/open/v2 → /api/open/v1），
+// 且回落后 requestBinding 对 v1 路径返回 undefined，签名自然是 body-only（无 v2 绑定前缀）。
+function resolveRequestBase(baseUrl, relPath) {
+  const base = String(baseUrl || '');
+  if (!isPayoutPath(relPath)) return base;
+  try {
+    const pathname = new URL(base.replace(/\/+$/, '') + relPath).pathname;
+    if (pathname.startsWith('/api/open/v2/')) {
+      // 命中 v2 说明 base 的路径以 /api/open/v2 开头（host 不含斜杠，首个匹配必是路径首段）；
+      // 只替换版本号，host 与端口不变。
+      return base.replace('/api/open/v2', '/api/open/v1');
+    }
+  } catch {
+    // 非法 URL 交给后续请求层报错。
+  }
+  return base;
+}
 import { ApiError, TransportError } from './errors.js';
 
 // [L19] SDK 版本单一事实源：从 package.json 派生（而非硬编码）。
@@ -34,7 +59,7 @@ const SDK_VERSION = (() => {
   } catch {
     // ignore：读不到就走兜底版本号。
   }
-  return '1.2.0';
+  return '1.3.0';
 })();
 const USER_AGENT = `openapi-sdk-nodejs/${SDK_VERSION}`;
 
@@ -82,9 +107,12 @@ export class Client {
   // 发起 POST application/json 请求，解析统一信封 {code,message,data}。
   // 返回 { data, raw }；code !== 0 抛 ApiError；HTTP/网络错误抛 TransportError。
   async _post(path, params, secretKind) {
-    const body = this._buildBody(params, secretKind, requestBinding(this.config.baseUrl, path));
+    // 代付仅存在于 v1（2026-08-15 拍板）：v2 基址下 payout 请求自动回落 v1，
+    // 回落后 requestBinding 返回 undefined → body-only 签名；代收路径基址不变。
+    const base = resolveRequestBase(this.config.baseUrl, path);
+    const body = this._buildBody(params, secretKind, requestBinding(base, path));
     const payload = JSON.stringify(body);
-    const url = new URL(this.config.baseUrl + path);
+    const url = new URL(base + path);
     const lib = url.protocol === 'https:' ? https : http;
 
     const raw = await new Promise((resolve, reject) => {
@@ -193,9 +221,12 @@ export class Client {
   }
 
   // ---- 代付（Payout，密钥：api_secret_payout）----
+  // 代付端点仅注册于 v1 Base（2026-08-15 拍板，v2 下 payout 路由一律 404）；
+  // 本 SDK 在 v2 baseUrl 下对以下方法自动回落 v1 基址并使用 body-only 签名（见 resolveRequestBase）。
 
   // 代付下单。params: { out_payout_no, amount(int), currency, notify_url, account_no,
-  //   channel_code? | pay_method?, country?, account_name?, bank_code?, bank_name?, remark?, client_ip?, extra? }
+  //   pay_method(必填), country?, account_name?, bank_code?, bank_name?, remark?, client_ip?, extra? }
+  // v1 契约：pay_method 必填，不收 channel_code/group_code。
   payoutCreate(params) {
     return this._post('/merchant/payout/create', params, 'payout');
   }

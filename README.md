@@ -8,7 +8,7 @@
 为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
 设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），
-**全部 12 个签名业务端点**（另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
+**全部 12 个签名业务端点**（其中代付 6 端点仅存在于 v1 Base，见下「环境」节；另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
 **测试 + 正式双环境**，**跨语言签名逐字节一致**（同一份标准答案向量五套都绿）。
 
 ## 目录结构
@@ -21,6 +21,7 @@ SDK/
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
 ├── RELEASE_NOTES.md     # 各版本面向用户的变更摘要
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
+├── appendix/            # 附录配置与国家/币种数据下载索引
 ├── _tooling/
 │   └── generate-vectors.mjs   # 向量生成器（经三处权威实现交叉校验后产出）
 ├── nodejs/   # Node.js (ESM)         —— node:https/http + node:crypto + node:test
@@ -40,7 +41,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`；`import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`；命名空间 `Merchant\Openapi` | cURL 扩展 | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go@v1.2.0`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go get github.com/bebebus/SDK/go@v1.2.1`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
 | Java | **源码引入（不发 Maven）**；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。
@@ -48,7 +49,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 ## 涵盖的接口（每语言均实现）
 
 **代收**：`payCreate`（下单，v2 传 `channel_code` 或 `pay_method`）、`payQuery`（查单）、`payMethodsQuery`（v2 返回 `pay_methods` + `channel_codes` 两个数组）、`groupsQuery`（兼容别名）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
-**代付**：`payoutCreate`、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）
+**代付**：`payoutCreate`（`pay_method` 必填，不收 `channel_code`）、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）——代付端点仅注册于 v1 Base，SDK 在 v2 baseUrl 下自动回落 v1（见「环境」节）
 **回调**：`verifyPayCallback` / `verifyPayoutCallback`（验签，时序安全比较）
 
 各方法的请求/响应字段见 [`INTERFACES.md`](./INTERFACES.md)。方法名按各语言习惯（Java/JS/PHP 驼峰、Python 蛇形 `pay_create`、Go 导出驼峰），语义一一对应。
@@ -64,6 +65,8 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 
 > 正式环境地址请向你的服务商获取（新对接形如 `https://api.<service_domain>/api/open/v2`；存量可用 `/api/open/v1`）。SDK **不内置任何正式主机名**：选 `PRODUCTION`（默认）时必须通过 `baseUrl` 显式传入，否则构造时报错。
 > 「测试密钥沙箱」可用上述正式 baseUrl + 测试密钥（测试单标记 `is_test`，不动真钱，可调 `*/test/complete`）。
+>
+> **代付例外（2026-08-15 拍板）**：代付（payout）端点仅注册于 **v1** Base；服务端 v2 Base 下 `payout/*` 路由一律 404。五套 SDK 均在 v2 baseUrl 下对 payout 类方法**自动回落** v1 基址（`/api/open/v2` → `/api/open/v1`，body-only 签名），调用方无需拆双基址；代付下单 `pay_method` 必填、不收 `channel_code`。
 
 ## 快速开始（以 Node.js 为例，其余语言见各自 README）
 
@@ -90,6 +93,23 @@ console.log(data.order_no, data.pay_url);
 ```
 
 各语言对应的 `pay_create` / `payout_create` / `callback_verify` 可运行示例见 `<语言>/examples/`。
+
+## 附录数据（查看 / 下载）
+
+国家/币种字典与客户端配置模板以本仓库为唯一来源：
+
+- Node.js 数据：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
+- PHP 数据：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+- Python 数据：https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py
+- Go 数据：https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go
+- Java 数据：https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json
+- Node.js 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/error-codes.json
+- PHP 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/error-codes.php
+- Python 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/error-codes.py
+- Go 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/error-codes.go
+- Java 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/error-codes.json
+
+完整索引见 [`appendix/README.md`](./appendix/README.md)。
 
 ## 回调（验签 + 处理片段）
 

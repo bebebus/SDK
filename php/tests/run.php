@@ -283,7 +283,9 @@ $stubClient->payQuery(['out_order_no' => '202501010001']);
 $secondNonce = $captured['body']['nonce'];
 checkTrue('nonce 每请求唯一', $firstNonce !== $secondNonce);
 
-// payout 类用 payout 密钥
+// payout 类用 payout 密钥。
+// 契约：代付仅存在于 v1（2026-08-15 拍板）——v2 基址（SANDBOX）下 payout 请求
+// 自动回落 v1 基址，签名为 body-only（无 v2 绑定前缀）。
 $stubClient->payoutCreate([
     'out_payout_no' => 'WD1',
     'amount' => 100000,
@@ -294,10 +296,16 @@ $stubClient->payoutCreate([
     'account_name' => 'San Zhang',
     'bank_code' => 'BDO',
 ]);
+check('stub payoutCreate URL 回落 v1', 'http://127.0.0.1:3090/api/open/v1/merchant/payout/create', $captured['url']);
 $pbody = $captured['body'];
 $psign = $pbody['sign'];
 unset($pbody['sign']);
-check('stub payoutCreate sign 用 payout 密钥', Signer::sign($pbody, $payoutSecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/payout/create']), $psign);
+check('stub payoutCreate sign 用 payout 密钥（body-only）', Signer::sign($pbody, $payoutSecret), $psign);
+// 反向锚：若仍按 v2 绑定基串计算则必不相等。
+checkFalse(
+    'stub payoutCreate 反例（v2 绑定签名必不相等）',
+    Signer::sign($pbody, $payoutSecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/payout/create']) === $psign
+);
 
 // receipt inline 归一为整数 1/0
 $stubClient->payoutReceiptQuery(['out_payout_no' => 'WD1', 'inline' => true]);
@@ -440,6 +448,28 @@ $cfgLocal = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'http://loca
 check('[D] http localhost 放行', 'http://localhost:3090/api/open/v1', $cfgLocal->baseUrl);
 $cfgLoop = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'http://127.0.0.1:3090/api/open/v1');
 check('[D] http 127.0.0.1 放行', 'http://127.0.0.1:3090/api/open/v1', $cfgLoop->baseUrl);
+
+/* ---------------------------- 附录配置文件 ---------------------------- */
+
+$cfgAppendix = require __DIR__ . '/../appendix/config.example.php';
+checkTrue('[appendix] config.example.php 返回数组', is_array($cfgAppendix));
+foreach (['merchant_no', 'api_key', 'api_secret_pay', 'api_secret_payout', 'base_url', 'timeout_seconds'] as $k) {
+    checkTrue("[appendix] config 含 {$k}", array_key_exists($k, $cfgAppendix));
+}
+checkTrue('[appendix] config base_url 为 https', str_starts_with((string) $cfgAppendix['base_url'], 'https://'));
+
+$catalogAppendix = require __DIR__ . '/../appendix/catalog.php';
+checkTrue('[appendix] catalog.php 返回数组', is_array($catalogAppendix));
+checkTrue('[appendix] catalog 含 countries', isset($catalogAppendix['countries']) && is_array($catalogAppendix['countries']));
+checkTrue('[appendix] catalog 含 currencies', isset($catalogAppendix['currencies']) && is_array($catalogAppendix['currencies']));
+$ph = null;
+foreach ($catalogAppendix['countries'] as $row) {
+    if (($row['code'] ?? '') === 'PH') {
+        $ph = $row;
+        break;
+    }
+}
+checkTrue('[appendix] catalog 含 PH', is_array($ph) && in_array('PHP', $ph['currencies'] ?? [], true));
 
 /* ---------------------------- 汇总 ---------------------------- */
 

@@ -29,6 +29,7 @@ Input: the key-value table `payload` made up of business fields (including commo
    k1=v1&k2=v2&...&secret=<secret>
    ```
    The canonical path is the full pathname (no host/query). **the HTTP method is always normalized to uppercase** (a lowercase `post` input is signed as `POST`); **v1 has no such prefix**, so the base string is byte-identical to 1.1.x. **Callback verification remains body-only.**
+   **Payout exception (decided 2026-08-15)**: payout endpoints exist only on v1, so **there is no payout request with a v2 binding**; under a v2 baseUrl the SDK automatically falls back to the v1 base for payout requests and uses body-only signing.
 
 Put the computed `sign` back into the request body and send it together.
 

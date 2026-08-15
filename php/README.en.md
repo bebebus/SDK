@@ -9,6 +9,15 @@ It uses only the PHP standard library and core extensions (`ext-curl`, `ext-json
 
 The signing algorithm uses [`SIGNING.md`](../SIGNING.en.md) at the repository root as its single source of truth, and is verified byte-for-byte across languages via the [`test-vectors.json`](../test-vectors.json) signature test vectors.
 
+Appendix config files (view or download):
+
+- Client config (PHP array): [`appendix/config.example.php`](./appendix/config.example.php)
+  - Download: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/config.example.php
+  - Docs site: https://openapi.overseas.cniia.cloud/sdk-config/config.example.php
+- Country / currency appendix (PHP array): [`appendix/catalog.php`](./appendix/catalog.php)
+  - Download: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+  - Docs site: https://openapi.overseas.cniia.cloud/appendix/catalog.php
+
 ## Requirements
 
 - PHP >= 8.1
