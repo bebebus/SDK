@@ -98,6 +98,9 @@ console.log(data.order_no, data.pay_url);
 
 - Node.js 数据：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
 - PHP 数据：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+- Python 数据：https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py
+- Go 数据：https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go
+- Java 数据：https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json
 
 完整索引见 [`appendix/README.md`](./appendix/README.md)。
 

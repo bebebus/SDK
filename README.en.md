@@ -96,6 +96,9 @@ The country/currency catalog and client config templates live in this repository
 
 - Node.js data: https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
 - PHP data: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+- Python data: https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py
+- Go data: https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go
+- Java data: https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json
 
 See [`appendix/README.md`](./appendix/README.md) for the full index.
 
