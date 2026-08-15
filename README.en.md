@@ -19,6 +19,7 @@ SDK/
 ├── CONTRIBUTING.md      # Branch, pull request, testing, and release contribution requirements
 ├── RELEASE_NOTES.md     # Human-readable summaries for each user-facing release
 ├── test-vectors.json    # Cross-language signing test vectors (11 entries; asserted by all five test suites)
+├── appendix/            # Appendix config and country/currency data index
 ├── _tooling/
 │   └── generate-vectors.mjs   # Vector generator (produced after cross-validation against three authoritative implementations)
 ├── nodejs/   # Node.js (ESM)         —— node:https/http + node:crypto + node:test
@@ -88,6 +89,15 @@ console.log(data.order_no, data.pay_url);
 ```
 
 Runnable examples of `pay_create` / `payout_create` / `callback_verify` for each language are in `<language>/examples/`.
+
+## Appendix data (view / download)
+
+The country/currency catalog and client config templates live in this repository:
+
+- Node.js data: https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
+- PHP data: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+
+See [`appendix/README.md`](./appendix/README.md) for the full index.
 
 ## Callback (signature verification + handling snippet)
 
