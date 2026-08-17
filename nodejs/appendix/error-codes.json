@@ -94,19 +94,19 @@
       "code": "300101",
       "http": 200,
       "retryable": "no",
-      "meaning_zh": "代收单幂等冲突",
-      "meaning_en": "Collection idempotency conflict",
-      "note_zh": "同 out_order_no 已存在但参数不一致；对齐参数或换新单号",
-      "note_en": "out_order_no exists with mismatched params; align params or use a new order no."
+      "meaning_zh": "商户订单号已存在",
+      "meaning_en": "Merchant order number already exists",
+      "note_zh": "同一商户 out_order_no 重复提交一律拒绝（无论参数是否相同，不返回原单）；请先查单或更换新单号",
+      "note_en": "Duplicate out_order_no is always rejected (regardless of params; original order is never returned). Query the order or use a new number."
     },
     {
       "code": "300201",
       "http": 200,
       "retryable": "no",
-      "meaning_zh": "代付单幂等冲突",
-      "meaning_en": "Payout idempotency conflict",
-      "note_zh": "同 out_payout_no 已存在但参数不一致；对齐参数或换新单号",
-      "note_en": "out_payout_no exists with mismatched params; align params or use a new payout no."
+      "meaning_zh": "商户代付单号已存在",
+      "meaning_en": "Merchant payout number already exists",
+      "note_zh": "同一商户 out_payout_no 重复提交一律拒绝（无论参数是否相同，不返回原单）；请先查单或更换新单号",
+      "note_en": "Duplicate out_payout_no is always rejected (regardless of params; original order is never returned). Query the order or use a new number."
     },
     {
       "code": "300301",
@@ -116,6 +116,15 @@
       "meaning_en": "Order not found",
       "note_zh": "核对订单号（order_no / out_order_no / payout_no / out_payout_no）",
       "note_en": "Check the order no. (order_no / out_order_no / payout_no / out_payout_no)"
+    },
+    {
+      "code": "300304",
+      "http": 503,
+      "retryable": "yes",
+      "meaning_zh": "建单暂不可用（订单未创建，可用同一外部单号重试）",
+      "meaning_en": "Order create temporarily unavailable (nothing persisted; retry with the same merchant order no.)",
+      "note_zh": "insert-first 并发冲突重试耗尽或风控版本分片缺失，均在 INSERT 之前 fail-closed；HTTP 503。请用同一 out_order_no / out_payout_no 稍后重试，勿换单号以免双单",
+      "note_en": "insert-first retry budget exhausted or risk-config version shard missing — fail-closed before INSERT; HTTP 503. Retry later with the same out_order_no / out_payout_no; do not change the number or you may create a duplicate"
     },
     {
       "code": "300401",
