@@ -15,18 +15,18 @@ type Environment int
 
 const (
 	// Production 正式环境。无内置 URL：正式基址请向服务商获取，
-	// 形如 https://api.<domain>/api/open/v2，必须用 Config.BaseURL 显式提供。
+	// 形如 https://api.<domain>/api/open/v1，必须用 Config.BaseURL 显式提供。
 	Production Environment = iota
 	// Sandbox 本地/联调环境。
 	Sandbox
 )
 
 const (
-	sandboxBaseURL = "http://127.0.0.1:3090/api/open/v2"
+	sandboxBaseURL = "http://127.0.0.1:3090/api/open/v1"
 )
 
 // ErrBaseURLRequired 表示选用 Production 但未提供 BaseURL。
-var ErrBaseURLRequired = errors.New("baseUrl is required: obtain the production URL from your service provider (e.g. https://api.<domain>/api/open/v2)")
+var ErrBaseURLRequired = errors.New("baseUrl is required: obtain the production URL from your service provider (e.g. https://api.<domain>/api/open/v1)")
 
 // ErrInsecureBaseURL 表示非本地的 baseUrl 用了非 https（明文传输密钥/签名，拒绝）。
 var ErrInsecureBaseURL = errors.New("baseUrl must use https:// for non-local hosts (refuse to transmit credentials over plaintext)")
