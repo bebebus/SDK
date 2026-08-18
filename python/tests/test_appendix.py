@@ -53,4 +53,8 @@ class TestAppendix(unittest.TestCase):
         self.assertIn("100001", codes)
         self.assertIn("300404", codes)
         self.assertEqual(next(e for e in errors if e["code"] == "100000")["retryable"], "depends")
-        self.assertTrue(all(e["http"] == 200 for e in errors))
+        # 300304（建单暂不可用，insert-first fail-closed）是当前唯一约定非 200 的错误码，固定 HTTP 503。
+        known_non_200 = {"300304": 503}
+        for e in errors:
+            expected = known_non_200.get(e["code"], 200)
+            self.assertEqual(e["http"], expected, f"{e['code']} http={e['http']}")

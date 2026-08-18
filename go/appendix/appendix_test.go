@@ -61,10 +61,16 @@ func TestErrorCodes(t *testing.T) {
 	if len(ErrorCodes) == 0 {
 		t.Fatal("empty ErrorCodes")
 	}
+	// 300304（建单暂不可用，insert-first fail-closed）是当前唯一约定非 200 的错误码，固定 HTTP 503。
+	knownNon200 := map[string]int{"300304": 503}
 	found := false
 	for _, e := range ErrorCodes {
-		if e.HTTP != 200 {
-			t.Fatalf("%s http=%d", e.Code, e.HTTP)
+		want := 200
+		if v, ok := knownNon200[e.Code]; ok {
+			want = v
+		}
+		if e.HTTP != want {
+			t.Fatalf("%s http=%d, want %d", e.Code, e.HTTP, want)
 		}
 		if e.Code == "100000" {
 			found = true
