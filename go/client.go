@@ -78,8 +78,8 @@ func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*R
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
 }
 
-// GroupsQuery 兼容别名，仍打 /merchant/groups/query。
-// 新对接请用 PayMethodsQuery 读取 channel_codes。
+// GroupsQuery 兼容别名，仍打 /merchant/groups/query（历史遗留、未文档化）。
+// 新对接请用 PayMethodsQuery。
 func (c *Client) GroupsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/groups/query", params, usePay)
 }

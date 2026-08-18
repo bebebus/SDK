@@ -73,8 +73,8 @@ public final class Client {
     }
 
     /**
-     * 兼容别名 POST /merchant/groups/query。
-     * 新对接请用 payMethodsQuery 读取 channel_codes。
+     * 兼容别名 POST /merchant/groups/query（历史遗留、未文档化）。
+     * 新对接请用 payMethodsQuery。
      */
     public ApiResponse groupsQuery(Map<String, Object> params) {
         return call("/merchant/groups/query", params, Secret.PAY);

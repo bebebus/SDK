@@ -2,13 +2,13 @@
 
 > [中文](./README.md) | English
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A zero-dependency Go SDK covering all 12 signed endpoints of the Merchant OpenAPI (6 collection + 6 payout), including
 HMAC-SHA256 signing, dual-environment configuration, and timing-safe callback signature verification. It uses only the Go standard library (`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`), with **no `require` at all**.
 
-- module: `github.com/bebebus/SDK/go`
+- module: `github.com/bebebus/SDK/go/v2` (Go semantic import versioning; the module path carries `/v2` starting at 2.0.0)
 - package: `openapi`
 - Go: 1.26 (declared in `go.mod`; backward-compatible with standard-library features of 1.21+)
 
@@ -17,11 +17,11 @@ HMAC-SHA256 signing, dual-environment configuration, and timing-safe callback si
 This SDK depends on no external package. Two ways to use it:
 
 1. Copy this `go/` directory into your project and import it by its module path; or
-2. Add `require github.com/bebebus/SDK/go v0.0.0` to your own `go.mod` and use `replace`
+2. Add `require github.com/bebebus/SDK/go/v2 v0.0.0` to your own `go.mod` and use `replace`
    to point at a local path (while it is private and unpublished):
 
 ```go
-import "github.com/bebebus/SDK/go"
+import "github.com/bebebus/SDK/go/v2"
 ```
 
 ## Quick Start
@@ -34,7 +34,7 @@ import (
     "errors"
     "fmt"
 
-    "github.com/bebebus/SDK/go"
+    "github.com/bebebus/SDK/go/v2"
 )
 
 func main() {

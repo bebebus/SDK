@@ -172,9 +172,9 @@ class Client:
         currency: Optional[str] = None,
         country: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """兼容别名：POST /merchant/groups/query。
+        """兼容别名：POST /merchant/groups/query（历史遗留、未文档化）。
 
-        新对接请用 ``pay_methods_query`` 读取 ``channel_codes``。
+        新对接请用 ``pay_methods_query``。
         """
         return self._call_pay(
             "/merchant/groups/query",

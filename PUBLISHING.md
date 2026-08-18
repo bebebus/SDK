@@ -11,7 +11,7 @@
 | npm | `@bebebus/merchant-openapi-sdk` | `npm i @bebebus/merchant-openapi-sdk` |
 | PyPI | `bebebus-merchant-openapi-sdk`（import 名仍 `openapi_sdk`） | `pip install bebebus-merchant-openapi-sdk` |
 | Packagist | `bebebus/merchant-openapi-sdk` | `composer require bebebus/merchant-openapi-sdk` |
-| Go (pkg.go.dev) | `github.com/bebebus/SDK/go` | `go get github.com/bebebus/SDK/go@v1.1.0` |
+| Go (pkg.go.dev) | `github.com/bebebus/SDK/go/v2`（2.0.0 起，SIV） | `go get github.com/bebebus/SDK/go/v2@v2.0.0` |
 | Java | —（不发 Maven） | 源码引入：把 `java/src/main/java` 加入工程，或 `cd java && mvn package` 自行打 jar |
 
 > ⚠️ 发布到公共索引**不可撤销**（版本号永久占用）。令牌只用于发布、勿入库。每次发版先 bump 版本号。
@@ -87,14 +87,20 @@ git branch -D php-split
 
 ## Go（pkg.go.dev）— 无需账号
 
-子目录模块用带前缀的 tag：
+子目录模块用带前缀的 tag。**2.0.0 起模块路径升为 `github.com/bebebus/SDK/go/v2`**（Go 语义化导入版本
+SIV：主版本 ≥2 的模块，导入路径必须带 `/vN` 后缀，否则该版本不可被 `go get` 拉取——`go.mod` 的
+`module` 声明与仓内全部自引用 import 均已同步改为 `/v2`）。tag 本身仍是 `go/vX.Y.Z`（**不**在 tag
+里重复 `/v2` 段——这是 Go 对子目录模块 SIV 的固定映射规则：tag 前缀只到子目录名，不含主版本后缀）：
 
 ```bash
-git tag go/v1.0.0
-git push origin go/v1.0.0
-# 触发索引（首次拉取后 pkg.go.dev 自动收录）
-GOPROXY=proxy.golang.org go list -m github.com/bebebus/SDK/go@v1.0.0
+git tag go/v2.0.0
+git push origin go/v2.0.0
+# 触发索引（首次拉取后 pkg.go.dev 自动收录）；注意 go list 的模块路径必须带 /v2
+GOPROXY=proxy.golang.org go list -m github.com/bebebus/SDK/go/v2@v2.0.0
 ```
+
+> 1.x 遗留 tag（`go/v1.0.0` 等）与旧模块路径 `github.com/bebebus/SDK/go`（无 `/v2`）仍保留，供已固定在
+> 1.x 的既有用户 `go get` 沿用；2.0.0 起的新对接一律用 `/v2` 路径。
 
 ## 发新版本
 

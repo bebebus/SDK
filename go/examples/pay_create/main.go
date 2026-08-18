@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bebebus/SDK/go"
+	"github.com/bebebus/SDK/go/v2"
 )
 
 func main() {

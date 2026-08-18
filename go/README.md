@@ -2,13 +2,13 @@
 
 > 中文 | [English](./README.en.md)
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 12 个签名端点（代收 6 + 代付 6），含
 HMAC-SHA256 签名、双环境配置、回调时序安全验签。仅用 Go 标准库（`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`），**无任何 `require`**。
 
-- module：`github.com/bebebus/SDK/go`
+- module：`github.com/bebebus/SDK/go/v2`（Go 语义化导入版本，2.0.0 起模块路径带 `/v2`）
 - package：`openapi`
 - Go：1.26（`go.mod` 声明，向下兼容 1.21+ 的标准库特性）
 
@@ -17,11 +17,11 @@ HMAC-SHA256 签名、双环境配置、回调时序安全验签。仅用 Go 标�
 本 SDK 不依赖任何外部包。两种用法：
 
 1. 直接拷贝本 `go/` 目录到你的工程并按模块路径导入；或
-2. 在自己的 `go.mod` 里 `require github.com/bebebus/SDK/go v0.0.0` 后用 `replace`
+2. 在自己的 `go.mod` 里 `require github.com/bebebus/SDK/go/v2 v0.0.0` 后用 `replace`
    指向本地路径（私有未发布时）：
 
 ```go
-import "github.com/bebebus/SDK/go"
+import "github.com/bebebus/SDK/go/v2"
 ```
 
 ## 快速开始
@@ -34,7 +34,7 @@ import (
     "errors"
     "fmt"
 
-    "github.com/bebebus/SDK/go"
+    "github.com/bebebus/SDK/go/v2"
 )
 
 func main() {

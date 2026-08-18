@@ -155,16 +155,29 @@ if want pypi; then
   fi; echo ""
 fi
 
-# Go（monorepo 子目录 tag go/vX.Y.Z）
+# Go（monorepo 子目录 tag go/vX.Y.Z；模块路径 2.0.0 起为 github.com/bebebus/SDK/go/v2，
+# 但 Go SIV 对子目录模块的 tag 映射规则是 tag 前缀只到子目录名、不重复 /v2 段，
+# 故 tag 仍是 go/vX.Y.Z，只有 go list 的模块路径需要带 /v2）。
+GO_MOD_PATH="github.com/bebebus/SDK/go/v2"
 if want go; then
   echo "──── Go ────"
   GOTAG="go/$TAG"
   if git ls-remote --tags origin "refs/tags/$GOTAG" 2>/dev/null | grep -q "$GOTAG"; then
     echo "  ⏭ 远程已存在 tag ${GOTAG}，跳过"; record "Go: 跳过(tag 已存在)"
   else
-    git tag "$GOTAG" && git push origin "$GOTAG" >/dev/null 2>&1 \
-      && { GOPROXY=https://proxy.golang.org go list -m "github.com/bebebus/SDK/go@$TAG" >/dev/null 2>&1 || true; record "Go: ✅ github.com/bebebus/SDK/go@$TAG"; echo "  ✅ 已推 $GOTAG"; } \
-      || record "Go: ❌ 打/推 tag 失败"
+    if git tag "$GOTAG" && git push origin "$GOTAG" >/dev/null 2>&1; then
+      # [F2] 真实判断 go list 结果，不再用 `|| true` 吞错后无条件记 ✅：
+      # proxy 解析失败（模块路径写错/索引未就绪等）必须如实记 ❌，让人工复核，
+      # 而不是掩盖成假成功。
+      if GOPROXY=https://proxy.golang.org go list -m "${GO_MOD_PATH}@$TAG" >/dev/null 2>&1; then
+        record "Go: ✅ ${GO_MOD_PATH}@$TAG"; echo "  ✅ 已推 $GOTAG，且 GOPROXY 已可解析"
+      else
+        record "Go: ❌ tag 已推送但 GOPROXY 解析失败(${GO_MOD_PATH}@$TAG，需人工复核)"
+        echo "  ⚠️ 已推 $GOTAG，但 GOPROXY 校验未通过（可能索引延迟或路径有误，需人工复核）"
+      fi
+    else
+      record "Go: ❌ 打/推 tag 失败"
+    fi
   fi; echo ""
 fi
 

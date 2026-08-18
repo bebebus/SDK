@@ -2,13 +2,13 @@
 
 # 商户支付 OpenAPI 多语言 SDK
 
-[![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bebebus/SDK/badge)](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
 
 为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
 设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），
-**全部 12 个签名业务端点**（其中代付 6 端点仅存在于 v1 Base，见下「环境」节；另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
+**全部 12 个签名业务端点**（均只存在于 v1 Base；另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
 **测试 + 正式双环境**，**跨语言签名逐字节一致**（同一份标准答案向量五套都绿）。
 
 ## 目录结构
@@ -41,7 +41,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`；`import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`；命名空间 `Merchant\Openapi` | cURL 扩展 | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go@v1.2.1`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go get github.com/bebebus/SDK/go/v2@v2.0.0`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go/v2"` | `net/http` | `cd go && go test -count=1 ./...` |
 | Java | **源码引入（不发 Maven）**；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。

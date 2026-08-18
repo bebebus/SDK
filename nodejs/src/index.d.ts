@@ -101,7 +101,7 @@ export class Client {
   payQuery(params: Params): Promise<ApiResult>;
   /** 可用支付方式 POST /merchant/pay-methods/query。 */
   payMethodsQuery(params?: Params): Promise<ApiResult>;
-  /** 兼容别名 POST /merchant/groups/query。新对接请用 payMethodsQuery 的 channel_codes。 */
+  /** 兼容别名 POST /merchant/groups/query（历史遗留、未文档化）。新对接请用 payMethodsQuery。 */
   groupsQuery(params?: Params): Promise<ApiResult>;
   /** 余额查询 POST /merchant/balance/query。 */
   balanceQuery(params?: Params): Promise<ApiResult>;

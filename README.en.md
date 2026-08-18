@@ -2,12 +2,12 @@
 
 # Merchant Payment OpenAPI Multi-Language SDK
 
-[![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bebebus/SDK/badge)](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
 
 Provides five SDKs in **PHP / Python / Java / Go / Node.js** for the merchant payment open API (collection / payout / callback).
 
-Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 12 signed business endpoints** (the 6 payout endpoints exist only on the v1 base, see "Environment" below; plus non-signed endpoints such as `/version`; 13 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
+Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 12 signed business endpoints** (all of which exist only on the v1 base; plus non-signed endpoints such as `/version`; 13 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
 
 ## Directory Structure
 
@@ -39,7 +39,7 @@ npm / PyPI / Packagist / Go are published to their respective package indexes (s
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`; `import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`; `from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`; namespace `Merchant\Openapi` | cURL extension | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go@v1.2.1` (min Go 1.21); `import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go get github.com/bebebus/SDK/go/v2@v2.0.0` (min Go 1.21); `import openapi "github.com/bebebus/SDK/go/v2"` | `net/http` | `cd go && go test -count=1 ./...` |
 | Java | **Source import (NOT published to Maven)**; `import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > The Go tests read the external `test-vectors.json`, and `go test`'s cache does not track that file, so **after changing the vectors use `-count=1`** to force a re-run.

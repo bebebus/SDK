@@ -17,7 +17,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/bebebus/SDK/go"
+	"github.com/bebebus/SDK/go/v2"
 )
 
 const (

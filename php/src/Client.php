@@ -84,8 +84,8 @@ final class Client
     }
 
     /**
-     * 兼容别名 POST /merchant/groups/query。
-     * 新对接请用 payMethodsQuery 读取 channel_codes。
+     * 兼容别名 POST /merchant/groups/query（历史遗留、未文档化）。
+     * 新对接请用 payMethodsQuery。
      *
      * @param array{biz_type?:string|null, currency?:string|null, country?:string|null} $params
      * @return array<string,mixed>
