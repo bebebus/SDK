@@ -38,7 +38,7 @@ public final class Config {
         if (resolved == null || resolved.isEmpty()) {
             throw new IllegalArgumentException(
                     "baseUrl is required: obtain the production URL from your service provider "
-                            + "(e.g. https://api.<domain>/api/open/v2)");
+                            + "(e.g. https://api.<domain>/api/open/v1)");
         }
         // 去掉尾部斜杠，统一后续拼接
         while (resolved.endsWith("/")) {
