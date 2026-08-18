@@ -151,7 +151,14 @@ jobs:
         # OIDC 交换需 npm CLI ≥ 11.5.1，Node 22 自带 10.x → 先升级 CLI。
         run: |
           npm install -g npm@latest
-          npm publish --provenance --access public
+          # 幂等守卫：该版本已在 npm 上则跳过（与 PyPI skip-existing / 镜像 tag 守卫同款），
+          # 保证发布 run 可安全重跑（此前 rerun 会在此步撞「cannot publish over」把后续步全跳掉）。
+          ver="${RELEASE_VERSION#v}"
+          if [ "$(npm view "@bebebus/merchant-openapi-sdk@${ver}" version 2>/dev/null)" = "${ver}" ]; then
+            echo "npm ${ver} already published; skipping."
+          else
+            npm publish --provenance --access public
+          fi
 
       - name: Publish Python package to PyPI
         if: ${{ inputs.publish_registries == true }}
