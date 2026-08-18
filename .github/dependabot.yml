@@ -7,7 +7,7 @@ updates:
     open-pull-requests-limit: 10
     ignore:
       # gh-aw 编译器会统一更新生成工作流中的 action pin，禁止直接合并此类 PR。
-      - dependency-name: github/gh-aw-actions
+      - dependency-name: github/gh-aw-actions/setup
 
   - package-ecosystem: npm
     directory: /nodejs
@@ -38,6 +38,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # Checkstyle 13.x 运行时要求 Java 21；本 SDK 与发布流程仍以 Java 17 为基线。
+      - dependency-name: com.puppycrawl.tools:checkstyle
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: gomod
     directory: /go
