@@ -4,7 +4,7 @@
 
 商户 OpenAPI 的请求与回调都用 **HMAC-SHA256** 签名，输出 **十六进制小写**。本文件定义的算法
 与服务端签名实现**逐字节一致**；五套 SDK
-的签名器都必须能复现 [`test-vectors.json`](./test-vectors.json) 里的 `base` 与 `sign`（含 `binding` 字段的 v2 绑定向量——1.2.0 起），否则即视为不合格。
+的签名器都必须能复现 [`test-vectors.json`](./test-vectors.json) 里的 `base` 与 `sign`，否则即视为不合格。
 
 > 签名是整套 SDK 唯一「一个字节都不能错」的部分。多数跨语言失败都出在**嵌套 JSON 序列化**与
 > **标量强转字符串**两处，务必逐条对照下文「跨语言坑」。
@@ -25,14 +25,6 @@
 5. **计算 sign**：`HMAC_SHA256(base, key=secret)`，输出**十六进制小写**字符串。
 6. **密钥选择**：pay 类接口与代收回调用 `api_secret_pay`；payout 类接口与代付回调用 `api_secret_payout`。
    （HMAC 的 key 与 base 末尾的 `&secret=` 用的是**同一个** secret。）
-7. **v2 请求绑定**（Base URL 路径以 `/api/open/v2/` 开头时强制）：在既有 canonical body 前加两行前缀：
-   ```
-   POST
-   /api/open/v2/merchant/pay/create
-   k1=v1&k2=v2&...&secret=<secret>
-   ```
-   规范路径为完整 pathname（不含 host/query）；**HTTP method 一律归一为大写**（传入小写 `post` 亦按 `POST` 计入基串）。**v1 无此前缀**，基串与 1.1.x 逐字节不变。**回调验签仍为 body-only。**
-   **代付例外（2026-08-15 拍板）**：payout 端点仅存在于 v1，**不存在带 v2 绑定的 payout 请求**；SDK 在 v2 baseUrl 下对 payout 请求自动回落 v1 基址并使用 body-only 签名。
 
 把算出的 `sign` 放回请求体一起发送。
 

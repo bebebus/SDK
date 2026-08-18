@@ -50,7 +50,7 @@ func main() {
         "out_order_no": "202501010001",
         "amount":       10000, // integer in the smallest unit, 10000 = 1.00
         "currency":     "PHP",
-        "channel_code": "GcashBig",
+        "pay_method":   "gcash",
         "country":      "PH",
         "notify_url":   "https://merchant.example.com/api/notify/pay",
     })
@@ -73,7 +73,7 @@ func main() {
 |------|------|------|------|
 | collection | `PayCreate` | `/merchant/pay/create` | pay |
 | collection | `PayQuery` | `/merchant/pay/query` | pay |
-| collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay; v2 returns `pay_methods` + `channel_codes` |
+| collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | collection | `GroupsQuery` | `/merchant/groups/query` | pay (compatibility alias) |
 | collection | `BalanceQuery` | `/merchant/balance/query` | pay |
 | collection | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
@@ -92,18 +92,18 @@ is passed as a standalone boolean parameter, and the SDK automatically sends it 
 
 ```go
 // Preset: production (no built-in URL; BaseURL must be passed explicitly)
-openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
-// Preset: local sandbox (http://127.0.0.1:3090/api/open/v2)
+openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
+// Preset: local sandbox (http://127.0.0.1:3090/api/open/v1)
 openapi.NewClient(openapi.Config{Environment: openapi.Sandbox, /* ... */})
 // Custom base URL override (service-provider URL or another port) — takes precedence over Environment
-openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
+openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 ```
 
 - `Production` → **no built-in URL**. Obtain the production base URL from your service provider, in the form
-  `https://api.<service_domain>/api/open/v2`, and provide it explicitly via `Config.BaseURL`.
+  `https://api.<service_domain>/api/open/v1`, and provide it explicitly via `Config.BaseURL`.
   If you choose `Production` but do not pass `BaseURL`, `NewClient` does not panic, but the first request returns
   `ErrBaseURLRequired` (a clear error).
-- `Sandbox` → `http://127.0.0.1:3090/api/open/v2`
+- `Sandbox` → `http://127.0.0.1:3090/api/open/v1`
 - `Config.Timeout` defaults to 30s.
 
 ## Callback Signature Verification and Acknowledgement

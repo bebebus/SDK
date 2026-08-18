@@ -8,10 +8,8 @@
 
 | 环境 | Base URL | 说明 |
 |------|----------|------|
-| 正式（production） | **无内置默认值，必须显式传 baseUrl** | 正式环境地址请向服务商获取。新对接用 `https://api.<service_domain>/api/open/v2`；存量可用 `/api/open/v1` |
-| 测试/本地（sandbox） | `http://127.0.0.1:3090/api/open/v2` | 自建/联调；亦可用「正式 baseUrl + 测试密钥」做沙箱（测试密钥下单标记 `is_test`，不动真钱，可调 `*/test/complete`） |
-
-> **代付例外（2026-08-15 拍板）**：代付（payout）端点仅注册于 **v1** Base（`/api/open/v1`）；v2 Base 下所有 `payout/*` 请求（含 receipt 文件）一律 404。SDK 在 v2 baseUrl 下会对 payout 类方法**自动回落**到对应 v1 基址（`/api/open/v2` → `/api/open/v1`），并使用 body-only 签名（无 v2 绑定前缀），调用方无需拆双基址。
+| 正式（production） | **无内置默认值，必须显式传 baseUrl** | 正式环境地址请向服务商获取，形如 `https://api.<service_domain>/api/open/v1` |
+| 测试/本地（sandbox） | `http://127.0.0.1:3090/api/open/v1` | 自建/联调；亦可用「正式 baseUrl + 测试密钥」做沙箱（测试密钥下单标记 `is_test`，不动真钱，可调 `*/test/complete`） |
 
 SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODUCTION`（默认）**不内置任何主机名**，必须显式传入 `baseUrl`（请向服务商获取），否则构造时报错。所有请求 `POST`，`Content-Type: application/json`，请求体为 JSON。
 
@@ -45,8 +43,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | `out_order_no` | string | 是 | 商户订单号（同一商户全局唯一；重复提交一律拒绝，不返回原单） |
 | `amount` | int | 是 | 金额最小单位整数，`[1, 1e12]` |
 | `currency` | string | 是 | 币种码（如 PHP/USDT） |
-| `channel_code` | string | 条件 | **v2 推荐**。支付分组编码，请向运营团队获取；也可见 `pay-methods/query` 的 `channel_codes`。与 `pay_method` 二选一必传 |
-| `pay_method` | string | 条件 | v2 可只传此项走智能选路；**v1 必填**。支付方式（gcash/maya/trc20…，见 pay-methods/query） |
+| `pay_method` | string | 是 | **必填**。支付方式（gcash/maya/trc20…，见 pay-methods/query）；不收 `channel_code` |
 | `country` | string | 否 | 国家 ISO 码；法币必填、加密货币可空 |
 | `notify_url` | string | 是 | 回调地址 |
 | `return_url` | string | 否 | 前端回跳地址 |
@@ -61,13 +58,11 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 请求：`order_no` 或 `out_order_no`（**二选一，至少一个**）。
 响应 `data`：`order_no, out_order_no, amount, currency, status(pending|success|failed), channel_order_no(始终为 null；订单查询和业务关联请使用 order_no 或 out_order_no), paid_at(可空), notify_status(pending|success|failed)`。
 
-### POST `/merchant/pay-methods/query` — 可用支付方式 / 分组编码（密钥：pay）
-请求：`country`（可选）；**v2** 还可传 `biz_type`（`pay`/`payout`）、`currency`。
-响应：
-- **v2** 分两个数组：`data.pay_methods[]` `{pay_method, name, country, currency, biz_type}`；`data.channel_codes[]` `{channel_code, name, country, currency, biz_type}`。`name` 为描述。`channel_code` 请向运营团队确认应使用哪一个。**`channel_codes` 字典只列代收（`biz_type=pay`）分组**——代付下单不收 `channel_code`（见 §四）。
-- **v1** 仍为 `data.methods[]` `{pay_method, name, country(可空), currency(可空)}`。
+### POST `/merchant/pay-methods/query` — 可用支付方式（密钥：pay）
+请求：`country`（可选）。
+响应 `data.methods[]`：`{pay_method, name, country(可空), currency(可空)}`。
 
-> `groups/query` 已并入本接口，不再作为对外主路径。存量 SDK 的 `groupsQuery` 仍可打到兼容别名，新对接请用本接口读 `channel_codes`。
+> `groupsQuery`（`/merchant/groups/query`）是历史遗留的未文档化兼容别名，信封为 `{groups}`；新对接一律用本接口。
 
 ### POST `/merchant/balance/query` — 余额查询（密钥：pay）
 请求：`currency`（可选过滤）。
@@ -79,7 +74,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 ## 四、代付（Payout）
 
-> **本节端点仅注册于 v1 Base（2026-08-15 拍板）**：v2 Base 下 `payout/*` 请求一律 404。SDK 在 v2 baseUrl 下对本节方法自动回落 v1 基址（body-only 签名，无 v2 绑定前缀）。代付契约为 v1 语义：`pay_method` 必填，不收 `channel_code`/`group_code`。
+> `pay_method` 必填，不收 `channel_code`/`group_code`。
 
 ### POST `/merchant/payout/create` — 代付下单（密钥：payout）
 请求（通用字段 +）：

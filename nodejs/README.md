@@ -43,16 +43,16 @@ const client = new Client(new Config({
   apiKey: 'ak_xxx',
   apiSecretPay: 'sk_pay_xxx',       // pay 类接口 / 代收·退款回调
   apiSecretPayout: 'sk_payout_xxx', // payout 类接口 / 代付回调
-  // PRODUCTION 无内置 URL；新对接用 /api/open/v2（channel_code 仅 v2 合法）
-  baseUrl: 'https://api.<service_domain>/api/open/v2',
+  // PRODUCTION 无内置 URL，必须显式传入
+  baseUrl: 'https://api.<service_domain>/api/open/v1',
 }));
 
-// 代收下单（v2：channel_code 钉产品线；金额是最小单位整数，10000 = 1 元）
+// 代收下单（pay_method 必填；金额是最小单位整数，10000 = 1 元）
 const { data, raw } = await client.payCreate({
   out_order_no: 'ORDER_' + Date.now(),
   amount: 10000,
   currency: 'PHP',
-  channel_code: 'GcashBig',
+  pay_method: 'gcash',
   country: 'PH',
   notify_url: 'https://merchant.example.com/api/notify/pay',
 });
@@ -67,17 +67,17 @@ console.log(data.pay_url, raw.code);
 import { Config, Environment } from './src/index.js';
 
 // 预设：正式（无内置 URL，必须显式传 baseUrl，否则抛错）
-new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v2' });
+new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1' });
 // 预设：本地/沙箱
 new Config({ /* ... */ environment: Environment.SANDBOX });
 // 自定义（服务商提供的地址或自定义端口）—— baseUrl 优先于 environment
-new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v2' });
+new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 ```
 
 | 预设 | Base URL |
 |------|----------|
-| `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v2`，并显式传入 `baseUrl` |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
+| `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v1`，并显式传入 `baseUrl` |
+| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
 ## 全部 12 个端点
 
@@ -85,7 +85,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v2' });
 |------|------|------|
 | `payCreate(params)` | `/merchant/pay/create` | pay |
 | `payQuery(params)` | `/merchant/pay/query` | pay |
-| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay；v2 返回 `pay_methods` + `channel_codes` |
+| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
 | `groupsQuery(params?)` | `/merchant/groups/query` | pay（兼容别名） |
 | `balanceQuery(params?)` | `/merchant/balance/query` | pay |
 | `payTestComplete(params)` | `/merchant/pay/test/complete` | pay（仅测试密钥） |

@@ -54,7 +54,7 @@ Map<String, Object> params = new LinkedHashMap<>();
 params.put("out_order_no", "202501010001");
 params.put("amount", 10000L);                      // smallest-unit integer: 10000 = 1.00
 params.put("currency", "PHP");
-params.put("channel_code", "GcashBig");
+params.put("pay_method", "gcash");
 params.put("country", "PH");
 params.put("notify_url", "https://merchant.example.com/api/notify/pay");
 
@@ -68,7 +68,7 @@ System.out.println(resp.dataAsMap().get("order_no"));
 |------|------|------|------|
 | Create collection | `payCreate` | `/merchant/pay/create` | pay |
 | Query collection | `payQuery` | `/merchant/pay/query` | pay |
-| Payment methods / group codes | `payMethodsQuery` | `/merchant/pay-methods/query` | pay; v2 returns `pay_methods` + `channel_codes` |
+| Payment methods | `payMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | Group codes (compat alias) | `groupsQuery` | `/merchant/groups/query` | pay |
 | Balance | `balanceQuery` | `/merchant/balance/query` | pay |
 | Complete collection test | `payTestComplete` | `/merchant/pay/test/complete` | pay (test secret only) |
@@ -99,16 +99,16 @@ Each method accepts a `Map<String, Object>` of business fields:
 // PRODUCTION has no built-in base URL: obtain the production address from your service provider, so baseUrl must be passed explicitly
 Config.builder()
       .environment(Environment.PRODUCTION)
-      .baseUrl("https://api.<service_domain>/api/open/v2")        // required, otherwise build() throws
+      .baseUrl("https://api.<service_domain>/api/open/v1")        // required, otherwise build() throws
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 
 // SANDBOX uses the built-in local address
-Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.0.1:3090/api/open/v2
+Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.0.1:3090/api/open/v1
 
 // Custom base URL override: takes priority over environment; a trailing slash is stripped
 Config.builder()
-      .baseUrl("https://api.<service_domain>/api/open/v2")
+      .baseUrl("https://api.<service_domain>/api/open/v1")
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 ```

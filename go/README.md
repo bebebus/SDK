@@ -50,7 +50,7 @@ func main() {
         "out_order_no": "202501010001",
         "amount":       10000, // 最小单位整数，10000 = 1 元
         "currency":     "PHP",
-        "channel_code": "GcashBig",
+        "pay_method":   "gcash",
         "country":      "PH",
         "notify_url":   "https://merchant.example.com/api/notify/pay",
     })
@@ -73,7 +73,7 @@ func main() {
 |------|------|------|------|
 | 代收 | `PayCreate` | `/merchant/pay/create` | pay |
 | 代收 | `PayQuery` | `/merchant/pay/query` | pay |
-| 代收 | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay；v2 返回 `pay_methods` + `channel_codes` |
+| 代收 | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | 代收 | `GroupsQuery` | `/merchant/groups/query` | pay（兼容别名） |
 | 代收 | `BalanceQuery` | `/merchant/balance/query` | pay |
 | 代收 | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
@@ -92,18 +92,18 @@ func main() {
 
 ```go
 // 预设：正式（无内置 URL，必须显式传 BaseURL）
-openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
-// 预设：本地沙箱（http://127.0.0.1:3090/api/open/v2）
+openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
+// 预设：本地沙箱（http://127.0.0.1:3090/api/open/v1）
 openapi.NewClient(openapi.Config{Environment: openapi.Sandbox, /* ... */})
 // 自定义基址覆盖（服务商提供的地址或其它端口）——优先于 Environment
-openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
+openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 ```
 
 - `Production` → **无内置 URL**。正式基址请向服务商获取，形如
-  `https://api.<service_domain>/api/open/v2`，必须用 `Config.BaseURL` 显式提供。
+  `https://api.<service_domain>/api/open/v1`，必须用 `Config.BaseURL` 显式提供。
   若选 `Production` 又不传 `BaseURL`，`NewClient` 不 panic，但首个请求返回
   `ErrBaseURLRequired`（清晰报错）。
-- `Sandbox` → `http://127.0.0.1:3090/api/open/v2`
+- `Sandbox` → `http://127.0.0.1:3090/api/open/v1`
 - `Config.Timeout` 默认 30s。
 
 ## 回调验签与应答

@@ -2,6 +2,25 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
+## v2.0.0 (2026-08-18) — OpenAPI v2 fully withdrawn
+
+Server contract (decided 2026-08-18): OpenAPI v2 has been physically removed from the server — the entire `/api/open/v2` base now returns 404 for every route, not only `payout/*`. There is no v2 base left to fall back from, so this release removes the now-dead v2 request-binding machinery from all five SDKs and returns every default/preset base URL to `/api/open/v1`. Only 11 of the 14 shared signing vectors (`test-vectors.json`) survive — the 3 `v2_binding_*` vectors are removed; the remaining 11 v1 vectors are byte-for-byte unchanged.
+
+**Breaking changes (all five languages)**:
+- **Request binding removed.** The `METHOD\npath\n` v2 signing prefix and its supporting API are gone:
+  - Node.js: `buildSignBase(payload, secret)` / `sign(payload, secret)` no longer accept a trailing `binding` argument; the exported `SignBinding` TypeScript type is removed.
+  - Python: `build_sign_base(payload, secret)` / `sign(payload, secret)` no longer accept a `binding` argument.
+  - PHP: `Signer::buildSignBase()` / `Signer::sign()` no longer accept a `$binding` argument; the public `Signer::bindingPrefix()` method is removed.
+  - Go: `BuildSignBaseWithBinding` / `SignWithBinding` and the exported `SignBinding` struct are removed; use the 2-argument `BuildSignBase(payload, secret)` / `Sign(payload, secret)` (now body-only, matching pre-1.2.0 behavior).
+  - Java: `SignBinding.java` (public class) is deleted; the 3-argument `Signer.buildSignBase(...)` / `Signer.sign(...)` overloads are removed — use the 2-argument versions.
+- **Payout v1<->v2 auto-fallback removed.** Since v2 no longer exists at all, the automatic base-URL rewrite (`/api/open/v2` → `/api/open/v1`) that payout methods performed under a v2 baseUrl has been deleted along with its helpers (`requestBinding`/`isPayoutPath`/`resolveRequestBase` and language equivalents). All requests now go straight to whatever `baseUrl` is configured — which must be a v1 base.
+- **SANDBOX preset changed.** `Environment.SANDBOX` (and the `PRODUCTION`-without-`baseUrl` error hint) now points at `http://127.0.0.1:3090/api/open/v1` in every language, not `/api/open/v2`.
+- **Breaking (Python only)**: `pay_create` drops the `channel_code` keyword argument (it never existed in the v1 server contract); `pay_method` is now required and a missing `pay_method` raises `TypeError`, mirroring the existing `payout_create` v1 contract. Callers passing `channel_code=` will get a `TypeError: pay_create() got an unexpected keyword argument 'channel_code'` and must switch to `pay_method`.
+- **Docs (SIGNING/INTERFACES/README, zh/en)**: the v2 request-binding section, the "payout exception" callout, and every `channel_code` / `pay_methods` + `channel_codes` mention describing v2-only response shapes are removed. `pay/create` and `pay-methods/query` are documented as v1-only: `pay_method` required, `data.methods[]` response.
+- Version bumped to `2.0.0` across all five SDKs (`package.json`, `pyproject.toml`, `Client::VERSION`/`Version`/`VERSION` constants, and the corresponding source-run version fallbacks).
+
+Non-breaking: callback verification, all other request/response fields, error codes, and the underlying canonical-body signing algorithm (filter/sort/stringify/HMAC) are unchanged — only the v2 binding prefix that used to be prepended to it is gone.
+
 ## v1.3.0 (2026-08-15) — Payout fully withdrawn from v2
 
 - Appendix config files you can view or download for all five languages: client config templates and country/currency catalogs under `<language>/appendix/` (Node.js/PHP/Python/Go/Java). Download URLs are listed in the root README and on the public docs site.

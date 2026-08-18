@@ -17,8 +17,6 @@ func main() {
 		APIKey:       "ak_demo_key",
 		SecretPay:    "sk_test_pay_xxxxxxxxxxxxxxxxxxxxxxxx",
 		SecretPayout: "sk_test_payout_xxxxxxxxxxxxxxxxxxxxxxxx",
-		// Sandbox 预设为 v2 基址亦可：代付仅存在于 v1（2026-08-15 拍板），
-		// payout 类方法会自动回落 v1 基址（body-only 签名），无需单独改基址。
 		Environment: openapi.Sandbox,
 	})
 

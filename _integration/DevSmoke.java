@@ -1,7 +1,5 @@
 // Java SDK × dev 环境联调。凭据从环境变量读取（PP_MNO/PP_KEY/PP_PAY/PP_POUT/PP_BASE）。
 // 序列与其余语言 dev_smoke 一致。编译运行见 run-dev-smoke.sh / 报告中的命令。
-// 单 base 跑 pay+payout：PP_BASE 传 v2 亦可——代付仅存在于 v1（2026-08-15 拍板），
-// payout 类方法在 v2 基址下自动回落 v1（body-only 签名），无需拆双基址。
 import cloud.cniia.openapi.sdk.ApiException;
 import cloud.cniia.openapi.sdk.ApiResponse;
 import cloud.cniia.openapi.sdk.Client;
@@ -40,13 +38,10 @@ public class DevSmoke {
         try {
             ApiResponse r = client.payMethodsQuery(map("country", "PH"));
             Map<String, Object> data = r.dataAsMap();
-            List<?> methods = (List<?>) (data.get("pay_methods") != null ? data.get("pay_methods") : data.get("methods"));
-            List<?> channels = (List<?>) data.get("channel_codes");
+            List<?> methods = (List<?>) data.get("methods");
             StringBuilder sb = new StringBuilder();
             if (methods != null) for (Object o : methods) sb.append(((Map<?, ?>) o).get("pay_method")).append(",");
-            sb.append(" channels=");
-            if (channels != null) for (Object o : channels) sb.append(((Map<?, ?>) o).get("channel_code")).append(",");
-            boolean okQuery = (methods != null && !methods.isEmpty()) || (channels != null && !channels.isEmpty());
+            boolean okQuery = methods != null && !methods.isEmpty();
             ok("pay-methods/query", okQuery, sb.toString());
         } catch (Exception e) { ok("pay-methods/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 

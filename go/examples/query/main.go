@@ -25,7 +25,7 @@ func main() {
 	resp, err := client.PayQuery(ctx, map[string]any{"out_order_no": "202501010001"})
 	printResult("pay/query", resp, err)
 
-	// 可用支付方式 / 分组编码（v2 返回 pay_methods + channel_codes）。
+	// 可用支付方式。
 	resp, err = client.PayMethodsQuery(ctx, map[string]any{"country": "PH"})
 	printResult("pay-methods/query", resp, err)
 
