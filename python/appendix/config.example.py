@@ -11,15 +11,12 @@
 #       base_url=CONFIG["base_url"],
 #       timeout=CONFIG["timeout"],
 #   ))
-#   # 代付端点仅在 /api/open/v1（v2 下 payout/* 返回 404）：
-#   # SDK ≥ 1.3.0 的 payout 方法会自动回落 v1，可复用上面的客户端。
 
 CONFIG = {
     "merchant_no": "<YOUR_MERCHANT_NO>",
     "api_key": "<YOUR_API_KEY>",
     "api_secret_pay": "<YOUR_API_SECRET_PAY>",
     "api_secret_payout": "<YOUR_API_SECRET_PAYOUT>",
-    "base_url": "https://api.<service_domain>/api/open/v2",
-    "base_url_payout": "https://api.<service_domain>/api/open/v1",
+    "base_url": "https://api.<service_domain>/api/open/v1",
     "timeout": 30.0,
 }

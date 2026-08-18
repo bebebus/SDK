@@ -30,13 +30,11 @@ class TestAppendix(unittest.TestCase):
             "api_secret_pay",
             "api_secret_payout",
             "base_url",
-            "base_url_payout",
             "timeout",
         ):
             self.assertIn(key, cfg)
         self.assertTrue(str(cfg["base_url"]).startswith("https://"))
-        self.assertTrue(str(cfg["base_url"]).endswith("/api/open/v2"))
-        self.assertTrue(str(cfg["base_url_payout"]).endswith("/api/open/v1"))
+        self.assertTrue(str(cfg["base_url"]).endswith("/api/open/v1"))
 
     def test_catalog(self) -> None:
         with open(os.path.join(_APPENDIX, "catalog.py"), encoding="utf-8") as fh:

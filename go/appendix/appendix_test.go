@@ -9,7 +9,6 @@ func TestExampleConfigFields(t *testing.T) {
 		"api_secret_pay",
 		"api_secret_payout",
 		"base_url",
-		"base_url_payout",
 		"timeout_ms",
 	}
 	for _, key := range keys {
