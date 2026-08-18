@@ -33,29 +33,7 @@ type Payload = map[string]any
 //
 // 过滤 key=="sign" 与值为 nil 的字段；其余按 key ASCII 升序；顶层标量取原始
 // 字符串形态（不加引号），object/array 走稳定 JSON 序列化。便于单测逐字节断言。
-// SignBinding v2 请求绑定：method 大写 + 规范路径。
-type SignBinding struct {
-	Method string
-	Path   string
-}
-
-func bindingPrefix(b *SignBinding) string {
-	if b == nil {
-		return ""
-	}
-	method := strings.ToUpper(strings.TrimSpace(b.Method))
-	path := strings.TrimSpace(b.Path)
-	if method == "" || path == "" {
-		panic("openapi: binding 必须同时提供 method 与 path")
-	}
-	return method + "\n" + path + "\n"
-}
-
 func BuildSignBase(payload Payload, secret string) string {
-	return BuildSignBaseWithBinding(payload, secret, nil)
-}
-
-func BuildSignBaseWithBinding(payload Payload, secret string, binding *SignBinding) string {
 	keys := make([]string, 0, len(payload))
 	for k, v := range payload {
 		if k == "sign" {
@@ -69,7 +47,6 @@ func BuildSignBaseWithBinding(payload Payload, secret string, binding *SignBindi
 	sort.Strings(keys)
 
 	var b strings.Builder
-	b.WriteString(bindingPrefix(binding))
 	for _, k := range keys {
 		b.WriteString(k)
 		b.WriteByte('=')
@@ -88,14 +65,10 @@ func BuildSignBaseWithBinding(payload Payload, secret string, binding *SignBindi
 // 同样 panic（合约要求金额用整数最小单位）。验签路径 VerifyCallback 会 recover
 // 这些 panic 并归一为 false，绝不向调用方冒泡。
 func Sign(payload Payload, secret string) string {
-	return SignWithBinding(payload, secret, nil)
-}
-
-func SignWithBinding(payload Payload, secret string, binding *SignBinding) string {
 	if isBlankSecret(secret) {
 		panic("openapi: secret 不可为空（拒绝用空密钥签名）")
 	}
-	base := BuildSignBaseWithBinding(payload, secret, binding)
+	base := BuildSignBase(payload, secret)
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte(base))
 	return hex.EncodeToString(mac.Sum(nil))

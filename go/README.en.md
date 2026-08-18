@@ -2,13 +2,13 @@
 
 > [中文](./README.md) | English
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A zero-dependency Go SDK covering all 12 signed endpoints of the Merchant OpenAPI (6 collection + 6 payout), including
 HMAC-SHA256 signing, dual-environment configuration, and timing-safe callback signature verification. It uses only the Go standard library (`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`), with **no `require` at all**.
 
-- module: `github.com/bebebus/SDK/go`
+- module: `github.com/bebebus/SDK/go/v2` (Go semantic import versioning; the module path carries `/v2` starting at 2.0.0)
 - package: `openapi`
 - Go: 1.26 (declared in `go.mod`; backward-compatible with standard-library features of 1.21+)
 
@@ -17,11 +17,11 @@ HMAC-SHA256 signing, dual-environment configuration, and timing-safe callback si
 This SDK depends on no external package. Two ways to use it:
 
 1. Copy this `go/` directory into your project and import it by its module path; or
-2. Add `require github.com/bebebus/SDK/go v0.0.0` to your own `go.mod` and use `replace`
+2. Add `require github.com/bebebus/SDK/go/v2 v0.0.0` to your own `go.mod` and use `replace`
    to point at a local path (while it is private and unpublished):
 
 ```go
-import "github.com/bebebus/SDK/go"
+import "github.com/bebebus/SDK/go/v2"
 ```
 
 ## Quick Start
@@ -34,7 +34,7 @@ import (
     "errors"
     "fmt"
 
-    "github.com/bebebus/SDK/go"
+    "github.com/bebebus/SDK/go/v2"
 )
 
 func main() {
@@ -50,7 +50,7 @@ func main() {
         "out_order_no": "202501010001",
         "amount":       10000, // integer in the smallest unit, 10000 = 1.00
         "currency":     "PHP",
-        "channel_code": "GcashBig",
+        "pay_method":   "gcash",
         "country":      "PH",
         "notify_url":   "https://merchant.example.com/api/notify/pay",
     })
@@ -73,7 +73,7 @@ func main() {
 |------|------|------|------|
 | collection | `PayCreate` | `/merchant/pay/create` | pay |
 | collection | `PayQuery` | `/merchant/pay/query` | pay |
-| collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay; v2 returns `pay_methods` + `channel_codes` |
+| collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | collection | `GroupsQuery` | `/merchant/groups/query` | pay (compatibility alias) |
 | collection | `BalanceQuery` | `/merchant/balance/query` | pay |
 | collection | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
@@ -92,18 +92,18 @@ is passed as a standalone boolean parameter, and the SDK automatically sends it 
 
 ```go
 // Preset: production (no built-in URL; BaseURL must be passed explicitly)
-openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
-// Preset: local sandbox (http://127.0.0.1:3090/api/open/v2)
+openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
+// Preset: local sandbox (http://127.0.0.1:3090/api/open/v1)
 openapi.NewClient(openapi.Config{Environment: openapi.Sandbox, /* ... */})
 // Custom base URL override (service-provider URL or another port) — takes precedence over Environment
-openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
+openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 ```
 
 - `Production` → **no built-in URL**. Obtain the production base URL from your service provider, in the form
-  `https://api.<service_domain>/api/open/v2`, and provide it explicitly via `Config.BaseURL`.
+  `https://api.<service_domain>/api/open/v1`, and provide it explicitly via `Config.BaseURL`.
   If you choose `Production` but do not pass `BaseURL`, `NewClient` does not panic, but the first request returns
   `ErrBaseURLRequired` (a clear error).
-- `Sandbox` → `http://127.0.0.1:3090/api/open/v2`
+- `Sandbox` → `http://127.0.0.1:3090/api/open/v1`
 - `Config.Timeout` defaults to 30s.
 
 ## Callback Signature Verification and Acknowledgement

@@ -54,7 +54,7 @@ Map<String, Object> params = new LinkedHashMap<>();
 params.put("out_order_no", "202501010001");
 params.put("amount", 10000L);                      // 最小单位整数：10000 = 1 元
 params.put("currency", "PHP");
-params.put("channel_code", "GcashBig");
+params.put("pay_method", "gcash");
 params.put("country", "PH");
 params.put("notify_url", "https://merchant.example.com/api/notify/pay");
 
@@ -68,7 +68,7 @@ System.out.println(resp.dataAsMap().get("order_no"));
 |------|------|------|------|
 | 代收下单 | `payCreate` | `/merchant/pay/create` | pay |
 | 代收查单 | `payQuery` | `/merchant/pay/query` | pay |
-| 支付方式 / 分组编码 | `payMethodsQuery` | `/merchant/pay-methods/query` | pay；v2 返回 `pay_methods` + `channel_codes` |
+| 支付方式 | `payMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | 分组编码（兼容别名） | `groupsQuery` | `/merchant/groups/query` | pay |
 | 余额 | `balanceQuery` | `/merchant/balance/query` | pay |
 | 代收测试完成 | `payTestComplete` | `/merchant/pay/test/complete` | pay（仅测试密钥）|
@@ -99,16 +99,16 @@ System.out.println(resp.dataAsMap().get("order_no"));
 // PRODUCTION 无内置基址：正式地址请向服务商获取，必须显式传 baseUrl
 Config.builder()
       .environment(Environment.PRODUCTION)
-      .baseUrl("https://api.<service_domain>/api/open/v2")        // 必填，否则 build() 抛错
+      .baseUrl("https://api.<service_domain>/api/open/v1")        // 必填，否则 build() 抛错
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 
 // SANDBOX 使用内置本地地址
-Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.0.1:3090/api/open/v2
+Config.builder().environment(Environment.SANDBOX) ...           // http://127.0.0.1:3090/api/open/v1
 
 // 自定义基址覆盖：优先级高于 environment，尾斜杠会被去掉
 Config.builder()
-      .baseUrl("https://api.<service_domain>/api/open/v2")
+      .baseUrl("https://api.<service_domain>/api/open/v1")
       .merchantNo("M00000001").apiKey("ak").apiSecretPay("...")
       .build();
 ```

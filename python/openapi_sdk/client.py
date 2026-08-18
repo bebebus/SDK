@@ -17,7 +17,6 @@ import json
 import secrets
 import time
 import urllib.error
-import urllib.parse
 import urllib.request
 import uuid
 from contextlib import suppress
@@ -30,39 +29,6 @@ from .exceptions import ApiError, TransportError
 __all__ = ["Client"]
 
 
-def _request_binding(base_url: str, rel_path: str) -> Optional[Dict[str, str]]:
-    """v2 Base URL 时绑定 POST + 规范路径；v1 返回 None。"""
-    joined = str(base_url or "").rstrip("/") + rel_path
-    path = urllib.parse.urlparse(joined).path
-    if path.startswith("/api/open/v2/"):
-        return {"method": "POST", "path": path}
-    return None
-
-
-def _is_payout_path(rel_path: str) -> bool:
-    """是否代付类端点（路径以 /merchant/payout 开头）。"""
-    return str(rel_path or "").startswith("/merchant/payout")
-
-
-def _resolve_request_base(base_url: str, rel_path: str) -> str:
-    """解析本次请求实际使用的基址。
-
-    契约：代付仅存在于 v1（2026-08-15 拍板）——服务端 v2 Base 下不再注册任何
-    payout 路由（一律 404）。因此 v2 基址 + payout 路径时自动回落到对应 v1 基址
-    （/api/open/v2 → /api/open/v1）；回落后 ``_request_binding`` 对 v1 路径返回
-    None，签名自然是 body-only（无 v2 绑定前缀）。代收路径基址不变。
-    """
-    base = str(base_url or "")
-    if not _is_payout_path(rel_path):
-        return base
-    joined = base.rstrip("/") + rel_path
-    path = urllib.parse.urlparse(joined).path
-    if path.startswith("/api/open/v2/"):
-        # 命中 v2 说明 base 的路径以 /api/open/v2 开头（host 不含斜杠，首个匹配必是路径首段）；
-        # 只替换版本号，host 与端口不变。
-        return base.replace("/api/open/v2", "/api/open/v1", 1)
-    return base
-
 # [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
 # 不再硬编码；源码直跑（未安装）取不到则兜底（须随发版同步）。
 try:
@@ -72,9 +38,9 @@ try:
     try:
         _SDK_VERSION = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        _SDK_VERSION = "1.3.0"
+        _SDK_VERSION = "2.0.0"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    _SDK_VERSION = "1.3.0"
+    _SDK_VERSION = "2.0.0"
 
 _JSON_HEADERS = {
     "Content-Type": "application/json",
@@ -98,7 +64,7 @@ class Client:
         )
         client = Client(cfg)
         resp = client.pay_create(out_order_no="ORD1", amount=10000,
-                                 currency="PHP", channel_code="GcashBig",
+                                 currency="PHP", pay_method="gcash",
                                  notify_url="https://m.example.com/cb")
     """
 
@@ -153,22 +119,20 @@ class Client:
         remark: Optional[str] = None,
         client_ip: Optional[str] = None,
         extra: Optional[Mapping[str, Any]] = None,
-        channel_code: Optional[str] = None,
     ) -> Dict[str, Any]:
         """POST /merchant/pay/create — 代收下单。
 
-        v2 传 ``channel_code`` 或 ``pay_method``（二选一）；v1 仍要求 ``pay_method``。
+        ``pay_method`` 必填（v1 契约，不收 ``channel_code``）。
         """
         if not notify_url:
             raise TypeError("notify_url is required")
-        if not channel_code and not pay_method:
-            raise TypeError("provide channel_code or pay_method")
+        if not pay_method:
+            raise TypeError("pay_method is required")
         body = {
             "out_order_no": out_order_no,
             "amount": amount,
             "currency": currency,
             "pay_method": pay_method,
-            "channel_code": channel_code,
             "notify_url": notify_url,
             "country": country,
             "return_url": return_url,
@@ -196,11 +160,7 @@ class Client:
         biz_type: Optional[str] = None,
         currency: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """POST /merchant/pay-methods/query — 可用支付方式 / 分组编码。
-
-        v2 返回 ``pay_methods`` 与 ``channel_codes`` 两个数组；v1 仍为 ``methods``。
-        ``biz_type`` / ``currency`` 仅 v2 接受。
-        """
+        """POST /merchant/pay-methods/query — 可用支付方式。返回 ``methods`` 数组。"""
         return self._call_pay(
             "/merchant/pay-methods/query",
             {"country": country, "biz_type": biz_type, "currency": currency},
@@ -212,9 +172,9 @@ class Client:
         currency: Optional[str] = None,
         country: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """兼容别名：POST /merchant/groups/query。
+        """兼容别名：POST /merchant/groups/query（历史遗留、未文档化）。
 
-        新对接请用 ``pay_methods_query`` 读取 ``channel_codes``。
+        新对接请用 ``pay_methods_query``。
         """
         return self._call_pay(
             "/merchant/groups/query",
@@ -245,9 +205,6 @@ class Client:
 
     # =====================================================================
     # 代付（Payout，密钥：api_secret_payout）
-    # 代付端点仅注册于 v1 Base（2026-08-15 拍板，v2 下 payout 路由一律 404）；
-    # 本 SDK 在 v2 base_url 下对本节方法自动回落 v1 基址并使用 body-only 签名
-    # （见 ``_resolve_request_base``）。
     # =====================================================================
 
     def payout_create(
@@ -268,9 +225,8 @@ class Client:
     ) -> Dict[str, Any]:
         """POST /merchant/payout/create — 代付下单。
 
-        v1 契约（代付仅存在于 v1，2026-08-15 拍板）：``pay_method`` 必填，
-        不收 ``channel_code``/``group_code``。银行类须传 ``bank_code``
-        （取 :meth:`payout_banks_query` 的 ``code``）。
+        ``pay_method`` 必填，不收 ``channel_code``/``group_code``。银行类须传
+        ``bank_code``（取 :meth:`payout_banks_query` 的 ``code``）。
         """
         if not notify_url:
             raise TypeError("notify_url is required")
@@ -404,7 +360,7 @@ class Client:
         return data if isinstance(data, dict) else {}
 
     def _build_payload(
-        self, body: Mapping[str, Any], secret: str, binding: Optional[Mapping[str, Any]] = None
+        self, body: Mapping[str, Any], secret: str
     ) -> Dict[str, Any]:
         """注入通用字段、剔除 None、计算签名，返回最终请求体。"""
         payload: Dict[str, Any] = {}
@@ -416,7 +372,7 @@ class Client:
         payload["api_key"] = self._config.api_key
         payload["timestamp"] = int(time.time())
         payload["nonce"] = self._gen_nonce()
-        payload["sign"] = signer.sign(payload, secret, binding)
+        payload["sign"] = signer.sign(payload, secret)
         return payload
 
     @staticmethod
@@ -427,10 +383,8 @@ class Client:
     def _request(
         self, path: str, body: Mapping[str, Any], secret: str
     ) -> Dict[str, Any]:
-        # 代付仅存在于 v1（2026-08-15 拍板）：v2 基址下 payout 请求自动回落 v1，
-        # 回落后 _request_binding 返回 None → body-only 签名；代收路径基址不变。
-        base = _resolve_request_base(self._config.base_url, path)
-        payload = self._build_payload(body, secret, _request_binding(base, path))
+        base = self._config.base_url
+        payload = self._build_payload(body, secret)
         url = base + path
         # allow_nan=False：NaN/Infinity 非法且与签名 base 分叉，序列化阶段即拒绝。
         data = json.dumps(

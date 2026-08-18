@@ -38,7 +38,7 @@ final class Config
             // 选了 PRODUCTION（或显式空串）又没传 baseUrl：正式无内置地址，必须显式提供。
             throw new \InvalidArgumentException(
                 'baseUrl is required: obtain the production URL from your service provider '
-                . '(e.g. https://api.<domain>/api/open/v2)'
+                . '(e.g. https://api.<domain>/api/open/v1)'
             );
         }
 

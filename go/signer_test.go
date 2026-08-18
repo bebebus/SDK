@@ -18,10 +18,8 @@ type vector struct {
 	Desc    string         `json:"desc"`
 	Secret  string         `json:"secret"`
 	Payload map[string]any `json:"payload"`
-	// v2 向量携 method+path 绑定前缀（1.2.0 起）；v1 向量缺省为 nil
-	Binding *SignBinding `json:"binding"`
-	Base    string       `json:"base"`
-	Sign    string       `json:"sign"`
+	Base    string         `json:"base"`
+	Sign    string         `json:"sign"`
 }
 
 // loadVectors 读取仓库根的 test-vectors.json（go 子目录的上一级），
@@ -50,32 +48,15 @@ func TestVectorsBaseAndSign(t *testing.T) {
 	for _, v := range loadVectors(t) {
 		v := v
 		t.Run(v.Name, func(t *testing.T) {
-			gotBase := BuildSignBaseWithBinding(v.Payload, v.Secret, v.Binding)
+			gotBase := BuildSignBase(v.Payload, v.Secret)
 			if gotBase != v.Base {
 				t.Errorf("base 不匹配\n期望: %s\n实际: %s", v.Base, gotBase)
 			}
-			gotSign := SignWithBinding(v.Payload, v.Secret, v.Binding)
+			gotSign := Sign(v.Payload, v.Secret)
 			if gotSign != v.Sign {
 				t.Errorf("sign 不匹配\n期望: %s\n实际: %s", v.Sign, gotSign)
 			}
 		})
-	}
-}
-
-func TestV2RequestBindingPrefix(t *testing.T) {
-	payload := Payload{"a": 1}
-	binding := &SignBinding{Method: "POST", Path: "/api/open/v2/merchant/pay/create"}
-	got := BuildSignBaseWithBinding(payload, "s", binding)
-	want := "POST\n/api/open/v2/merchant/pay/create\na=1&secret=s"
-	if got != want {
-		t.Fatalf("base 不匹配\n期望: %q\n实际: %q", want, got)
-	}
-	gotSign := SignWithBinding(payload, "s", binding)
-	if gotSign != "1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b" {
-		t.Fatalf("sign 不匹配: %s", gotSign)
-	}
-	if BuildSignBase(payload, "s") != "a=1&secret=s" {
-		t.Fatalf("无 binding 时应保持 v1 口径")
 	}
 }
 

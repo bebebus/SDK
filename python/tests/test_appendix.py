@@ -30,13 +30,11 @@ class TestAppendix(unittest.TestCase):
             "api_secret_pay",
             "api_secret_payout",
             "base_url",
-            "base_url_payout",
             "timeout",
         ):
             self.assertIn(key, cfg)
         self.assertTrue(str(cfg["base_url"]).startswith("https://"))
-        self.assertTrue(str(cfg["base_url"]).endswith("/api/open/v2"))
-        self.assertTrue(str(cfg["base_url_payout"]).endswith("/api/open/v1"))
+        self.assertTrue(str(cfg["base_url"]).endswith("/api/open/v1"))
 
     def test_catalog(self) -> None:
         with open(os.path.join(_APPENDIX, "catalog.py"), encoding="utf-8") as fh:
@@ -55,4 +53,8 @@ class TestAppendix(unittest.TestCase):
         self.assertIn("100001", codes)
         self.assertIn("300404", codes)
         self.assertEqual(next(e for e in errors if e["code"] == "100000")["retryable"], "depends")
-        self.assertTrue(all(e["http"] == 200 for e in errors))
+        # 300304（建单暂不可用，insert-first fail-closed）是当前唯一约定非 200 的错误码，固定 HTTP 503。
+        known_non_200 = {"300304": 503}
+        for e in errors:
+            expected = known_non_200.get(e["code"], 200)
+            self.assertEqual(e["http"], expected, f"{e['code']} http={e['http']}")

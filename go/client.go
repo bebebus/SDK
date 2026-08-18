@@ -7,13 +7,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
 // Version 是 SDK 版本号单一事实源：UA 由它派生（不再硬编码）。
 // release.sh 发版打 tag go/vX.Y.Z 时，同步 sed 此常量保持一致。
-const Version = "1.3.0"
+const Version = "2.0.0"
 
 // secretKind 标记某端点该用哪把密钥。
 type secretKind int
@@ -43,7 +42,7 @@ type Client struct {
 //
 // 注意：Production 没有内置 URL。若选用 Production 又未提供 BaseURL，构造不会
 // panic，但首个请求会返回 ErrBaseURLRequired（正式基址请向服务商获取，
-// 形如 https://api.<service_domain>/api/open/v2）。
+// 形如 https://api.<service_domain>/api/open/v1）。
 func NewClient(cfg Config) *Client {
 	base, err := cfg.resolveBaseURL()
 	return &Client{
@@ -63,8 +62,8 @@ func NewClient(cfg Config) *Client {
 
 // ===================== 代收（Pay，密钥 api_secret_pay） =====================
 
-// PayCreate 代收下单。params 为业务字段（out_order_no/amount/currency/notify_url，
-// 以及 v2 的 channel_code 或 pay_method 等），通用字段与签名由 SDK 自动注入。
+// PayCreate 代收下单。params 为业务字段（out_order_no/amount/currency/notify_url/
+// pay_method 等，pay_method 必填），通用字段与签名由 SDK 自动注入。
 func (c *Client) PayCreate(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay/create", params, usePay)
 }
@@ -74,14 +73,13 @@ func (c *Client) PayQuery(ctx context.Context, params map[string]any) (*Response
 	return c.call(ctx, "/merchant/pay/query", params, usePay)
 }
 
-// PayMethodsQuery 可用支付方式 / 分组编码。params 可含 country / biz_type / currency。
-// v2 返回 pay_methods 与 channel_codes；v1 仍为 methods。
+// PayMethodsQuery 可用支付方式。params 可含 country / biz_type / currency。返回 methods。
 func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
 }
 
-// GroupsQuery 兼容别名，仍打 /merchant/groups/query。
-// 新对接请用 PayMethodsQuery 读取 channel_codes。
+// GroupsQuery 兼容别名，仍打 /merchant/groups/query（历史遗留、未文档化）。
+// 新对接请用 PayMethodsQuery。
 func (c *Client) GroupsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/groups/query", params, usePay)
 }
@@ -98,8 +96,6 @@ func (c *Client) PayTestComplete(ctx context.Context, params map[string]any) (*R
 }
 
 // ===================== 代付（Payout，密钥 api_secret_payout） =====================
-// 代付端点仅注册于 v1 Base（2026-08-15 拍板，v2 下 payout 路由一律 404）；
-// 本 SDK 在 v2 BaseURL 下对本节方法自动回落 v1 基址并使用 body-only 签名（见 resolveRequestBase）。
 
 // PayoutCreate 代付下单。params 为业务字段（out_payout_no/amount/currency/
 // notify_url/account_no，pay_method 必填（不收 channel_code）；银行类必填 bank_code）。
@@ -171,12 +167,9 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 		return nil, c.baseURLErr
 	}
 	secret := c.secretFor(kind)
-	// 代付仅存在于 v1（2026-08-15 拍板）：v2 基址下 payout 请求自动回落 v1，
-	// 回落后 requestBinding 返回 nil → body-only 签名；代收路径基址不变。
-	base := resolveRequestBase(c.baseURL, path)
-	body := c.buildBody(params, secret, base, path)
+	body := c.buildBody(params, secret)
 
-	raw, status, err := c.do(ctx, base, path, body)
+	raw, status, err := c.do(ctx, c.baseURL, path, body)
 	if err != nil {
 		return nil, err
 	}
@@ -204,8 +197,7 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 
 // buildBody 注入通用字段并签名，返回最终请求体（含 sign）。
 // 过滤值为 nil 的字段（既不入体、也不参与签名）。
-// base 为本次请求实际使用的基址（payout 在 v2 基址下已由 resolveRequestBase 回落 v1）。
-func (c *Client) buildBody(params map[string]any, secret, base, relPath string) map[string]any {
+func (c *Client) buildBody(params map[string]any, secret string) map[string]any {
 	body := make(map[string]any, len(params)+5)
 	for k, v := range params {
 		if v == nil {
@@ -218,52 +210,11 @@ func (c *Client) buildBody(params map[string]any, secret, base, relPath string) 
 	body["timestamp"] = nowUnix()
 	body["nonce"] = newNonce()
 
-	body["sign"] = SignWithBinding(body, secret, requestBinding(base, relPath))
+	body["sign"] = Sign(body, secret)
 	return body
 }
 
-func requestBinding(baseURL, relPath string) *SignBinding {
-	joined := strings.TrimRight(baseURL, "/") + relPath
-	u, err := url.Parse(joined)
-	if err != nil {
-		return nil
-	}
-	if strings.HasPrefix(u.Path, "/api/open/v2/") {
-		return &SignBinding{Method: "POST", Path: u.Path}
-	}
-	return nil
-}
-
-// isPayoutPath 判断是否代付类端点（路径以 /merchant/payout 开头）。
-func isPayoutPath(relPath string) bool {
-	return strings.HasPrefix(relPath, "/merchant/payout")
-}
-
-// resolveRequestBase 解析本次请求实际使用的基址。
-//
-// 契约：代付仅存在于 v1（2026-08-15 拍板）——服务端 v2 Base 下不再注册任何
-// payout 路由（一律 404）。因此 v2 基址 + payout 路径时自动回落到对应 v1 基址
-// （/api/open/v2 → /api/open/v1）；回落后 requestBinding 对 v1 路径返回 nil，
-// 签名自然是 body-only（无 v2 绑定前缀）。代收路径基址不变。
-func resolveRequestBase(baseURL, relPath string) string {
-	if !isPayoutPath(relPath) {
-		return baseURL
-	}
-	joined := strings.TrimRight(baseURL, "/") + relPath
-	u, err := url.Parse(joined)
-	if err != nil {
-		return baseURL
-	}
-	if strings.HasPrefix(u.Path, "/api/open/v2/") {
-		// 命中 v2 说明 base 的路径以 /api/open/v2 开头（host 不含斜杠，首个匹配必是路径首段）；
-		// 只替换版本号（n=1），host 与端口不变。
-		return strings.Replace(baseURL, "/api/open/v2", "/api/open/v1", 1)
-	}
-	return baseURL
-}
-
 // do 执行 POST application/json，返回原始响应体与状态码。
-// base 为本次请求实际使用的基址（payout 在 v2 基址下已回落 v1）。
 func (c *Client) do(ctx context.Context, base, path string, body map[string]any) ([]byte, int, error) {
 	payload, err := marshalNoEscape(body)
 	if err != nil {

@@ -1,8 +1,5 @@
 """Python SDK × dev 环境联调。凭据从环境变量读取（PP_MNO/PP_KEY/PP_PAY/PP_POUT/PP_BASE）。
-序列与 dev_smoke.mjs / dev_smoke.php 完全一致，便于跨语言对比。
-
-单 base 跑 pay+payout：PP_BASE 传 v2 亦可——代付仅存在于 v1（2026-08-15 拍板），
-payout 类方法在 v2 基址下自动回落 v1（body-only 签名），无需拆双基址。"""
+序列与 dev_smoke.mjs / dev_smoke.php 完全一致，便于跨语言对比。"""
 import os
 import sys
 import time
@@ -27,12 +24,11 @@ print(f"[Python] base={base} merchant={mno} tag={tag}")
 # 1. pay-methods/query
 try:
     d = client.pay_methods_query(country="PH")
-    methods = d.get("pay_methods") or d.get("methods") or []
-    channels = d.get("channel_codes") or []
+    methods = d.get("methods") or []
     ok(
         "pay-methods/query",
-        len(methods) > 0 or len(channels) > 0,
-        "methods=" + ",".join(m["pay_method"] for m in methods) + " channels=" + ",".join(c["channel_code"] for c in channels),
+        len(methods) > 0,
+        "methods=" + ",".join(m["pay_method"] for m in methods),
     )
 except Exception as e:  # noqa: BLE001
     ok("pay-methods/query", False, f"{type(e).__name__} {e}")

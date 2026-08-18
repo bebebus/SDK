@@ -35,10 +35,6 @@ public final class Signer {
      * @param secret  与请求/回调匹配的密钥
      */
     public static String buildSignBase(Map<String, Object> payload, String secret) {
-        return buildSignBase(payload, secret, null);
-    }
-
-    public static String buildSignBase(Map<String, Object> payload, String secret, SignBinding binding) {
         // 空/空白密钥一律拒绝：从根上禁止用空密钥签名（fail-closed）。
         if (!isUsableSecret(secret)) {
             throw new IllegalArgumentException("secret 不能为空或全空白");
@@ -72,20 +68,7 @@ public final class Signer {
             sb.append('&');
         }
         sb.append("secret=").append(secret);
-        return bindingPrefix(binding) + sb;
-    }
-
-    /** v2 请求绑定前缀。binding 为 null 时与 v1 基串逐字节一致。 */
-    public static String bindingPrefix(SignBinding binding) {
-        if (binding == null) {
-            return "";
-        }
-        String method = binding.method() == null ? "" : binding.method().trim().toUpperCase();
-        String path = binding.path() == null ? "" : binding.path().trim();
-        if (method.isEmpty() || path.isEmpty()) {
-            throw new IllegalArgumentException("binding 必须同时提供 method 与 path");
-        }
-        return method + "\n" + path + "\n";
+        return sb.toString();
     }
 
     /**
@@ -95,15 +78,11 @@ public final class Signer {
      * @param secret  与请求/回调匹配的密钥
      */
     public static String sign(Map<String, Object> payload, String secret) {
-        return sign(payload, secret, null);
-    }
-
-    public static String sign(Map<String, Object> payload, String secret, SignBinding binding) {
         // 空/空白密钥拒绝（与 buildSignBase 一致，从根上禁止空密钥签名）。
         if (!isUsableSecret(secret)) {
             throw new IllegalArgumentException("secret 不能为空或全空白");
         }
-        String base = buildSignBase(payload, secret, binding);
+        String base = buildSignBase(payload, secret);
         return hmacSha256Hex(base, secret);
     }
 

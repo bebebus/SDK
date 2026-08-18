@@ -23,9 +23,8 @@ final class Signer
      *
      * @param array<string,mixed> $payload 业务字段键值表（不含 sign，含 null 的会被自动跳过）
      * @param string              $secret  与 base 末尾及 HMAC key 同一个 secret
-     * @param array{method?:string,path?:string}|null $binding v2 请求绑定，v1 传 null
      */
-    public static function buildSignBase(array $payload, string $secret, ?array $binding = null): string
+    public static function buildSignBase(array $payload, string $secret): string
     {
         // 过滤：排除 sign 字段与 null 值
         $filtered = [];
@@ -47,25 +46,7 @@ final class Signer
             $parts[] = $key . '=' . self::signValue($value);
         }
 
-        return self::bindingPrefix($binding) . implode('&', $parts) . '&secret=' . $secret;
-    }
-
-    /**
-     * v2 请求绑定前缀。缺省 binding 时与 v1 基串逐字节一致。
-     *
-     * @param array{method?:string,path?:string}|null $binding
-     */
-    public static function bindingPrefix(?array $binding): string
-    {
-        if ($binding === null) {
-            return '';
-        }
-        $method = strtoupper(trim((string) ($binding['method'] ?? '')));
-        $path = trim((string) ($binding['path'] ?? ''));
-        if ($method === '' || $path === '') {
-            throw new \InvalidArgumentException('binding 必须同时提供 method 与 path');
-        }
-        return $method . "\n" . $path . "\n";
+        return implode('&', $parts) . '&secret=' . $secret;
     }
 
     /**
@@ -75,15 +56,14 @@ final class Signer
      * 否则攻击者用空密钥即可伪造任意签名）。合法非空密钥的签名结果与服务端逐字节一致。
      *
      * @param array<string,mixed> $payload
-     * @param array{method?:string,path?:string}|null $binding v2 请求绑定，v1 传 null
      */
-    public static function sign(array $payload, string $secret, ?array $binding = null): string
+    public static function sign(array $payload, string $secret): string
     {
         if (!self::isUsableSecret($secret)) {
             throw new \InvalidArgumentException('secret 不能为空：禁止使用空密钥签名');
         }
 
-        $base = self::buildSignBase($payload, $secret, $binding);
+        $base = self::buildSignBase($payload, $secret);
 
         return hash_hmac('sha256', $base, $secret);
     }

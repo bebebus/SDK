@@ -2,13 +2,13 @@
 
 > 中文 | [English](./README.en.md)
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 12 个签名端点（代收 6 + 代付 6），含
 HMAC-SHA256 签名、双环境配置、回调时序安全验签。仅用 Go 标准库（`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`），**无任何 `require`**。
 
-- module：`github.com/bebebus/SDK/go`
+- module：`github.com/bebebus/SDK/go/v2`（Go 语义化导入版本，2.0.0 起模块路径带 `/v2`）
 - package：`openapi`
 - Go：1.26（`go.mod` 声明，向下兼容 1.21+ 的标准库特性）
 
@@ -17,11 +17,11 @@ HMAC-SHA256 签名、双环境配置、回调时序安全验签。仅用 Go 标�
 本 SDK 不依赖任何外部包。两种用法：
 
 1. 直接拷贝本 `go/` 目录到你的工程并按模块路径导入；或
-2. 在自己的 `go.mod` 里 `require github.com/bebebus/SDK/go v0.0.0` 后用 `replace`
+2. 在自己的 `go.mod` 里 `require github.com/bebebus/SDK/go/v2 v0.0.0` 后用 `replace`
    指向本地路径（私有未发布时）：
 
 ```go
-import "github.com/bebebus/SDK/go"
+import "github.com/bebebus/SDK/go/v2"
 ```
 
 ## 快速开始
@@ -34,7 +34,7 @@ import (
     "errors"
     "fmt"
 
-    "github.com/bebebus/SDK/go"
+    "github.com/bebebus/SDK/go/v2"
 )
 
 func main() {
@@ -50,7 +50,7 @@ func main() {
         "out_order_no": "202501010001",
         "amount":       10000, // 最小单位整数，10000 = 1 元
         "currency":     "PHP",
-        "channel_code": "GcashBig",
+        "pay_method":   "gcash",
         "country":      "PH",
         "notify_url":   "https://merchant.example.com/api/notify/pay",
     })
@@ -73,7 +73,7 @@ func main() {
 |------|------|------|------|
 | 代收 | `PayCreate` | `/merchant/pay/create` | pay |
 | 代收 | `PayQuery` | `/merchant/pay/query` | pay |
-| 代收 | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay；v2 返回 `pay_methods` + `channel_codes` |
+| 代收 | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | 代收 | `GroupsQuery` | `/merchant/groups/query` | pay（兼容别名） |
 | 代收 | `BalanceQuery` | `/merchant/balance/query` | pay |
 | 代收 | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
@@ -92,18 +92,18 @@ func main() {
 
 ```go
 // 预设：正式（无内置 URL，必须显式传 BaseURL）
-openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
-// 预设：本地沙箱（http://127.0.0.1:3090/api/open/v2）
+openapi.NewClient(openapi.Config{Environment: openapi.Production, BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
+// 预设：本地沙箱（http://127.0.0.1:3090/api/open/v1）
 openapi.NewClient(openapi.Config{Environment: openapi.Sandbox, /* ... */})
 // 自定义基址覆盖（服务商提供的地址或其它端口）——优先于 Environment
-openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v2", /* ... */})
+openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open/v1", /* ... */})
 ```
 
 - `Production` → **无内置 URL**。正式基址请向服务商获取，形如
-  `https://api.<service_domain>/api/open/v2`，必须用 `Config.BaseURL` 显式提供。
+  `https://api.<service_domain>/api/open/v1`，必须用 `Config.BaseURL` 显式提供。
   若选 `Production` 又不传 `BaseURL`，`NewClient` 不 panic，但首个请求返回
   `ErrBaseURLRequired`（清晰报错）。
-- `Sandbox` → `http://127.0.0.1:3090/api/open/v2`
+- `Sandbox` → `http://127.0.0.1:3090/api/open/v1`
 - `Config.Timeout` 默认 30s。
 
 ## 回调验签与应答

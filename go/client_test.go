@@ -21,7 +21,7 @@ func TestEnvironmentBaseURL(t *testing.T) {
 		t.Errorf("production 应无内置基址，实际: %s", got)
 	}
 	// Sandbox 预设仍为本地端口 127.0.0.1。
-	if sandboxBaseURL != "http://127.0.0.1:3090/api/open/v2" {
+	if sandboxBaseURL != "http://127.0.0.1:3090/api/open/v1" {
 		t.Errorf("sandbox 预设常量被改动: %s", sandboxBaseURL)
 	}
 	if got := Sandbox.BaseURL(); got != sandboxBaseURL {
@@ -80,7 +80,7 @@ func TestBuildBodyInjectsCommonFields(t *testing.T) {
 		"out_order_no": "202501010001",
 		"amount":       10000,
 		"return_url":   nil, // 应被过滤。
-	}, c.cfg.SecretPay, c.baseURL, "/merchant/pay/create")
+	}, c.cfg.SecretPay)
 
 	if body["merchant_no"] != "M00000001" || body["api_key"] != "ak_demo_key" {
 		t.Errorf("通用字段缺失: %+v", body)
@@ -238,84 +238,6 @@ func TestCallSuccessParsesData(t *testing.T) {
 	amt, ok := resp.Data["amount"].(json.Number)
 	if !ok || amt.String() != "1000000000000" {
 		t.Errorf("大整数解析错误: %+v (%T)", resp.Data["amount"], resp.Data["amount"])
-	}
-}
-
-// TestPayoutFallsBackToV1WithBodyOnlySign 校验契约：代付仅存在于 v1（2026-08-15 拍板）。
-// v2 BaseURL 下 payout 请求须自动回落 v1 路径且签名为 body-only（无 v2 绑定前缀）。
-func TestPayoutFallsBackToV1WithBodyOnlySign(t *testing.T) {
-	var captured map[string]any
-	var gotPath string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotPath = r.URL.Path
-		raw, _ := io.ReadAll(r.Body)
-		dec := json.NewDecoder(bytes.NewReader(raw))
-		dec.UseNumber()
-		var m map[string]any
-		_ = dec.Decode(&m)
-		captured = m
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = io.WriteString(w, `{"code":0,"message":"ok","data":{}}`)
-	}))
-	defer srv.Close()
-
-	// v2 基址：payout 应自动回落 /api/open/v1。
-	c := NewClient(Config{BaseURL: srv.URL + "/api/open/v2", SecretPayout: "sk_payout"})
-	if _, err := c.PayoutQuery(context.Background(), map[string]any{"payout_no": "W1"}); err != nil {
-		t.Fatalf("PayoutQuery 失败: %v", err)
-	}
-	if gotPath != "/api/open/v1/merchant/payout/query" {
-		t.Errorf("payout 未回落 v1 路径: %s", gotPath)
-	}
-	gotSign, _ := captured["sign"].(string)
-	delete(captured, "sign")
-	// 与独立复算的 v1 body-only 签名一致。
-	if want := Sign(captured, "sk_payout"); gotSign != want {
-		t.Errorf("payout 应为 body-only 签名, got=%s want=%s", gotSign, want)
-	}
-	// 反向锚：若仍按 v2 绑定基串计算则必不相等。
-	bound := SignWithBinding(captured, "sk_payout",
-		&SignBinding{Method: "POST", Path: "/api/open/v2/merchant/payout/query"})
-	if gotSign == bound {
-		t.Errorf("payout 签名不应携带 v2 绑定前缀")
-	}
-}
-
-// TestPayStaysOnV2WithBindingSign 防回归反向锚：代收在 v2 BaseURL 下行为完全不变
-// （仍打 v2 路径且签名带 METHOD+path 绑定前缀）。
-func TestPayStaysOnV2WithBindingSign(t *testing.T) {
-	var captured map[string]any
-	var gotPath string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotPath = r.URL.Path
-		raw, _ := io.ReadAll(r.Body)
-		dec := json.NewDecoder(bytes.NewReader(raw))
-		dec.UseNumber()
-		var m map[string]any
-		_ = dec.Decode(&m)
-		captured = m
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = io.WriteString(w, `{"code":0,"message":"ok","data":{}}`)
-	}))
-	defer srv.Close()
-
-	c := NewClient(Config{BaseURL: srv.URL + "/api/open/v2", SecretPay: "sk_pay"})
-	if _, err := c.PayQuery(context.Background(), map[string]any{"order_no": "P1"}); err != nil {
-		t.Fatalf("PayQuery 失败: %v", err)
-	}
-	if gotPath != "/api/open/v2/merchant/pay/query" {
-		t.Errorf("pay 不应回落，path=%s", gotPath)
-	}
-	gotSign, _ := captured["sign"].(string)
-	delete(captured, "sign")
-	want := SignWithBinding(captured, "sk_pay",
-		&SignBinding{Method: "POST", Path: "/api/open/v2/merchant/pay/query"})
-	if gotSign != want {
-		t.Errorf("pay 应为 v2 绑定签名, got=%s want=%s", gotSign, want)
-	}
-	// 反向锚：body-only 签名必不相等。
-	if gotSign == Sign(captured, "sk_pay") {
-		t.Errorf("pay 签名不应退化为 body-only")
 	}
 }
 

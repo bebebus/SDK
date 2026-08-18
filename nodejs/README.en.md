@@ -43,16 +43,16 @@ const client = new Client(new Config({
   apiKey: 'ak_xxx',
   apiSecretPay: 'sk_pay_xxx',       // pay endpoints / collection & refund callbacks
   apiSecretPayout: 'sk_payout_xxx', // payout endpoints / payout callbacks
-  // PRODUCTION has no built-in URL; new integrations use /api/open/v2 (channel_code is v2-only)
-  baseUrl: 'https://api.<service_domain>/api/open/v2',
+  // PRODUCTION has no built-in URL; must be passed explicitly
+  baseUrl: 'https://api.<service_domain>/api/open/v1',
 }));
 
-// Create a collection order (v2: pin a product line with channel_code)
+// Create a collection order (pay_method required)
 const { data, raw } = await client.payCreate({
   out_order_no: 'ORDER_' + Date.now(),
   amount: 10000,
   currency: 'PHP',
-  channel_code: 'GcashBig',
+  pay_method: 'gcash',
   country: 'PH',
   notify_url: 'https://merchant.example.com/api/notify/pay',
 });
@@ -67,17 +67,17 @@ Each method returns `{ data, raw }`: `data` is the `data` field inside the unifi
 import { Config, Environment } from './src/index.js';
 
 // Preset: production (no built-in URL; you must explicitly pass baseUrl, otherwise it throws)
-new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v2' });
+new Config({ /* ... */ environment: Environment.PRODUCTION, baseUrl: 'https://api.<service_domain>/api/open/v1' });
 // Preset: local/sandbox
 new Config({ /* ... */ environment: Environment.SANDBOX });
 // Custom (service-provider URL or custom port) — baseUrl takes precedence over environment
-new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v2' });
+new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 ```
 
 | Preset | Base URL |
 |------|----------|
-| `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v2` from your service provider and pass it as `baseUrl` |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v2` |
+| `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v1` from your service provider and pass it as `baseUrl` |
+| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
 ## All 12 endpoints
 
@@ -85,7 +85,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v2' });
 |------|------|------|
 | `payCreate(params)` | `/merchant/pay/create` | pay |
 | `payQuery(params)` | `/merchant/pay/query` | pay |
-| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay; v2 returns `pay_methods` + `channel_codes` |
+| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
 | `groupsQuery(params?)` | `/merchant/groups/query` | pay (compatibility alias) |
 | `balanceQuery(params?)` | `/merchant/balance/query` | pay |
 | `payTestComplete(params)` | `/merchant/pay/test/complete` | pay (test secret only) |

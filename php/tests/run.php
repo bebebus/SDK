@@ -88,11 +88,9 @@ foreach ($doc->vectors as $vec) {
     $secret = (string) $vec->secret;
     // 顶层 stdClass → 关联数组（嵌套对象保持 stdClass、嵌套数组保持 array）
     $payload = (array) $vec->payload;
-    // v2 向量携 binding（method+path 绑定前缀，1.2.0 起）；v1 向量无该字段 → null
-    $binding = isset($vec->binding) ? (array) $vec->binding : null;
 
-    $base = Signer::buildSignBase($payload, $secret, $binding);
-    $sign = Signer::sign($payload, $secret, $binding);
+    $base = Signer::buildSignBase($payload, $secret);
+    $sign = Signer::sign($payload, $secret);
 
     check("vector[$vname] base", $vec->base, $base);
     check("vector[$vname] sign", $vec->sign, $sign);
@@ -188,18 +186,6 @@ check(
 // 整数顶层
 check('整数顶层', 'n=10000&secret=s', Signer::buildSignBase(['n' => 10000], 's'));
 
-// v2 请求绑定前缀
-check(
-    'v2 binding 前缀',
-    "POST\n/api/open/v2/merchant/pay/create\na=1&secret=s",
-    Signer::buildSignBase(['a' => 1], 's', ['method' => 'POST', 'path' => '/api/open/v2/merchant/pay/create'])
-);
-check(
-    'v2 binding sign',
-    '1ee55ced40501b30d841a56884eaf8c54f05d080d76868d72b41030eb1ce892b',
-    Signer::sign(['a' => 1], 's', ['method' => 'POST', 'path' => '/api/open/v2/merchant/pay/create'])
-);
-
 // 空对象（stdClass）→ {}，与空数组 [] → [] 区分（HIGH 项回归）
 check('空对象 stdClass → {}', 'extra={}&secret=s', Signer::buildSignBase(['extra' => new \stdClass()], 's'));
 check('空数组 [] → []', 'extra=[]&secret=s', Signer::buildSignBase(['extra' => []], 's'));
@@ -225,7 +211,7 @@ checkTrue('PRODUCTION 缺 baseUrl 抛 InvalidArgumentException', $prodThrew);
 
 // SANDBOX 预设仍内置本地基址
 $cfgSand = new Config('M', 'k', 'p', 'q', Environment::SANDBOX);
-check('SANDBOX 基址', 'http://127.0.0.1:3090/api/open/v2', $cfgSand->baseUrl);
+check('SANDBOX 基址', 'http://127.0.0.1:3090/api/open/v1', $cfgSand->baseUrl);
 
 /* ---- 用注入的 HTTP 桩验证：请求构建（通用字段/nonce/签名/null 过滤）+ 信封解析 + 密钥选择 ---- */
 
@@ -255,7 +241,7 @@ $data = $stubClient->payCreate([
 ]);
 
 check('stub payCreate 返回 data', ['echo' => true], $data);
-check('stub payCreate URL', 'http://127.0.0.1:3090/api/open/v2/merchant/pay/create', $captured['url']);
+check('stub payCreate URL', 'http://127.0.0.1:3090/api/open/v1/merchant/pay/create', $captured['url']);
 checkTrue('stub 通用字段 merchant_no', $captured['body']['merchant_no'] === 'M00000001');
 checkTrue('stub 通用字段 api_key', $captured['body']['api_key'] === 'ak_demo_key');
 checkTrue('stub 通用字段 timestamp 是整数', is_int($captured['body']['timestamp']));
@@ -268,14 +254,14 @@ checkFalse('stub null 字段 subject 被过滤', array_key_exists('subject', $ca
 $bodyNoSign = $captured['body'];
 $receivedSign = $bodyNoSign['sign'];
 unset($bodyNoSign['sign']);
-check('stub payCreate sign 用 pay 密钥', Signer::sign($bodyNoSign, $paySecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/pay/create']), $receivedSign);
+check('stub payCreate sign 用 pay 密钥', Signer::sign($bodyNoSign, $paySecret), $receivedSign);
 
 $stubClient->groupsQuery(['biz_type' => 'pay', 'currency' => 'PHP', 'country' => 'PH']);
-check('stub groupsQuery URL', 'http://127.0.0.1:3090/api/open/v2/merchant/groups/query', $captured['url']);
+check('stub groupsQuery URL', 'http://127.0.0.1:3090/api/open/v1/merchant/groups/query', $captured['url']);
 $groupsBody = $captured['body'];
 $groupsSign = $groupsBody['sign'];
 unset($groupsBody['sign']);
-check('stub groupsQuery sign 用 pay 密钥', Signer::sign($groupsBody, $paySecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/groups/query']), $groupsSign);
+check('stub groupsQuery sign 用 pay 密钥', Signer::sign($groupsBody, $paySecret), $groupsSign);
 
 // nonce 每请求唯一
 $firstNonce = $captured['body']['nonce'];
@@ -284,8 +270,6 @@ $secondNonce = $captured['body']['nonce'];
 checkTrue('nonce 每请求唯一', $firstNonce !== $secondNonce);
 
 // payout 类用 payout 密钥。
-// 契约：代付仅存在于 v1（2026-08-15 拍板）——v2 基址（SANDBOX）下 payout 请求
-// 自动回落 v1 基址，签名为 body-only（无 v2 绑定前缀）。
 $stubClient->payoutCreate([
     'out_payout_no' => 'WD1',
     'amount' => 100000,
@@ -296,16 +280,11 @@ $stubClient->payoutCreate([
     'account_name' => 'San Zhang',
     'bank_code' => 'BDO',
 ]);
-check('stub payoutCreate URL 回落 v1', 'http://127.0.0.1:3090/api/open/v1/merchant/payout/create', $captured['url']);
+check('stub payoutCreate URL', 'http://127.0.0.1:3090/api/open/v1/merchant/payout/create', $captured['url']);
 $pbody = $captured['body'];
 $psign = $pbody['sign'];
 unset($pbody['sign']);
-check('stub payoutCreate sign 用 payout 密钥（body-only）', Signer::sign($pbody, $payoutSecret), $psign);
-// 反向锚：若仍按 v2 绑定基串计算则必不相等。
-checkFalse(
-    'stub payoutCreate 反例（v2 绑定签名必不相等）',
-    Signer::sign($pbody, $payoutSecret, ['method' => 'POST', 'path' => '/api/open/v2/merchant/payout/create']) === $psign
-);
+check('stub payoutCreate sign 用 payout 密钥', Signer::sign($pbody, $payoutSecret), $psign);
 
 // receipt inline 归一为整数 1/0
 $stubClient->payoutReceiptQuery(['out_payout_no' => 'WD1', 'inline' => true]);

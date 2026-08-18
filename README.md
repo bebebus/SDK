@@ -2,13 +2,13 @@
 
 # 商户支付 OpenAPI 多语言 SDK
 
-[![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bebebus/SDK/badge)](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
 
 为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
 设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），
-**全部 12 个签名业务端点**（其中代付 6 端点仅存在于 v1 Base，见下「环境」节；另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
+**全部 12 个签名业务端点**（均只存在于 v1 Base；另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
 **测试 + 正式双环境**，**跨语言签名逐字节一致**（同一份标准答案向量五套都绿）。
 
 ## 目录结构
@@ -41,15 +41,15 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`；`import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`；命名空间 `Merchant\Openapi` | cURL 扩展 | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go@v1.2.1`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go get github.com/bebebus/SDK/go/v2@v2.0.0`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go/v2"` | `net/http` | `cd go && go test -count=1 ./...` |
 | Java | **源码引入（不发 Maven）**；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。
 
 ## 涵盖的接口（每语言均实现）
 
-**代收**：`payCreate`（下单，v2 传 `channel_code` 或 `pay_method`）、`payQuery`（查单）、`payMethodsQuery`（v2 返回 `pay_methods` + `channel_codes` 两个数组）、`groupsQuery`（兼容别名）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
-**代付**：`payoutCreate`（`pay_method` 必填，不收 `channel_code`）、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）——代付端点仅注册于 v1 Base，SDK 在 v2 baseUrl 下自动回落 v1（见「环境」节）
+**代收**：`payCreate`（下单，`pay_method` 必填）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`groupsQuery`（兼容别名）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
+**代付**：`payoutCreate`（`pay_method` 必填，不收 `channel_code`）、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）
 **回调**：`verifyPayCallback` / `verifyPayoutCallback`（验签，时序安全比较）
 
 各方法的请求/响应字段见 [`INTERFACES.md`](./INTERFACES.md)。方法名按各语言习惯（Java/JS/PHP 驼峰、Python 蛇形 `pay_create`、Go 导出驼峰），语义一一对应。
@@ -61,12 +61,12 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 | 预设 | 基址 |
 |------|------|
 | `PRODUCTION`（正式） | **无内置默认值，必须显式传 baseUrl** |
-| `SANDBOX`（测试/本地） | `http://127.0.0.1:3090/api/open/v2` |
+| `SANDBOX`（测试/本地） | `http://127.0.0.1:3090/api/open/v1` |
 
-> 正式环境地址请向你的服务商获取（新对接形如 `https://api.<service_domain>/api/open/v2`；存量可用 `/api/open/v1`）。SDK **不内置任何正式主机名**：选 `PRODUCTION`（默认）时必须通过 `baseUrl` 显式传入，否则构造时报错。
+> 正式环境地址请向你的服务商获取（形如 `https://api.<service_domain>/api/open/v1`）。SDK **不内置任何正式主机名**：选 `PRODUCTION`（默认）时必须通过 `baseUrl` 显式传入，否则构造时报错。
 > 「测试密钥沙箱」可用上述正式 baseUrl + 测试密钥（测试单标记 `is_test`，不动真钱，可调 `*/test/complete`）。
 >
-> **代付例外（2026-08-15 拍板）**：代付（payout）端点仅注册于 **v1** Base；服务端 v2 Base 下 `payout/*` 路由一律 404。五套 SDK 均在 v2 baseUrl 下对 payout 类方法**自动回落** v1 基址（`/api/open/v2` → `/api/open/v1`，body-only 签名），调用方无需拆双基址；代付下单 `pay_method` 必填、不收 `channel_code`。
+> 代付下单 `pay_method` 必填、不收 `channel_code`。
 
 ## 快速开始（以 Node.js 为例，其余语言见各自 README）
 
@@ -78,15 +78,15 @@ const client = new Client(new Config({
   apiKey: process.env.API_KEY,
   apiSecretPay: process.env.API_SECRET_PAY,
   apiSecretPayout: process.env.API_SECRET_PAYOUT,
-  // 正式环境必须显式传 baseUrl（请向服务商获取：https://api.<service_domain>/api/open/v2）
+  // 正式环境必须显式传 baseUrl（请向服务商获取：https://api.<service_domain>/api/open/v1）
   baseUrl: process.env.API_BASE_URL,
   // 本地联调可改用：environment: Environment.SANDBOX,
 }));
 
-// 代收下单（v2：channel_code 钉产品线；金额为最小单位整数，10000 = 1 元）
+// 代收下单（pay_method 必填；金额为最小单位整数，10000 = 1 元）
 const { data } = await client.payCreate({
   out_order_no: 'order-' + Date.now(),
-  amount: 10000, currency: 'PHP', channel_code: 'GcashBig', country: 'PH',
+  amount: 10000, currency: 'PHP', pay_method: 'gcash', country: 'PH',
   notify_url: 'https://merchant.example.com/api/notify/pay',
 });
 console.log(data.order_no, data.pay_url);

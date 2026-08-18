@@ -6,7 +6,7 @@
 export const Environment: {
   /** 正式：无内置 URL，构造 Config 时必须显式传 baseUrl（请向服务商获取）。 */
   readonly PRODUCTION: null;
-  /** 本地/联调：http://127.0.0.1:3090/api/open/v2 */
+  /** 本地/联调：http://127.0.0.1:3090/api/open/v1 */
   readonly SANDBOX: string;
 };
 
@@ -95,13 +95,13 @@ export class Client {
 
   // ---- 代收（Pay，密钥 api_secret_pay）----
 
-  /** 代收下单 POST /merchant/pay/create。v2 传 channel_code 或 pay_method。 */
+  /** 代收下单 POST /merchant/pay/create（pay_method 必填）。 */
   payCreate(params: Params): Promise<ApiResult>;
   /** 代收查单 POST /merchant/pay/query（order_no 或 out_order_no 二选一）。 */
   payQuery(params: Params): Promise<ApiResult>;
-  /** 可用支付方式 / 分组编码 POST /merchant/pay-methods/query。v2 返回 pay_methods 与 channel_codes。 */
+  /** 可用支付方式 POST /merchant/pay-methods/query。 */
   payMethodsQuery(params?: Params): Promise<ApiResult>;
-  /** 兼容别名 POST /merchant/groups/query。新对接请用 payMethodsQuery 的 channel_codes。 */
+  /** 兼容别名 POST /merchant/groups/query（历史遗留、未文档化）。新对接请用 payMethodsQuery。 */
   groupsQuery(params?: Params): Promise<ApiResult>;
   /** 余额查询 POST /merchant/balance/query。 */
   balanceQuery(params?: Params): Promise<ApiResult>;
@@ -109,7 +109,6 @@ export class Client {
   payTestComplete(params: Params): Promise<ApiResult>;
 
   // ---- 代付（Payout，密钥 api_secret_payout）----
-  // 代付端点仅注册于 v1 Base（2026-08-15 拍板）；v2 baseUrl 下 SDK 自动回落 v1（body-only 签名）。
 
   /** 代付下单 POST /merchant/payout/create（pay_method 必填，不收 channel_code）。 */
   payoutCreate(params: Params): Promise<ApiResult>;
@@ -134,14 +133,11 @@ export class Client {
 
 // ---- 签名器（底层，按需直接使用）----
 
-/** v2 请求绑定：method 大写 + 规范路径（如 /api/open/v2/merchant/pay/create）。 */
-export type SignBinding = { method: string; path: string };
+/** 计算签名：HMAC-SHA256(base, key=secret) -> hex 小写。空密钥抛 TypeError。 */
+export function sign(payload: Record<string, unknown>, secret: string): string;
 
-/** 计算签名：HMAC-SHA256(base, key=secret) -> hex 小写。空密钥抛 TypeError。v2 传入 binding。 */
-export function sign(payload: Record<string, unknown>, secret: string, binding?: SignBinding): string;
-
-/** 构造签名 base 串（不含 HMAC），便于逐字节断言。v2 传入 binding。 */
-export function buildSignBase(payload: Record<string, unknown>, secret: string, binding?: SignBinding): string;
+/** 构造签名 base 串（不含 HMAC），便于逐字节断言。 */
+export function buildSignBase(payload: Record<string, unknown>, secret: string): string;
 
 /** 稳定 JSON 序列化（递归、key 升序、紧凑无空格），与跨语言实现逐字节一致。 */
 export function stableStringify(value: unknown): string;

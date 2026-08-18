@@ -6,7 +6,7 @@ package cloud.cniia.openapi.sdk;
  * <ul>
  *   <li>{@link #PRODUCTION} — 正式环境，<b>无内置基址</b>。正式地址请向服务商获取，
  *       必须通过 {@link Config.Builder#baseUrl(String)} 显式提供
- *       （形如 {@code https://api.<service_domain>/api/open/v2}）。</li>
+ *       （形如 {@code https://api.<service_domain>/api/open/v1}）。</li>
  *   <li>{@link #SANDBOX} — 本地/联调地址。</li>
  * </ul>
  *
@@ -14,7 +14,7 @@ package cloud.cniia.openapi.sdk;
  */
 public enum Environment {
     PRODUCTION(null),
-    SANDBOX("http://127.0.0.1:3090/api/open/v2");
+    SANDBOX("http://127.0.0.1:3090/api/open/v1");
 
     private final String baseUrl;
 

@@ -26,7 +26,7 @@ def main() -> None:
         api_secret_payout=os.environ.get("PP_SECRET_PAYOUT", "sk_payout_demo"),
         # 切换正式 / 沙箱：Environment.PRODUCTION / Environment.SANDBOX
         # 正式环境地址请向服务商获取，用 base_url= 覆盖：
-        #   base_url="https://api.<domain>/api/open/v2"
+        #   base_url="https://api.<domain>/api/open/v1"
         environment=Environment.SANDBOX,
     )
     client = Client(config)
@@ -37,7 +37,7 @@ def main() -> None:
             out_order_no="ORD20250101000001",
             amount=10000,
             currency="PHP",
-            channel_code="GcashBig",
+            pay_method="gcash",
             country="PH",
             notify_url="https://merchant.example.com/api/notify/pay",
             subject="测试订单",

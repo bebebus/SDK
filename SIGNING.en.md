@@ -2,7 +2,7 @@
 
 # Signing Specification (single source of truth for the SDKs in all languages)
 
-Both requests and callbacks of the merchant OpenAPI are signed with **HMAC-SHA256**, output as **lowercase hexadecimal**. The algorithm defined in this file is **byte-for-byte identical** to the server's signing implementation; the signers of all five SDKs must reproduce the `base` and `sign` in [`test-vectors.json`](./test-vectors.json) (including v2 binding vectors carrying a `binding` field — since 1.2.0), otherwise they are considered non-compliant.
+Both requests and callbacks of the merchant OpenAPI are signed with **HMAC-SHA256**, output as **lowercase hexadecimal**. The algorithm defined in this file is **byte-for-byte identical** to the server's signing implementation; the signers of all five SDKs must reproduce the `base` and `sign` in [`test-vectors.json`](./test-vectors.json), otherwise they are considered non-compliant.
 
 > Signing is the only part of the entire SDK where "not a single byte may be wrong". Most cross-language failures come from two places: **nested JSON serialization** and **scalar-to-string coercion**; be sure to check the "cross-language pitfalls" below item by item.
 
@@ -22,14 +22,6 @@ Input: the key-value table `payload` made up of business fields (including commo
 5. **Compute sign**: `HMAC_SHA256(base, key=secret)`, output as a **lowercase hexadecimal** string.
 6. **Key selection**: pay-type endpoints and collection callbacks use `api_secret_pay`; payout-type endpoints and payout callbacks use `api_secret_payout`.
    (The HMAC key and the `&secret=` at the end of base use the **same** secret.)
-7. **v2 request binding** (mandatory when the Base URL path starts with `/api/open/v2/`): prepend two lines before the existing canonical body:
-   ```
-   POST
-   /api/open/v2/merchant/pay/create
-   k1=v1&k2=v2&...&secret=<secret>
-   ```
-   The canonical path is the full pathname (no host/query). **the HTTP method is always normalized to uppercase** (a lowercase `post` input is signed as `POST`); **v1 has no such prefix**, so the base string is byte-identical to 1.1.x. **Callback verification remains body-only.**
-   **Payout exception (decided 2026-08-15)**: payout endpoints exist only on v1, so **there is no payout request with a v2 binding**; under a v2 baseUrl the SDK automatically falls back to the v1 base for payout requests and uses body-only signing.
 
 Put the computed `sign` back into the request body and send it together.
 

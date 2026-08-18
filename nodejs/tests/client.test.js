@@ -46,7 +46,7 @@ function makeClient(baseUrl) {
 
 test('Environment 预设：PRODUCTION 无内置 URL，SANDBOX 为本地基址', () => {
   assert.equal(Environment.PRODUCTION, null);
-  assert.equal(Environment.SANDBOX, 'http://127.0.0.1:3090/api/open/v2');
+  assert.equal(Environment.SANDBOX, 'http://127.0.0.1:3090/api/open/v1');
 });
 
 test('选 PRODUCTION 且不传 baseUrl 抛清晰错误', () => {
@@ -88,7 +88,7 @@ test('SANDBOX 预设基址仍为 127.0.0.1', () => {
     apiKey: 'k',
     environment: Environment.SANDBOX,
   });
-  assert.equal(c.baseUrl, 'http://127.0.0.1:3090/api/open/v2');
+  assert.equal(c.baseUrl, 'http://127.0.0.1:3090/api/open/v1');
 });
 
 test('payCreate：注入通用字段/timestamp/nonce，过滤 null，签名用 pay 密钥，命中正确 path', async () => {
@@ -207,86 +207,6 @@ test('payoutReceiptQuery：inline 以整数 1/0 发送', async () => {
     assert.strictEqual(bodies[0].inline === true, false); // 不是布尔
     assert.equal(bodies[1].inline, 0);
     assert.ok(!('inline' in bodies[2]));
-  } finally {
-    server.close();
-  }
-});
-
-// 启动一个 v2 基址的桩服务器（代付回落 v1 的场景专用）。
-function startStubV2(handler) {
-  return new Promise((resolveServer) => {
-    const server = http.createServer((req, res) => {
-      const chunks = [];
-      req.on('data', (c) => chunks.push(c));
-      req.on('end', () => {
-        const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-        handler(req.url, body, res);
-        if (res.writableEnded) return;
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ code: 0, message: 'ok', data: {} }));
-      });
-    });
-    server.listen(0, '127.0.0.1', () => {
-      const { port } = server.address();
-      resolveServer({ server, baseUrl: `http://127.0.0.1:${port}/api/open/v2` });
-    });
-  });
-}
-
-// 契约：代付仅存在于 v1（2026-08-15 拍板）——v2 baseUrl 下 payout 请求自动回落 v1 且签名 body-only。
-test('v2 baseUrl：payoutCreate 自动回落 v1 路径且签名为 body-only', async () => {
-  let captured = null;
-  const { server, baseUrl } = await startStubV2((url, body) => {
-    captured = { url, body };
-  });
-  try {
-    const client = makeClient(baseUrl);
-    await client.payoutCreate({
-      out_payout_no: 'WD-v2-fallback',
-      amount: 100000,
-      currency: 'PHP',
-      pay_method: 'bank',
-      country: 'PH',
-      notify_url: 'https://m.example.com/cb',
-      account_no: '1234567890',
-      bank_code: 'BDO',
-    });
-    // 请求实际打到 v1 基址（/api/open/v2 → /api/open/v1）。
-    assert.equal(captured.url, '/api/open/v1/merchant/payout/create');
-    const { sign: gotSign, ...rest } = captured.body;
-    // 签名与独立复算的 v1 body-only 签名一致（无 METHOD+path 绑定前缀）。
-    assert.equal(gotSign, sign(rest, SECRET_PAYOUT));
-    // 反向锚：若仍按 v2 绑定基串计算则必不相等。
-    assert.notEqual(
-      gotSign,
-      sign(rest, SECRET_PAYOUT, { method: 'POST', path: '/api/open/v2/merchant/payout/create' }),
-    );
-  } finally {
-    server.close();
-  }
-});
-
-// 防回归反向锚：代收在 v2 baseUrl 下行为完全不变（仍打 v2 且带绑定签名）。
-test('v2 baseUrl：payCreate 仍打 v2 且签名带 METHOD+path 绑定', async () => {
-  let captured = null;
-  const { server, baseUrl } = await startStubV2((url, body) => {
-    captured = { url, body };
-  });
-  try {
-    const client = makeClient(baseUrl);
-    await client.payCreate({
-      out_order_no: 'ORD-v2-keep',
-      amount: 10000,
-      currency: 'PHP',
-      pay_method: 'gcash',
-      country: 'PH',
-      notify_url: 'https://m.example.com/cb',
-    });
-    assert.equal(captured.url, '/api/open/v2/merchant/pay/create');
-    const { sign: gotSign, ...rest } = captured.body;
-    assert.equal(gotSign, sign(rest, SECRET_PAY, { method: 'POST', path: '/api/open/v2/merchant/pay/create' }));
-    // 反向锚：body-only 签名必不相等。
-    assert.notEqual(gotSign, sign(rest, SECRET_PAY));
   } finally {
     server.close();
   }

@@ -20,8 +20,6 @@ import java.util.Map;
 public class PayoutCreateExample {
 
     public static void main(String[] args) {
-        // SANDBOX 预设为 v2 基址亦可：代付仅存在于 v1（2026-08-15 拍板），
-        // payout 类方法会自动回落 v1 基址（body-only 签名），无需单独改基址。
         Config config = Config.builder()
                 .environment(Environment.SANDBOX)
                 .merchantNo("M00000001")

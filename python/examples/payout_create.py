@@ -21,8 +21,7 @@ def main() -> None:
         api_key=os.environ.get("PP_API_KEY", "ak_demo_key"),
         api_secret_pay=os.environ.get("PP_SECRET_PAY", "sk_pay_demo"),
         api_secret_payout=os.environ.get("PP_SECRET_PAYOUT", "sk_payout_demo"),
-        # SANDBOX 预设为 v2 基址亦可：代付仅存在于 v1（2026-08-15 拍板），
-        # payout 类方法会自动回落 v1 基址（body-only 签名），无需单独改基址。
+        # 切换正式 / 沙箱：Environment.PRODUCTION / Environment.SANDBOX
         environment=Environment.SANDBOX,
     )
     client = Client(config)
