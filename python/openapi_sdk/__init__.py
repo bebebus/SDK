@@ -37,6 +37,6 @@ try:
     try:
         __version__ = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        __version__ = "1.3.0"
+        __version__ = "2.0.0"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    __version__ = "1.3.0"
+    __version__ = "2.0.0"

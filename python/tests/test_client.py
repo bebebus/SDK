@@ -6,7 +6,6 @@ receipt inline 整数化、信封解析与异常分类。
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 import unittest
@@ -61,7 +60,7 @@ class TestEnvironmentAndConfig(unittest.TestCase):
         self.assertEqual(Environment.PRODUCTION.base_url, "")
         # SANDBOX 仍为本地预设基址。
         self.assertEqual(
-            Environment.SANDBOX.base_url, "http://127.0.0.1:3090/api/open/v2"
+            Environment.SANDBOX.base_url, "http://127.0.0.1:3090/api/open/v1"
         )
 
     def test_production_without_base_url_raises(self):
@@ -95,7 +94,7 @@ class TestEnvironmentAndConfig(unittest.TestCase):
             api_secret_payout="o",
             environment=Environment.SANDBOX,
         )
-        self.assertEqual(cfg.base_url, "http://127.0.0.1:3090/api/open/v2")
+        self.assertEqual(cfg.base_url, "http://127.0.0.1:3090/api/open/v1")
 
     def test_default_environment_is_production(self):
         # 默认环境仍是 PRODUCTION（于是默认就要求显式传 base_url）。
@@ -258,96 +257,6 @@ class TestEnvelopeHandling(unittest.TestCase):
             Client._request = orig  # type: ignore[assignment]
 
 
-class _FakeHttpResponse:
-    """urlopen 桩响应：HTTP 200 + 统一成功信封。"""
-
-    def __init__(self, body: str = '{"code":0,"message":"ok","data":{}}'):
-        self._body = body
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        return False
-
-    def getcode(self):
-        return 200
-
-    def read(self):
-        return self._body.encode("utf-8")
-
-
-class TestPayoutV1Fallback(unittest.TestCase):
-    """契约：代付仅存在于 v1（2026-08-15 拍板）。
-
-    v2 base_url 下 payout 请求须自动回落 v1 基址且签名为 body-only；
-    代收请求保持 v2 + 绑定签名（防回归反向锚）。
-    """
-
-    def _capture_request(self, do_call):
-        """monkeypatch urllib.request.urlopen，捕获实际发出的 Request。"""
-        import urllib.request as _ur
-
-        captured = {}
-        orig = _ur.urlopen
-
-        def fake_urlopen(request, timeout=None):
-            captured["url"] = request.full_url
-            captured["body"] = json.loads(request.data.decode("utf-8"))
-            return _FakeHttpResponse()
-
-        _ur.urlopen = fake_urlopen
-        try:
-            do_call()
-        finally:
-            _ur.urlopen = orig
-        return captured
-
-    def test_payout_falls_back_to_v1_with_body_only_sign(self):
-        client = _make_client()  # SANDBOX = v2 基址
-        captured = self._capture_request(
-            lambda: client.payout_query(out_payout_no="WD1")
-        )
-        # 请求实际打到 v1 基址（/api/open/v2 → /api/open/v1）。
-        self.assertEqual(
-            captured["url"], "http://127.0.0.1:3090/api/open/v1/merchant/payout/query"
-        )
-        body = dict(captured["body"])
-        got_sign = body.pop("sign")
-        # 与独立复算的 v1 body-only 签名一致（无 METHOD+path 绑定前缀）。
-        self.assertEqual(got_sign, signer.sign(body, "sk_payout_secret"))
-        # 反向锚：若仍按 v2 绑定基串计算则必不相等。
-        self.assertNotEqual(
-            got_sign,
-            signer.sign(
-                body,
-                "sk_payout_secret",
-                {"method": "POST", "path": "/api/open/v2/merchant/payout/query"},
-            ),
-        )
-
-    def test_pay_still_hits_v2_with_binding_sign(self):
-        client = _make_client()
-        captured = self._capture_request(
-            lambda: client.pay_query(out_order_no="ORD1")
-        )
-        self.assertEqual(
-            captured["url"], "http://127.0.0.1:3090/api/open/v2/merchant/pay/query"
-        )
-        body = dict(captured["body"])
-        got_sign = body.pop("sign")
-        self.assertEqual(
-            got_sign,
-            signer.sign(
-                body,
-                "sk_pay_secret",
-                {"method": "POST", "path": "/api/open/v2/merchant/pay/query"},
-            ),
-        )
-        # 反向锚：body-only 签名必不相等。
-        self.assertNotEqual(got_sign, signer.sign(body, "sk_pay_secret"))
-
-
 class TestPayoutCreateV1Contract(unittest.TestCase):
     """payout_create 回归 v1 契约：pay_method 必填、不收 channel_code。"""
 
@@ -372,6 +281,31 @@ class TestPayoutCreateV1Contract(unittest.TestCase):
                 currency="PHP",
                 notify_url="https://m.example.com/cb",
                 account_no="123",
+            )
+
+
+class TestPayCreateV1Contract(unittest.TestCase):
+    """pay_create 回归 v1 契约：pay_method 必填、不收 channel_code（同款锚，对照 payout_create）。"""
+
+    def test_channel_code_kwarg_rejected(self):
+        client = _make_client()
+        with self.assertRaises(TypeError):
+            client.pay_create(
+                out_order_no="ORD1",
+                amount=10000,
+                currency="PHP",
+                channel_code="GcashBig",  # 已移除的形参 → TypeError
+                notify_url="https://m.example.com/cb",
+            )
+
+    def test_missing_pay_method_rejected(self):
+        client = _make_client()
+        with self.assertRaises(TypeError):
+            client.pay_create(
+                out_order_no="ORD1",
+                amount=10000,
+                currency="PHP",
+                notify_url="https://m.example.com/cb",
             )
 
 
