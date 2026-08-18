@@ -17,7 +17,7 @@ func main() {
 		APIKey:       "ak_demo_key",
 		SecretPay:    "sk_test_pay_xxxxxxxxxxxxxxxxxxxxxxxx",
 		SecretPayout: "sk_test_payout_xxxxxxxxxxxxxxxxxxxxxxxx",
-		Environment: openapi.Sandbox,
+		Environment:  openapi.Sandbox,
 	})
 
 	ctx := context.Background()
