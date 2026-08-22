@@ -6,6 +6,7 @@ import cloud.cniia.openapi.sdk.Client;
 import cloud.cniia.openapi.sdk.Config;
 import cloud.cniia.openapi.sdk.Signer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,9 +57,9 @@ public class DevSmoke {
         try {
             ApiResponse r = client.countriesQuery();
             List<?> cs = (List<?>) r.dataAsMap().get("countries");
-            StringBuilder sb = new StringBuilder();
-            if (cs != null) for (Object o : cs) sb.append(((Map<?, ?>) o).get("country")).append(",");
-            ok("countries/query", cs != null && !cs.isEmpty(), sb.toString());
+            List<String> names = new ArrayList<>();
+            if (cs != null) for (Object o : cs) names.add(String.valueOf(((Map<?, ?>) o).get("country")));
+            ok("countries/query", cs != null && !cs.isEmpty(), String.join(",", names));
         } catch (Exception e) { ok("countries/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
         // 4. pay/create

@@ -73,7 +73,8 @@ func (c *Client) PayQuery(ctx context.Context, params map[string]any) (*Response
 	return c.call(ctx, "/merchant/pay/query", params, usePay)
 }
 
-// PayMethodsQuery 可用支付方式。params 可含 country / biz_type / currency。返回 methods。
+// PayMethodsQuery 可用支付方式。params 可含 country / biz_type / currency。返回 methods，
+// 每项含 name_i18n{zh-CN,en-US}、logo_svg（可空）。
 func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
 }

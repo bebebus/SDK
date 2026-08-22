@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/bebebus/SDK/go/v2"
@@ -76,13 +77,13 @@ func main() {
 		ok("countries/query", false, msg)
 	} else {
 		cs, _ := r.Data["countries"].([]any)
-		s := ""
+		names := make([]string, 0, len(cs))
 		for _, c := range cs {
 			if cc, okc := c.(map[string]any); okc {
-				s += fmt.Sprint(cc["country"]) + ","
+				names = append(names, fmt.Sprint(cc["country"]))
 			}
 		}
-		ok("countries/query", len(cs) > 0, s)
+		ok("countries/query", len(cs) > 0, strings.Join(names, ","))
 	}
 
 	// 4. pay/create

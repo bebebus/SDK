@@ -185,13 +185,13 @@ class Client:
             {"biz_type": biz_type, "currency": currency, "country": country},
         )
 
-    def balance_query(self, currency: Optional[str] = None) -> Dict[str, Any]:
-        """POST /merchant/balance/query — 余额查询。"""
-        return self._call_pay("/merchant/balance/query", {"currency": currency})
-
     def countries_query(self) -> Dict[str, Any]:
         """POST /merchant/countries/query — 可用国家/币种。返回 ``countries`` 数组。"""
         return self._call_pay("/merchant/countries/query", {})
+
+    def balance_query(self, currency: Optional[str] = None) -> Dict[str, Any]:
+        """POST /merchant/balance/query — 余额查询。"""
+        return self._call_pay("/merchant/balance/query", {"currency": currency})
 
     def pay_test_complete(
         self,
