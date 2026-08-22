@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 )
@@ -170,6 +172,58 @@ func TestGroupsQueryPathAndPaySecret(t *testing.T) {
 	want := Sign(captured, "sk_pay")
 	if gotSign != want {
 		t.Errorf("groupsQuery 应用 pay 密钥签名, got=%s want=%s", gotSign, want)
+	}
+}
+
+// TestCountriesQueryPathAndPaySecret 校验 countries/query 走 pay 密钥、仅公共字段、响应透传 name_i18n。
+func TestCountriesQueryPathAndPaySecret(t *testing.T) {
+	var captured map[string]any
+	var gotPath string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		raw, _ := io.ReadAll(r.Body)
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.UseNumber()
+		var m map[string]any
+		_ = dec.Decode(&m)
+		captured = m
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"code":0,"message":"ok","data":{"countries":[{"country":"PH","name":"菲律宾","name_i18n":{"zh-CN":"菲律宾","en-US":"Philippines"},"currencies":["PHP"]}]}}`)
+	}))
+	defer srv.Close()
+
+	c := NewClient(Config{BaseURL: srv.URL, SecretPay: "sk_pay"})
+	resp, err := c.CountriesQuery(context.Background(), map[string]any{})
+	if err != nil {
+		t.Fatalf("CountriesQuery 失败: %v", err)
+	}
+	if gotPath != "/merchant/countries/query" {
+		t.Errorf("path 错误: %s", gotPath)
+	}
+	// 仅公共字段：请求体键集应恰为这 5 个（不含任何业务字段）。
+	gotKeys := make([]string, 0, len(captured))
+	for k := range captured {
+		gotKeys = append(gotKeys, k)
+	}
+	sort.Strings(gotKeys)
+	wantKeys := []string{"api_key", "merchant_no", "nonce", "sign", "timestamp"}
+	if !reflect.DeepEqual(gotKeys, wantKeys) {
+		t.Errorf("请求体键集错误: got=%v want=%v", gotKeys, wantKeys)
+	}
+	gotSign, _ := captured["sign"].(string)
+	delete(captured, "sign")
+	want := Sign(captured, "sk_pay")
+	if gotSign != want {
+		t.Errorf("countriesQuery 应用 pay 密钥签名, got=%s want=%s", gotSign, want)
+	}
+	countries, _ := resp.Data["countries"].([]any)
+	if len(countries) != 1 {
+		t.Fatalf("countries 数量错误: %+v", resp.Data["countries"])
+	}
+	first, _ := countries[0].(map[string]any)
+	nameI18n, _ := first["name_i18n"].(map[string]any)
+	if nameI18n["zh-CN"] != "菲律宾" {
+		t.Errorf("name_i18n 未正确透传: %+v", first)
 	}
 }
 

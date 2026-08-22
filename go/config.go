@@ -47,7 +47,7 @@ type Config struct {
 	MerchantNo string
 	// APIKey API Key（必填）。
 	APIKey string
-	// SecretPay 代收密钥 api_secret_pay：pay/*、pay-methods/query、balance/query 及代收/退款回调使用。
+	// SecretPay 代收密钥 api_secret_pay：pay/*、pay-methods/query、countries/query、balance/query 及代收/退款回调使用。
 	SecretPay string
 	// SecretPayout 代付密钥 api_secret_payout：payout/* 及代付回调使用。
 	SecretPayout string

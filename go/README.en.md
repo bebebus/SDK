@@ -4,7 +4,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A zero-dependency Go SDK covering all 12 signed endpoints of the Merchant OpenAPI (6 collection + 6 payout), including
+A zero-dependency Go SDK covering all 13 signed endpoints of the Merchant OpenAPI (7 collection + 6 payout), including
 HMAC-SHA256 signing, dual-environment configuration, and timing-safe callback signature verification. It uses only the Go standard library (`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`), with **no `require` at all**.
 
@@ -67,7 +67,7 @@ func main() {
 }
 ```
 
-### The 12 Endpoint Methods
+### The 13 Endpoint Methods
 
 | Category | Method | Endpoint | Secret |
 |------|------|------|------|
@@ -75,6 +75,7 @@ func main() {
 | collection | `PayQuery` | `/merchant/pay/query` | pay |
 | collection | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | collection | `GroupsQuery` | `/merchant/groups/query` | pay (compatibility alias) |
+| collection | `CountriesQuery` | `/merchant/countries/query` | pay |
 | collection | `BalanceQuery` | `/merchant/balance/query` | pay |
 | collection | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
 | payout | `PayoutCreate` | `/merchant/payout/create` | payout |

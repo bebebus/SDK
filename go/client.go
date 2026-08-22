@@ -78,6 +78,11 @@ func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*R
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
 }
 
+// CountriesQuery 可用国家/币种字典。仅需公共字段，params 传空 map 即可。返回 countries。
+func (c *Client) CountriesQuery(ctx context.Context, params map[string]any) (*Response, error) {
+	return c.call(ctx, "/merchant/countries/query", params, usePay)
+}
+
 // GroupsQuery 兼容别名，仍打 /merchant/groups/query（历史遗留、未文档化）。
 // 新对接请用 PayMethodsQuery。
 func (c *Client) GroupsQuery(ctx context.Context, params map[string]any) (*Response, error) {

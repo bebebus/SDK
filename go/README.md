@@ -4,7 +4,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 12 个签名端点（代收 6 + 代付 6），含
+零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 13 个签名端点（代收 7 + 代付 6），含
 HMAC-SHA256 签名、双环境配置、回调时序安全验签。仅用 Go 标准库（`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`），**无任何 `require`**。
 
@@ -67,7 +67,7 @@ func main() {
 }
 ```
 
-### 12 个端点方法
+### 13 个端点方法
 
 | 类别 | 方法 | 端点 | 密钥 |
 |------|------|------|------|
@@ -75,6 +75,7 @@ func main() {
 | 代收 | `PayQuery` | `/merchant/pay/query` | pay |
 | 代收 | `PayMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | 代收 | `GroupsQuery` | `/merchant/groups/query` | pay（兼容别名） |
+| 代收 | `CountriesQuery` | `/merchant/countries/query` | pay |
 | 代收 | `BalanceQuery` | `/merchant/balance/query` | pay |
 | 代收 | `PayTestComplete` | `/merchant/pay/test/complete` | pay |
 | 代付 | `PayoutCreate` | `/merchant/payout/create` | payout |

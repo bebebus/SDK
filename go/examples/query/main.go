@@ -1,4 +1,4 @@
-// 示例：查询类端点（pay/query、pay-methods/query、balance/query、payout/query、payout/receipt/query）。
+// 示例：查询类端点（pay/query、pay-methods/query、countries/query、balance/query、payout/query、payout/receipt/query）。
 //
 // 运行：go run ./examples/query
 package main
@@ -28,6 +28,10 @@ func main() {
 	// 可用支付方式。
 	resp, err = client.PayMethodsQuery(ctx, map[string]any{"country": "PH"})
 	printResult("pay-methods/query", resp, err)
+
+	// 可用国家/币种字典（仅公共字段，params 传空 map）。
+	resp, err = client.CountriesQuery(ctx, map[string]any{})
+	printResult("countries/query", resp, err)
 
 	// 余额查询（currency 可选过滤）。
 	resp, err = client.BalanceQuery(ctx, map[string]any{})
