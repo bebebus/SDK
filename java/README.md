@@ -2,7 +2,7 @@
 
 # 商户支付 OpenAPI — Java SDK
 
-零第三方依赖的 Java 客户端，覆盖商户支付 OpenAPI 全部 **12 个签名端点**，实现 HMAC-SHA256 请求签名与回调验签。
+零第三方依赖的 Java 客户端，覆盖商户支付 OpenAPI 全部 **13 个签名端点**，实现 HMAC-SHA256 请求签名与回调验签。
 
 - **JDK**：17+（用 `java.net.http.HttpClient`、`javax.crypto.Mac`、`MessageDigest.isEqual`，全为标准库）。
 - **依赖**：无。HTTP、JSON、HMAC、测试全部用 JDK 内建，**不引入任何包管理器拉取的库**（无 Jackson/Gson/OkHttp/JUnit）。
@@ -62,7 +62,7 @@ ApiResponse resp = client.payCreate(params);       // 自动注入 timestamp/non
 System.out.println(resp.dataAsMap().get("order_no"));
 ```
 
-### 全部 12 个端点（客户端方法）
+### 全部 13 个端点（客户端方法）
 
 | 业务 | 方法 | 端点 | 密钥 |
 |------|------|------|------|
@@ -70,6 +70,7 @@ System.out.println(resp.dataAsMap().get("order_no"));
 | 代收查单 | `payQuery` | `/merchant/pay/query` | pay |
 | 支付方式 | `payMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | 分组编码（兼容别名） | `groupsQuery` | `/merchant/groups/query` | pay |
+| 可用国家 | `countriesQuery` | `/merchant/countries/query` | pay |
 | 余额 | `balanceQuery` | `/merchant/balance/query` | pay |
 | 代收测试完成 | `payTestComplete` | `/merchant/pay/test/complete` | pay（仅测试密钥）|
 | 代付下单 | `payoutCreate` | `/merchant/payout/create` | payout |
@@ -144,7 +145,7 @@ return "success"; // HTTP 200 + 纯文本 success
 | `PayCreateExample.java` | 代收下单（含 extra 嵌套对象） |
 | `PayoutCreateExample.java` | 代付下单（先查银行编码再下单） |
 | `CallbackVerifyExample.java` | 回调验签 + 幂等处理 + 应答（代收 + 代付，含篡改反例） |
-| `QueryExample.java` | 查单 / 余额 / 支付方式 / 收据（inline 演示） |
+| `QueryExample.java` | 查单 / 余额 / 支付方式 / 国家 / 收据（inline 演示） |
 
 运行任一示例（在 `java/` 目录下）：
 

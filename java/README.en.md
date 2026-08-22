@@ -2,7 +2,7 @@
 
 # Merchant Payment OpenAPI — Java SDK
 
-A Java client with zero third-party dependencies, covering all **12 signed endpoints** of the merchant payment OpenAPI, implementing HMAC-SHA256 request signing and callback signature verification.
+A Java client with zero third-party dependencies, covering all **13 signed endpoints** of the merchant payment OpenAPI, implementing HMAC-SHA256 request signing and callback signature verification.
 
 - **JDK**: 17+ (uses `java.net.http.HttpClient`, `javax.crypto.Mac`, `MessageDigest.isEqual`, all from the standard library).
 - **Dependencies**: none. HTTP, JSON, HMAC, and tests all use JDK built-ins, **without pulling in any library through a package manager** (no Jackson/Gson/OkHttp/JUnit).
@@ -62,7 +62,7 @@ ApiResponse resp = client.payCreate(params);       // automatically injects time
 System.out.println(resp.dataAsMap().get("order_no"));
 ```
 
-### All 12 endpoints (client methods)
+### All 13 endpoints (client methods)
 
 | Business | Method | Endpoint | Secret |
 |------|------|------|------|
@@ -70,6 +70,7 @@ System.out.println(resp.dataAsMap().get("order_no"));
 | Query collection | `payQuery` | `/merchant/pay/query` | pay |
 | Payment methods | `payMethodsQuery` | `/merchant/pay-methods/query` | pay |
 | Group codes (compat alias) | `groupsQuery` | `/merchant/groups/query` | pay |
+| Available countries | `countriesQuery` | `/merchant/countries/query` | pay |
 | Balance | `balanceQuery` | `/merchant/balance/query` | pay |
 | Complete collection test | `payTestComplete` | `/merchant/pay/test/complete` | pay (test secret only) |
 | Create payout | `payoutCreate` | `/merchant/payout/create` | payout |
@@ -144,7 +145,7 @@ Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` i
 | `PayCreateExample.java` | Create collection (with a nested extra object) |
 | `PayoutCreateExample.java` | Create payout (query the bank code first, then place the order) |
 | `CallbackVerifyExample.java` | Callback signature verification + idempotent handling + response (collection + payout, including a tampering counter-example) |
-| `QueryExample.java` | Query order / balance / payment methods / receipt (inline demo) |
+| `QueryExample.java` | Query order / balance / payment methods / countries / receipt (inline demo) |
 
 Run any example (from the `java/` directory):
 

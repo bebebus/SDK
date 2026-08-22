@@ -227,6 +227,25 @@ public class VectorTest {
         np.put("amount", 500L);
         assertEquals("null 过滤 base",
                 "a=1&amount=500&secret=sk", Signer.buildSignBase(np, "sk"));
+
+        // 新增端点方法存在性（Java 无 HTTP mock，只断言签名同族；getMethod 抛 checked
+        // NoSuchMethodException，就地 try/catch 转换为 failed++，不外抛打断整体测试）
+        try {
+            Client.class.getMethod("countriesQuery", Map.class);
+            passed++;
+            System.out.println("  PASS countriesQuery(Map) 存在");
+        } catch (NoSuchMethodException e) {
+            failed++;
+            System.out.println("  FAIL countriesQuery(Map) 存在");
+        }
+        try {
+            Client.class.getMethod("countriesQuery");
+            passed++;
+            System.out.println("  PASS countriesQuery() 无参重载存在");
+        } catch (NoSuchMethodException e) {
+            failed++;
+            System.out.println("  FAIL countriesQuery() 无参重载存在");
+        }
     }
 
     // ---------------- 断言工具 ----------------

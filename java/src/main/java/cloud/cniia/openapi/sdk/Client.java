@@ -9,6 +9,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -67,9 +68,19 @@ public final class Client {
         return call("/merchant/pay/query", params, Secret.PAY);
     }
 
-    /** 可用支付方式 POST /merchant/pay-methods/query。返回 methods。 */
+    /** 可用支付方式 POST /merchant/pay-methods/query。返回 methods（每项含 name_i18n{zh-CN,en-US}、logo_svg 可空）。 */
     public ApiResponse payMethodsQuery(Map<String, Object> params) {
         return call("/merchant/pay-methods/query", params, Secret.PAY);
+    }
+
+    /** 可用国家 POST /merchant/countries/query（密钥：pay）。params 无业务字段。 */
+    public ApiResponse countriesQuery(Map<String, Object> params) {
+        return call("/merchant/countries/query", params, Secret.PAY);
+    }
+
+    /** 可用国家 POST /merchant/countries/query（密钥：pay）。无参重载。 */
+    public ApiResponse countriesQuery() {
+        return countriesQuery(Collections.emptyMap());
     }
 
     /**
