@@ -73,7 +73,8 @@ final class Client
     }
 
     /**
-     * 可用支付方式 POST /merchant/pay-methods/query。返回 methods。
+     * 可用支付方式 POST /merchant/pay-methods/query。返回 methods，
+     * 每项含 name_i18n{zh-CN,en-US} 与 logo_svg（内联 SVG 字符串，可为 null）。
      *
      * @param array{country?:string|null, biz_type?:string|null, currency?:string|null} $params
      * @return array<string,mixed>
@@ -81,6 +82,17 @@ final class Client
     public function payMethodsQuery(array $params = []): array
     {
         return $this->callPay('/merchant/pay-methods/query', $params);
+    }
+
+    /**
+     * 可用国家 POST /merchant/countries/query。返回 countries。
+     *
+     * @param array<string,mixed> $params 无业务字段（仅公共字段，由 SDK 注入）
+     * @return array<string,mixed>
+     */
+    public function countriesQuery(array $params = []): array
+    {
+        return $this->callPay('/merchant/countries/query', $params);
     }
 
     /**

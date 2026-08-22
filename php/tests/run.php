@@ -263,6 +263,16 @@ $groupsSign = $groupsBody['sign'];
 unset($groupsBody['sign']);
 check('stub groupsQuery sign 用 pay 密钥', Signer::sign($groupsBody, $paySecret), $groupsSign);
 
+$stubClient->countriesQuery();
+check('stub countriesQuery URL', 'http://127.0.0.1:3090/api/open/v1/merchant/countries/query', $captured['url']);
+$ctBody = $captured['body'];
+$ctSign = $ctBody['sign'];
+unset($ctBody['sign']);
+check('stub countriesQuery sign 用 pay 密钥', Signer::sign($ctBody, $paySecret), $ctSign);
+$ctKeys = array_keys($captured['body']);
+sort($ctKeys);
+check('countriesQuery 仅公共字段', ['api_key', 'merchant_no', 'nonce', 'sign', 'timestamp'], $ctKeys);
+
 // nonce 每请求唯一
 $firstNonce = $captured['body']['nonce'];
 $stubClient->payQuery(['out_order_no' => '202501010001']);
@@ -292,6 +302,29 @@ check('receipt inline true→1', 1, $captured['body']['inline']);
 checkTrue('receipt inline 是整数', is_int($captured['body']['inline']));
 $stubClient->payoutReceiptQuery(['out_payout_no' => 'WD1', 'inline' => false]);
 check('receipt inline false→0', 0, $captured['body']['inline']);
+
+// countriesQuery 响应形状：data.countries[]，每项含 name_i18n{zh-CN,en-US}
+$countriesStub = fn (string $u, string $j, int $t): array => [
+    'status' => 200,
+    'body' => json_encode([
+        'code' => 0,
+        'message' => 'ok',
+        'data' => [
+            'countries' => [
+                [
+                    'country' => 'PH',
+                    'name' => '菲律宾',
+                    'name_i18n' => ['zh-CN' => '菲律宾', 'en-US' => 'Philippines'],
+                    'currencies' => ['PHP'],
+                ],
+            ],
+        ],
+    ]),
+];
+$countriesClient = new Client(new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX), $countriesStub);
+$countriesData = $countriesClient->countriesQuery();
+check('countriesQuery 响应 name_i18n zh-CN', '菲律宾', $countriesData['countries'][0]['name_i18n']['zh-CN']);
+check('countriesQuery 响应 currencies', ['PHP'], $countriesData['countries'][0]['currencies']);
 
 // 业务码非 0 → ApiException（携带 code/message/data）
 $errStub = fn (string $u, string $j, int $t): array => [

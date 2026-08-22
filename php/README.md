@@ -4,7 +4,7 @@
 
 [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 12 个签名端点 + HMAC-SHA256 签名 + 回调验签。
+零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 13 个签名端点 + HMAC-SHA256 签名 + 回调验签。
 仅使用 PHP 标准库与核心扩展（`ext-curl`、`ext-json`），**不依赖 composer 安装任何包**（如 Guzzle/PHPUnit 等一概不用）。
 
 签名算法以仓库根的 [`SIGNING.md`](../SIGNING.md) 为单一事实源，并通过 [`test-vectors.json`](../test-vectors.json) 跨语言向量逐字节校验。
@@ -104,7 +104,7 @@ new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 
 > `PRODUCTION` **不内置任何正式地址**：正式地址请向服务商获取（形如 `https://api.<service_domain>/api/open/v1`），必须用 `baseUrl` 显式传入。选 `PRODUCTION` 而不传 `baseUrl` 会在构造 `Config` 时抛 `InvalidArgumentException`。
 
-## 端点方法（全 12 个）
+## 端点方法（全 13 个）
 
 | 方法 | 端点 | 密钥 |
 |------|------|------|
@@ -112,6 +112,7 @@ new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 | `payQuery($params)` | `/merchant/pay/query` | pay |
 | `payMethodsQuery($params = [])` | `/merchant/pay-methods/query` | pay |
 | `groupsQuery($params = [])` | `/merchant/groups/query` | pay（兼容别名） |
+| `countriesQuery($params = [])` | `/merchant/countries/query` | pay |
 | `balanceQuery($params = [])` | `/merchant/balance/query` | pay |
 | `payTestComplete($params)` | `/merchant/pay/test/complete`（仅测试密钥） | pay |
 | `payoutCreate($params)` | `/merchant/payout/create` | payout |
