@@ -71,7 +71,7 @@ config = Config(
 )
 ```
 
-## 全部 12 个端点
+## 全部 13 个端点
 
 代收（密钥 `api_secret_pay`，自动选用）：
 
@@ -81,6 +81,7 @@ config = Config(
 | `pay_query(order_no=, out_order_no=)` | `/merchant/pay/query` |
 | `pay_methods_query(country=, biz_type=, currency=)` | `/merchant/pay-methods/query` |
 | `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query`（兼容别名） |
+| `countries_query()` | `/merchant/countries/query` |
 | `balance_query(currency=)` | `/merchant/balance/query` |
 | `pay_test_complete(result=, ...)` | `/merchant/pay/test/complete`（仅测试密钥） |
 

@@ -1,4 +1,4 @@
-"""商户支付 OpenAPI 客户端：覆盖全部 12 个签名业务端点。
+"""商户支付 OpenAPI 客户端：覆盖全部 13 个签名业务端点。
 
 仅用标准库：urllib.request（HTTP）、json、uuid、time、secrets。
 
@@ -160,7 +160,11 @@ class Client:
         biz_type: Optional[str] = None,
         currency: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """POST /merchant/pay-methods/query — 可用支付方式。返回 ``methods`` 数组。"""
+        """POST /merchant/pay-methods/query — 可用支付方式。
+
+        返回 ``methods`` 数组，每项含 ``name_i18n``（``{zh-CN, en-US}``）与
+        ``logo_svg``（内联 SVG 字符串，可为 ``None``）。
+        """
         return self._call_pay(
             "/merchant/pay-methods/query",
             {"country": country, "biz_type": biz_type, "currency": currency},
@@ -184,6 +188,10 @@ class Client:
     def balance_query(self, currency: Optional[str] = None) -> Dict[str, Any]:
         """POST /merchant/balance/query — 余额查询。"""
         return self._call_pay("/merchant/balance/query", {"currency": currency})
+
+    def countries_query(self) -> Dict[str, Any]:
+        """POST /merchant/countries/query — 可用国家/币种。返回 ``countries`` 数组。"""
+        return self._call_pay("/merchant/countries/query", {})
 
     def pay_test_complete(
         self,
