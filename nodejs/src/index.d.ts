@@ -99,8 +99,10 @@ export class Client {
   payCreate(params: Params): Promise<ApiResult>;
   /** 代收查单 POST /merchant/pay/query（order_no 或 out_order_no 二选一）。 */
   payQuery(params: Params): Promise<ApiResult>;
-  /** 可用支付方式 POST /merchant/pay-methods/query。 */
+  /** 可用支付方式 POST /merchant/pay-methods/query。响应 data.methods[] 含 name_i18n / logo_svg。 */
   payMethodsQuery(params?: Params): Promise<ApiResult>;
+  /** 可用国家 POST /merchant/countries/query。 */
+  countriesQuery(params?: Params): Promise<ApiResult>;
   /** 兼容别名 POST /merchant/groups/query（历史遗留、未文档化）。新对接请用 payMethodsQuery。 */
   groupsQuery(params?: Params): Promise<ApiResult>;
   /** 余额查询 POST /merchant/balance/query。 */

@@ -147,6 +147,74 @@ test('groupsQuery：走 /merchant/groups/query 且用 pay 密钥', async () => {
   }
 });
 
+test('countriesQuery：走 /merchant/countries/query、仅公共字段、用 pay 密钥', async () => {
+  let captured = null;
+  const { server, baseUrl } = await startStub((url, body) => {
+    captured = { url, body };
+    return {
+      code: 0,
+      message: 'ok',
+      data: {
+        countries: [
+          {
+            country: 'PH',
+            name: '菲律宾',
+            name_i18n: { 'zh-CN': '菲律宾', 'en-US': 'Philippines' },
+            currencies: ['PHP'],
+          },
+        ],
+      },
+    };
+  });
+  try {
+    const client = makeClient(baseUrl);
+    const { data } = await client.countriesQuery();
+    assert.equal(captured.url, '/api/open/v1/merchant/countries/query');
+    assert.deepEqual(Object.keys(captured.body).sort(), ['api_key', 'merchant_no', 'nonce', 'sign', 'timestamp']);
+    const { sign: gotSign, ...rest } = captured.body;
+    assert.equal(gotSign, sign(rest, SECRET_PAY));
+    assert.equal(data.countries[0].name_i18n['zh-CN'], '菲律宾');
+  } finally {
+    server.close();
+  }
+});
+
+test('payMethodsQuery：name_i18n / logo_svg 原样透传', async () => {
+  const { server, baseUrl } = await startStub(() => ({
+    code: 0,
+    message: 'ok',
+    data: {
+      methods: [
+        {
+          pay_method: 'gcash',
+          name: 'GCash',
+          country: 'PH',
+          currency: 'PHP',
+          name_i18n: { 'zh-CN': 'GCash 钱包', 'en-US': 'GCash' },
+          logo_svg: '<svg viewBox="0 0 24 24"/>',
+        },
+        {
+          pay_method: 'trc20',
+          name: 'USDT-TRC20',
+          country: null,
+          currency: 'USDT',
+          name_i18n: { 'zh-CN': 'USDT-TRC20', 'en-US': 'USDT-TRC20' },
+          logo_svg: null,
+        },
+      ],
+    },
+  }));
+  try {
+    const client = makeClient(baseUrl);
+    const { data } = await client.payMethodsQuery();
+    assert.equal(data.methods[0].name_i18n['en-US'], 'GCash');
+    assert.equal(data.methods[0].logo_svg, '<svg viewBox="0 0 24 24"/>');
+    assert.equal(data.methods[1].logo_svg, null);
+  } finally {
+    server.close();
+  }
+});
+
 test('每请求 nonce 唯一', async () => {
   const seen = [];
   const { server, baseUrl } = await startStub((url, body) => {
@@ -276,6 +344,7 @@ test('全部签名业务端点方法均存在', () => {
     'payCreate',
     'payQuery',
     'payMethodsQuery',
+    'countriesQuery',
     'groupsQuery',
     'balanceQuery',
     'payTestComplete',
