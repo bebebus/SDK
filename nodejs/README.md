@@ -8,7 +8,7 @@
 签名、HTTP、JSON、测试框架全部用官方内建，**无需 `npm install`**。
 
 - 签名算法：HMAC-SHA256 → hex 小写，见仓库根 [`SIGNING.md`](../SIGNING.md)
-- 接口契约：环境/鉴权/12 个签名端点/回调/错误码，见 [`INTERFACES.md`](../INTERFACES.md)
+- 接口契约：环境/鉴权/13 个签名端点/回调/错误码，见 [`INTERFACES.md`](../INTERFACES.md)
 - 标准答案向量：[`test-vectors.json`](../test-vectors.json)
 - 附录配置（可查看 / 下载）：[`appendix/config.example.json`](./appendix/config.example.json) · [`appendix/catalog.json`](./appendix/catalog.json)
 
@@ -79,7 +79,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v1`，并显式传入 `baseUrl` |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
-## 全部 12 个端点
+## 全部 13 个端点
 
 | 方法 | 端点 | 密钥 |
 |------|------|------|
@@ -87,6 +87,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `payQuery(params)` | `/merchant/pay/query` | pay |
 | `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
 | `groupsQuery(params?)` | `/merchant/groups/query` | pay（兼容别名） |
+| `countriesQuery(params?)` | `/merchant/countries/query` | pay |
 | `balanceQuery(params?)` | `/merchant/balance/query` | pay |
 | `payTestComplete(params)` | `/merchant/pay/test/complete` | pay（仅测试密钥） |
 | `payoutCreate(params)` | `/merchant/payout/create` | payout |

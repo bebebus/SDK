@@ -3,6 +3,7 @@ import cloud.cniia.openapi.sdk.Signer;
 import cloud.cniia.openapi.sdk.Config;
 import cloud.cniia.openapi.sdk.Client;
 import cloud.cniia.openapi.sdk.Environment;
+import cloud.cniia.openapi.sdk.TransportException;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -227,6 +228,42 @@ public class VectorTest {
         np.put("amount", 500L);
         assertEquals("null 过滤 base",
                 "a=1&amount=500&secret=sk", Signer.buildSignBase(np, "sk"));
+
+        // 新增端点方法存在性（Java 无 HTTP mock，只断言签名同族；getMethod 抛 checked
+        // NoSuchMethodException，就地 try/catch 转换为 failed++，不外抛打断整体测试）
+        try {
+            Client.class.getMethod("countriesQuery", Map.class);
+            passed++;
+            System.out.println("  PASS countriesQuery(Map) 存在");
+        } catch (NoSuchMethodException e) {
+            failed++;
+            System.out.println("  FAIL countriesQuery(Map) 存在");
+        }
+        try {
+            Client.class.getMethod("countriesQuery");
+            passed++;
+            System.out.println("  PASS countriesQuery() 无参重载存在");
+        } catch (NoSuchMethodException e) {
+            failed++;
+            System.out.println("  FAIL countriesQuery() 无参重载存在");
+        }
+
+        // countriesQuery 请求路径断言：指向 127.0.0.1:1（大概率无监听方，快速拒连），
+        // 断言抛出 TransportException 且异常文案含拼接后的真实路径 /merchant/countries/query，
+        // 借此在无 HTTP mock 的前提下钉死该方法确实打到了预期端点。
+        Config unreachable = Config.builder()
+                .baseUrl("http://127.0.0.1:1/api/open/v1")
+                .merchantNo("M1").apiKey("k").apiSecretPay("p")
+                .build();
+        boolean threwTransport = false;
+        try {
+            new Client(unreachable).countriesQuery();
+        } catch (TransportException e) {
+            threwTransport = true;
+            assertTrue("countriesQuery 请求路径含 /merchant/countries/query",
+                    e.getMessage() != null && e.getMessage().contains("/merchant/countries/query"));
+        }
+        assertTrue("countriesQuery 连接失败抛 TransportException", threwTransport);
     }
 
     // ---------------- 断言工具 ----------------

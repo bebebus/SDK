@@ -25,7 +25,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | `nonce` | string | 否 | 防重放随机串；不传则服务端按签名指纹在 ±300s 内去重。**建议每请求生成唯一值** |
 | `sign` | string | 是 | 见 SIGNING.md |
 
-**密钥选择**：`pay/*`、`pay-methods/query`、`balance/query` 用 `api_secret_pay`；`payout/*` 用 `api_secret_payout`。
+**密钥选择**：`pay/*`、`pay-methods/query`、`countries/query`、`balance/query` 用 `api_secret_pay`；`payout/*` 用 `api_secret_payout`。
 
 **统一响应信封**（业务失败通常仍是 HTTP 200，靠 `code` 判定）：
 ```json
@@ -60,9 +60,13 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 
 ### POST `/merchant/pay-methods/query` — 可用支付方式（密钥：pay）
 请求：`country`（可选）。
-响应 `data.methods[]`：`{pay_method, name, country(可空), currency(可空)}`。
+响应 `data.methods[]`：`{pay_method, name, name_i18n{zh-CN,en-US}, logo_svg(可空), country(可空), currency(可空)}`。
 
 > `groupsQuery`（`/merchant/groups/query`）是历史遗留的未文档化兼容别名，信封为 `{groups}`；新对接一律用本接口。
+
+### POST `/merchant/countries/query` — 可用国家（密钥：pay）
+请求：无业务字段（仅通用字段）。
+响应 `data.countries[]`：`{country, name, name_i18n{zh-CN,en-US}, currencies[]}`。
 
 ### POST `/merchant/balance/query` — 余额查询（密钥：pay）
 请求：`currency`（可选过滤）。

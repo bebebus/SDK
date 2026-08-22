@@ -3,6 +3,7 @@
 **/.pytest_cache/
 *.pyc
 java/out/
+java/target/
 *.class
 vendor/
 node_modules/

@@ -7,7 +7,7 @@
 
 Provides five SDKs in **PHP / Python / Java / Go / Node.js** for the merchant payment open API (collection / payout / callback).
 
-Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 12 signed business endpoints** (all of which exist only on the v1 base; plus non-signed endpoints such as `/version`; 13 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
+Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 13 signed business endpoints** (all of which exist only on the v1 base; plus non-signed endpoints such as `/version`; 14 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
 
 ## Directory Structure
 
@@ -15,7 +15,7 @@ Design principles: **zero third-party dependencies** (only each language's stand
 SDK/
 ├── README.md            # This file
 ├── SIGNING.md           # Authoritative signing algorithm description + per-language serialization pitfalls (required reading for implementation/debugging)
-├── INTERFACES.md        # Field-level request/response for the 12 signed business endpoints, callback fields, error codes
+├── INTERFACES.md        # Field-level request/response for the 13 signed business endpoints, callback fields, error codes
 ├── CONTRIBUTING.md      # Branch, pull request, testing, and release contribution requirements
 ├── RELEASE_NOTES.md     # Human-readable summaries for each user-facing release
 ├── test-vectors.json    # Cross-language signing test vectors (11 entries; asserted by all five test suites)
@@ -46,7 +46,7 @@ npm / PyPI / Packagist / Go are published to their respective package indexes (s
 
 ## Covered Endpoints (implemented in every language)
 
-**Collection**: `payCreate` (create order, `pay_method` required), `payQuery` (query order), `payMethodsQuery` (available pay methods), `groupsQuery` (compatibility alias), `balanceQuery` (balance), `payTestComplete` (complete test order, test key only)
+**Collection**: `payCreate` (create order, `pay_method` required), `payQuery` (query order), `payMethodsQuery` (available pay methods), `groupsQuery` (compatibility alias), `countriesQuery` (available countries), `balanceQuery` (balance), `payTestComplete` (complete test order, test key only)
 **Payout**: `payoutCreate` (`pay_method` required, `channel_code` not accepted), `payoutQuery`, `payoutBanksQuery` (available banks), `payoutProofQuery` (proof), `payoutReceiptQuery` (receipt), `payoutTestComplete` (complete test order, test key only)
 **Callback**: `verifyPayCallback` / `verifyPayoutCallback` (callback signature verification, constant-time comparison)
 

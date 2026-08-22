@@ -8,7 +8,7 @@ Zero dependencies: uses only the Node standard library (`node:http` / `node:http
 Signing, HTTP, JSON, and the test framework all rely on official built-ins, so **no `npm install` is required**.
 
 - Signing algorithm: HMAC-SHA256 → lowercase hex, see [`SIGNING.md`](../SIGNING.en.md) at the repo root
-- Interface contract: environments / authentication / 12 signed endpoints / callbacks / error codes, see [`INTERFACES.md`](../INTERFACES.en.md)
+- Interface contract: environments / authentication / 13 signed endpoints / callbacks / error codes, see [`INTERFACES.md`](../INTERFACES.en.md)
 - Reference vectors: [`test-vectors.json`](../test-vectors.json)
 - Appendix config (view / download): [`appendix/config.example.json`](./appendix/config.example.json) · [`appendix/catalog.json`](./appendix/catalog.json)
 
@@ -79,7 +79,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v1` from your service provider and pass it as `baseUrl` |
 | `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
 
-## All 12 endpoints
+## All 13 endpoints
 
 | Method | Endpoint | Secret |
 |------|------|------|
@@ -87,6 +87,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `payQuery(params)` | `/merchant/pay/query` | pay |
 | `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
 | `groupsQuery(params?)` | `/merchant/groups/query` | pay (compatibility alias) |
+| `countriesQuery(params?)` | `/merchant/countries/query` | pay |
 | `balanceQuery(params?)` | `/merchant/balance/query` | pay |
 | `payTestComplete(params)` | `/merchant/pay/test/complete` | pay (test secret only) |
 | `payoutCreate(params)` | `/merchant/payout/create` | payout |

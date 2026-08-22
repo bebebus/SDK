@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 查询类示例：代收查单、余额、支付方式、代付查单、收据（inline 演示）。
+ * 查询类示例：代收查单、余额、支付方式、可用国家、代付查单、收据（inline 演示）。
  *
  * <p>编译运行（在 java 目录下）：
  * <pre>{@code
@@ -45,6 +45,9 @@ public class QueryExample {
             Map<String, Object> methods = new LinkedHashMap<>();
             methods.put("country", "PH");
             System.out.println("支付方式: " + client.payMethodsQuery(methods).dataAsMap());
+
+            // 可用国家/币种（仅公共字段，无参重载）
+            System.out.println("可用国家: " + client.countriesQuery().dataAsMap());
 
             // 代付查单
             Map<String, Object> pq = new LinkedHashMap<>();

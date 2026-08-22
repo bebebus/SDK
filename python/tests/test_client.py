@@ -142,6 +142,15 @@ class TestPayloadBuild(unittest.TestCase):
         base = build_sign_base(payload, "s")
         self.assertEqual(base, "amount=5&merchant_no=M1&secret=s")
 
+    def test_empty_body_still_injects_common_fields_only(self):
+        # countries_query 等无业务字段的端点：请求体应恰好是通用字段 + sign。
+        client = _make_client()
+        payload = client._build_payload({}, "sk_pay_secret")
+        self.assertEqual(
+            set(payload.keys()),
+            {"merchant_no", "api_key", "timestamp", "nonce", "sign"},
+        )
+
 
 class TestKeySelectionAndShaping(unittest.TestCase):
     def setUp(self):
@@ -185,6 +194,14 @@ class TestKeySelectionAndShaping(unittest.TestCase):
         client = _make_client()
         client.balance_query()
         self.assertEqual(self.capture.calls[-1]["secret"], "sk_pay_secret")
+
+    def test_countries_query_path_and_pay_secret(self):
+        client = _make_client()
+        client.countries_query()
+        call = self.capture.calls[-1]
+        self.assertEqual(call["path"], "/merchant/countries/query")
+        self.assertEqual(call["secret"], "sk_pay_secret")
+        self.assertEqual(call["body"], {})
 
     def test_groups_query_path_and_pay_secret(self):
         client = _make_client()
@@ -240,6 +257,40 @@ class TestEnvelopeHandling(unittest.TestCase):
         try:
             data = client.pay_query(out_order_no="ORD1")
             self.assertEqual(data, {"status": "pending"})
+        finally:
+            Client._request = orig  # type: ignore[assignment]
+
+    def test_pay_methods_query_passes_through_name_i18n_and_logo_svg(self):
+        # SDK 对 data 不做强类型解析（Dict[str, Any]），name_i18n / logo_svg 应原样透传。
+        client = _make_client()
+        methods_data = {
+            "methods": [
+                {
+                    "pay_method": "gcash",
+                    "name": "GCash",
+                    "country": "PH",
+                    "currency": "PHP",
+                    "name_i18n": {"zh-CN": "GCash 钱包", "en-US": "GCash"},
+                    "logo_svg": '<svg viewBox="0 0 24 24"/>',
+                },
+                {
+                    "pay_method": "trc20",
+                    "name": "USDT-TRC20",
+                    "country": None,
+                    "currency": "USDT",
+                    "name_i18n": {"zh-CN": "USDT-TRC20", "en-US": "USDT-TRC20"},
+                    "logo_svg": None,
+                },
+            ]
+        }
+        capture = _Capture({"code": 0, "message": "ok", "data": methods_data})
+        orig = Client._request
+        Client._request = capture  # type: ignore[assignment]
+        try:
+            data = client.pay_methods_query()
+            self.assertEqual(data["methods"][0]["name_i18n"]["en-US"], "GCash")
+            self.assertEqual(data["methods"][0]["logo_svg"], '<svg viewBox="0 0 24 24"/>')
+            self.assertIsNone(data["methods"][1]["logo_svg"])
         finally:
             Client._request = orig  # type: ignore[assignment]
 
@@ -317,6 +368,7 @@ class TestAllEndpointsCallable(unittest.TestCase):
         "pay_query": "/merchant/pay/query",
         "pay_methods_query": "/merchant/pay-methods/query",
         "groups_query": "/merchant/groups/query",
+        "countries_query": "/merchant/countries/query",
         "balance_query": "/merchant/balance/query",
         "pay_test_complete": "/merchant/pay/test/complete",
         "payout_create": "/merchant/payout/create",
@@ -336,7 +388,7 @@ class TestAllEndpointsCallable(unittest.TestCase):
             )
 
     def test_endpoint_count(self):
-        self.assertEqual(len(self.EXPECTED), 12)
+        self.assertEqual(len(self.EXPECTED), 13)
 
 
 if __name__ == "__main__":

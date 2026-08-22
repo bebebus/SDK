@@ -25,7 +25,7 @@ Every request body contains the following common fields (at the same level as bu
 | `nonce` | string | No | Anti-replay random string; if omitted, the server deduplicates by signature fingerprint within ±300s. **Generating a unique value per request is recommended** |
 | `sign` | string | Yes | See SIGNING.md |
 
-**Key selection**: `pay/*`, `pay-methods/query`, `balance/query` use `api_secret_pay`; `payout/*` uses `api_secret_payout`.
+**Key selection**: `pay/*`, `pay-methods/query`, `countries/query`, `balance/query` use `api_secret_pay`; `payout/*` uses `api_secret_payout`.
 
 **Unified response envelope** (a business failure is usually still HTTP 200, judged by `code`):
 ```json
@@ -60,9 +60,13 @@ Response `data`: `order_no, out_order_no, amount, currency, status(pending|succe
 
 ### POST `/merchant/pay-methods/query` — available pay methods (key: pay)
 Request: `country` (optional).
-Response `data.methods[]`: `{pay_method, name, country(nullable), currency(nullable)}`.
+Response `data.methods[]`: `{pay_method, name, name_i18n{zh-CN,en-US}, logo_svg(nullable), country(nullable), currency(nullable)}`.
 
 > `groupsQuery` (`/merchant/groups/query`) is a legacy, undocumented compatibility alias with envelope `{groups}`; new integrations should always use this endpoint instead.
+
+### POST `/merchant/countries/query` — available countries (key: pay)
+Request: no business fields (common fields only).
+Response `data.countries[]`: `{country, name, name_i18n{zh-CN,en-US}, currencies[]}`.
 
 ### POST `/merchant/balance/query` — balance query (key: pay)
 Request: `currency` (optional filter).

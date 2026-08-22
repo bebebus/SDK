@@ -71,7 +71,7 @@ config = Config(
 )
 ```
 
-## All 12 endpoints
+## All 13 endpoints
 
 Collection (secret `api_secret_pay`, selected automatically):
 
@@ -81,6 +81,7 @@ Collection (secret `api_secret_pay`, selected automatically):
 | `pay_query(order_no=, out_order_no=)` | `/merchant/pay/query` |
 | `pay_methods_query(country=, biz_type=, currency=)` | `/merchant/pay-methods/query` |
 | `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query` (compatibility alias) |
+| `countries_query()` | `/merchant/countries/query` |
 | `balance_query(currency=)` | `/merchant/balance/query` |
 | `pay_test_complete(result=, ...)` | `/merchant/pay/test/complete` (test secret only) |
 

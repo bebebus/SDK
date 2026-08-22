@@ -158,9 +158,14 @@ export class Client {
     return this._post('/merchant/pay/query', params, 'pay');
   }
 
-  // 可用支付方式。params: { country? }。响应 data.methods[]。
+  // 可用支付方式。params: { country? }。响应 data.methods[]（每项含 name_i18n{zh-CN,en-US}、logo_svg 可空）。
   payMethodsQuery(params = {}) {
     return this._post('/merchant/pay-methods/query', params, 'pay');
+  }
+
+  // 可用国家/币种。params: {}（仅公共字段）。响应 data.countries[]。
+  countriesQuery(params = {}) {
+    return this._post('/merchant/countries/query', params, 'pay');
   }
 
   // 兼容别名：仍打 /merchant/groups/query（历史遗留、未文档化）。新对接请用 payMethodsQuery。
