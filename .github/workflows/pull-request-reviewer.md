@@ -7,6 +7,19 @@ on:
     workflows: [ci, CodeQL]
     types: [completed]
     branches: ["**"]
+  permissions:
+    pull-requests: read
+  steps:
+    - name: Check for exactly one associated open PR
+      id: pr_target
+      env:
+        GH_TOKEN: ${{ github.token }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        pr_count="$(gh api --method GET \
+          "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/pulls" \
+          --jq '[.[] | select(.state == "open")] | length')"
+        test "$pr_count" -eq 1
 
 permissions:
   contents: read
@@ -20,12 +33,16 @@ max-ai-credits: 100
 timeout-minutes: 15
 network: defaults
 
+if: needs.pre_activation.outputs.pr_target_result == 'success'
+
 tools:
   github:
     toolsets: [default, actions]
     min-integrity: approved
 
 safe-outputs:
+  noop:
+    report-as-issue: false
   add-comment:
     target: "*"
     max: 1
