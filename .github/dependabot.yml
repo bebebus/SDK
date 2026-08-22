@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    groups:
+      # CodeQL 各步骤必须使用同一版本，否则运行时会拒绝加载配置。
+      codeql-actions:
+        patterns:
+          - "github/codeql-action/*"
     ignore:
       # gh-aw 编译器会统一更新生成工作流中的 action pin，禁止直接合并此类 PR。
       - dependency-name: github/gh-aw-actions/setup
