@@ -8,7 +8,7 @@
 为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
 设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），
-**全部 12 个签名业务端点**（均只存在于 v1 Base；另有 `/version` 等非签名端点；服务端 HTTP 路由共 13 个），
+**全部 13 个签名业务端点**（均只存在于 v1 Base；另有 `/version` 等非签名端点；服务端 HTTP 路由共 14 个），
 **测试 + 正式双环境**，**跨语言签名逐字节一致**（同一份标准答案向量五套都绿）。
 
 ## 目录结构
@@ -17,7 +17,7 @@
 SDK/
 ├── README.md            # 本文件
 ├── SIGNING.md           # 签名算法权威说明 + 逐语言序列化坑（实现/排错必读）
-├── INTERFACES.md        # 12 个签名业务端点字段级请求/响应、回调字段、错误码
+├── INTERFACES.md        # 13 个签名业务端点字段级请求/响应、回调字段、错误码
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
 ├── RELEASE_NOTES.md     # 各版本面向用户的变更摘要
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
@@ -48,7 +48,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 
 ## 涵盖的接口（每语言均实现）
 
-**代收**：`payCreate`（下单，`pay_method` 必填）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`groupsQuery`（兼容别名）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
+**代收**：`payCreate`（下单，`pay_method` 必填）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`groupsQuery`（兼容别名）、`countriesQuery`（可用国家）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
 **代付**：`payoutCreate`（`pay_method` 必填，不收 `channel_code`）、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）
 **回调**：`verifyPayCallback` / `verifyPayoutCallback`（验签，时序安全比较）
 

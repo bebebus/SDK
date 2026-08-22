@@ -2,6 +2,14 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
+## Unreleased
+
+New endpoint (all five languages): `POST /merchant/countries/query` — available countries/currencies, signed with `api_secret_pay`, request carries common fields only, response is `data.countries[]` of `{country, name, name_i18n{zh-CN,en-US}, currencies[]}`. Exposed as `countriesQuery` (Node.js/PHP/Java), `countries_query()` (Python) and `CountriesQuery` (Go), mirroring `payMethodsQuery`.
+
+`pay-methods/query` response documented with two additional per-method fields: `name_i18n` (`{zh-CN, en-US}` display names) and `logo_svg` (inline SVG string, nullable). No SDK code change is required to read them — every language passes `data` through untyped.
+
+Non-breaking: no signature-algorithm change (`test-vectors.json` untouched), no existing method signature changed. Upgrade impact: none for existing callers.
+
 ## v2.0.0 (2026-08-18) — OpenAPI v2 fully withdrawn
 
 Server contract (decided 2026-08-18): OpenAPI v2 has been physically removed from the server — the entire `/api/open/v2` base now returns 404 for every route, not only `payout/*`. There is no v2 base left to fall back from, so this release removes the now-dead v2 request-binding machinery from all five SDKs and returns every default/preset base URL to `/api/open/v1`. Only 11 of the 14 shared signing vectors (`test-vectors.json`) survive — the 3 `v2_binding_*` vectors are removed; the remaining 11 v1 vectors are byte-for-byte unchanged.
