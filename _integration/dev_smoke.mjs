@@ -31,7 +31,11 @@ catch (e) { ok('pay-methods/query', false, `${e.name} ${e.code ?? ''} ${e.messag
 try { const r = await client.balanceQuery({}); ok('balance/query', Array.isArray(r.data.balances), JSON.stringify(r.data.balances)); }
 catch (e) { ok('balance/query', false, `${e.name} ${e.code ?? ''} ${e.message}`); }
 
-// 3. pay/create（gcash/PH/PHP，含 customer 以满足上游必填）
+// 3. countries/query
+try { const r = await client.countriesQuery({}); const cs = r.data.countries || []; ok('countries/query', cs.length > 0, `countries=${cs.map((c) => c.country).join(',')}`); }
+catch (e) { ok('countries/query', false, `${e.name} ${e.code ?? ''} ${e.message}`); }
+
+// 4. pay/create（gcash/PH/PHP，含 customer 以满足上游必填）
 const outOrderNo = `sdk-${tag}`;
 let orderNo = null;
 try {
@@ -44,16 +48,16 @@ try {
   ok('pay/create', !!orderNo, `order_no=${orderNo} status=${r.data.status} pay_url=${(r.data.pay_url || '').slice(0, 48)}`);
 } catch (e) { ok('pay/create', false, `${e.name} ${e.code ?? ''} ${e.message} ${JSON.stringify(e.data ?? '')}`); }
 
-// 4. pay/query（按商户单号）
+// 5. pay/query（按商户单号）
 try { const r = await client.payQuery({ out_order_no: outOrderNo }); ok('pay/query', r.data.out_order_no === outOrderNo, `status=${r.data.status} notify_status=${r.data.notify_status}`); }
 catch (e) { ok('pay/query', false, `${e.name} ${e.code ?? ''} ${e.message}`); }
 
-// 5. payout/banks/query
+// 6. payout/banks/query
 let bankCode = null;
 try { const r = await client.payoutBanksQuery({ pay_method: 'bank', country: 'PH', currency: 'PHP' }); const banks = r.data.banks || []; bankCode = banks[0]?.code; ok('payout/banks/query', Array.isArray(banks), `count=${banks.length} first=${bankCode ?? 'N/A'}`); }
 catch (e) { ok('payout/banks/query', false, `${e.name} ${e.code ?? ''} ${e.message}`); }
 
-// 6. payout/create（冻结余额；bank 类需 bank_code）
+// 7. payout/create（冻结余额；bank 类需 bank_code）
 const outPayoutNo = `sdkw-${tag}`;
 try {
   const r = await client.payoutCreate({
@@ -64,18 +68,18 @@ try {
   ok('payout/create', !!r.data.payout_no, `payout_no=${r.data.payout_no} status=${r.data.status} freeze=${r.data.freeze_amount ?? ''}`);
 } catch (e) { ok('payout/create', false, `${e.name} ${e.code ?? ''} ${e.message} ${JSON.stringify(e.data ?? '')}`); }
 
-// 7. payout/query
+// 8. payout/query
 try { const r = await client.payoutQuery({ out_payout_no: outPayoutNo }); ok('payout/query', r.data.out_payout_no === outPayoutNo, `status=${r.data.status} sub_state=${r.data.sub_state ?? ''}`); }
 catch (e) { ok('payout/query', false, `${e.name} ${e.code ?? ''} ${e.message}`); }
 
-// 8. 负例：错误密钥签名应被服务端拒（code 100104）
+// 9. 负例：错误密钥签名应被服务端拒（code 100104）
 try {
   const badClient = new Client(new Config({ merchantNo: env.PP_MNO, apiKey: env.PP_KEY, apiSecretPay: 'deadbeef'.repeat(8), apiSecretPayout: env.PP_POUT, baseUrl: env.PP_BASE }));
   await badClient.payQuery({ out_order_no: outOrderNo });
   ok('负例:错误签名被拒', false, '未抛错（异常）');
 } catch (e) { ok('负例:错误签名被拒', e.code === 100104 || e.code === 100000, `code=${e.code ?? ''} ${e.message}`); }
 
-// 9. 回调验签自证（用 SDK 自签 → 验签 true；篡改 → false）
+// 10. 回调验签自证（用 SDK 自签 → 验签 true；篡改 → false）
 const cb = { merchant_no: env.PP_MNO, order_no: orderNo || 'P_demo', out_order_no: outOrderNo, amount: 10000, currency: 'PHP', status: 'success', paid_at: '2026-06-23T08:00:00+08:00' };
 cb.sign = sign(cb, env.PP_PAY);
 ok('回调验签 正例', client.verifyPayCallback(cb) === true);

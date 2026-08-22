@@ -70,7 +70,22 @@ func main() {
 		ok("balance/query", has, fmt.Sprint(r.Data["balances"]))
 	}
 
-	// 3. pay/create
+	// 3. countries/query
+	if r, err := client.CountriesQuery(ctx, map[string]any{}); err != nil {
+		_, msg := apiCode(err)
+		ok("countries/query", false, msg)
+	} else {
+		cs, _ := r.Data["countries"].([]any)
+		s := ""
+		for _, c := range cs {
+			if cc, okc := c.(map[string]any); okc {
+				s += fmt.Sprint(cc["country"]) + ","
+			}
+		}
+		ok("countries/query", len(cs) > 0, s)
+	}
+
+	// 4. pay/create
 	outOrderNo := "sdk-" + tag
 	var orderNo string
 	if r, err := client.PayCreate(ctx, map[string]any{
@@ -89,7 +104,7 @@ func main() {
 		ok("pay/create", orderNo != "", fmt.Sprintf("order_no=%s status=%v pay_url=%s", orderNo, r.Data["status"], payURL))
 	}
 
-	// 4. pay/query
+	// 5. pay/query
 	if r, err := client.PayQuery(ctx, map[string]any{"out_order_no": outOrderNo}); err != nil {
 		_, msg := apiCode(err)
 		ok("pay/query", false, msg)
@@ -97,7 +112,7 @@ func main() {
 		ok("pay/query", r.Data["out_order_no"] == outOrderNo, fmt.Sprintf("status=%v notify_status=%v", r.Data["status"], r.Data["notify_status"]))
 	}
 
-	// 5. payout/banks/query
+	// 6. payout/banks/query
 	var bankCode string
 	if r, err := client.PayoutBanksQuery(ctx, map[string]any{"pay_method": "bank", "country": "PH", "currency": "PHP"}); err != nil {
 		_, msg := apiCode(err)
@@ -116,7 +131,7 @@ func main() {
 		ok("payout/banks/query", banks != nil, fmt.Sprintf("count=%d first=%s", len(banks), first))
 	}
 
-	// 6. payout/create
+	// 7. payout/create
 	outPayoutNo := "sdkw-" + tag
 	payMethod := "gcash"
 	params := map[string]any{
@@ -136,7 +151,7 @@ func main() {
 		ok("payout/create", r.Data["payout_no"] != nil, fmt.Sprintf("payout_no=%v status=%v freeze=%v", r.Data["payout_no"], r.Data["status"], r.Data["freeze_amount"]))
 	}
 
-	// 7. payout/query
+	// 8. payout/query
 	if r, err := client.PayoutQuery(ctx, map[string]any{"out_payout_no": outPayoutNo}); err != nil {
 		_, msg := apiCode(err)
 		ok("payout/query", false, msg)
@@ -144,7 +159,7 @@ func main() {
 		ok("payout/query", r.Data["out_payout_no"] == outPayoutNo, fmt.Sprintf("status=%v sub_state=%v", r.Data["status"], r.Data["sub_state"]))
 	}
 
-	// 8. 负例：错误密钥签名应被服务端拒（code 100104）
+	// 9. 负例：错误密钥签名应被服务端拒（code 100104）
 	bad := openapi.NewClient(openapi.Config{MerchantNo: mno, APIKey: key, SecretPay: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef", SecretPayout: pout, BaseURL: base})
 	if _, err := bad.PayQuery(ctx, map[string]any{"out_order_no": outOrderNo}); err == nil {
 		ok("负例:错误签名被拒", false, "未返错误（异常）")
@@ -153,7 +168,7 @@ func main() {
 		ok("负例:错误签名被拒", c == 100104 || c == 100000, fmt.Sprintf("code=%d %s", c, msg))
 	}
 
-	// 9. 回调验签自证
+	// 10. 回调验签自证
 	if orderNo == "" {
 		orderNo = "P_demo"
 	}

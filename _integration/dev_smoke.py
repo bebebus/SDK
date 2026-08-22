@@ -40,7 +40,15 @@ try:
 except Exception as e:  # noqa: BLE001
     ok("balance/query", False, f"{type(e).__name__} {e}")
 
-# 3. pay/create
+# 3. countries/query
+try:
+    d = client.countries_query()
+    cs = d.get("countries") or []
+    ok("countries/query", len(cs) > 0, "countries=" + ",".join(c["country"] for c in cs))
+except Exception as e:  # noqa: BLE001
+    ok("countries/query", False, f"{type(e).__name__} {e}")
+
+# 4. pay/create
 out_order_no = f"sdk-{tag}"
 order_no = None
 try:
@@ -56,14 +64,14 @@ except ApiError as e:
 except Exception as e:  # noqa: BLE001
     ok("pay/create", False, f"{type(e).__name__} {e}")
 
-# 4. pay/query
+# 5. pay/query
 try:
     d = client.pay_query(out_order_no=out_order_no)
     ok("pay/query", d.get("out_order_no") == out_order_no, f"status={d.get('status')} notify_status={d.get('notify_status')}")
 except Exception as e:  # noqa: BLE001
     ok("pay/query", False, f"{type(e).__name__} {e}")
 
-# 5. payout/banks/query
+# 6. payout/banks/query
 bank_code = None
 try:
     d = client.payout_banks_query(pay_method="bank", country="PH", currency="PHP")
@@ -73,7 +81,7 @@ try:
 except Exception as e:  # noqa: BLE001
     ok("payout/banks/query", False, f"{type(e).__name__} {e}")
 
-# 6. payout/create
+# 7. payout/create
 out_payout_no = f"sdkw-{tag}"
 try:
     d = client.payout_create(
@@ -88,14 +96,14 @@ except ApiError as e:
 except Exception as e:  # noqa: BLE001
     ok("payout/create", False, f"{type(e).__name__} {e}")
 
-# 7. payout/query
+# 8. payout/query
 try:
     d = client.payout_query(out_payout_no=out_payout_no)
     ok("payout/query", d.get("out_payout_no") == out_payout_no, f"status={d.get('status')} sub_state={d.get('sub_state')}")
 except Exception as e:  # noqa: BLE001
     ok("payout/query", False, f"{type(e).__name__} {e}")
 
-# 8. 负例：错误密钥签名应被服务端拒（code 100104）
+# 9. 负例：错误密钥签名应被服务端拒（code 100104）
 try:
     bad = Client(Config(mno, key, "deadbeef" * 8, pout, base_url=base))
     bad.pay_query(out_order_no=out_order_no)
@@ -105,7 +113,7 @@ except ApiError as e:
 except Exception as e:  # noqa: BLE001
     ok("负例:错误签名被拒", False, f"{type(e).__name__} {e}")
 
-# 9. 回调验签自证
+# 10. 回调验签自证
 cb = {"merchant_no": mno, "order_no": order_no or "P_demo", "out_order_no": out_order_no, "amount": 10000, "currency": "PHP", "status": "success", "paid_at": "2026-06-23T08:00:00+08:00"}
 cb["sign"] = sign(cb, pay)
 ok("回调验签 正例", verify_callback(cb, pay) is True)

@@ -52,7 +52,16 @@ public class DevSmoke {
             ok("balance/query", balances instanceof List, String.valueOf(balances));
         } catch (Exception e) { ok("balance/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
-        // 3. pay/create
+        // 3. countries/query
+        try {
+            ApiResponse r = client.countriesQuery();
+            List<?> cs = (List<?>) r.dataAsMap().get("countries");
+            StringBuilder sb = new StringBuilder();
+            if (cs != null) for (Object o : cs) sb.append(((Map<?, ?>) o).get("country")).append(",");
+            ok("countries/query", cs != null && !cs.isEmpty(), sb.toString());
+        } catch (Exception e) { ok("countries/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
+
+        // 4. pay/create
         String outOrderNo = "sdk-" + tag;
         String orderNo = null;
         try {
@@ -66,14 +75,14 @@ public class DevSmoke {
         } catch (ApiException e) { ok("pay/create", false, "ApiException code=" + e.code() + " " + e.getMessage() + " " + e.data()); }
         catch (Exception e) { ok("pay/create", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
-        // 4. pay/query
+        // 5. pay/query
         try {
             ApiResponse r = client.payQuery(map("out_order_no", outOrderNo));
             ok("pay/query", outOrderNo.equals(r.dataAsMap().get("out_order_no")),
                     "status=" + r.dataAsMap().get("status") + " notify_status=" + r.dataAsMap().get("notify_status"));
         } catch (Exception e) { ok("pay/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
-        // 5. payout/banks/query
+        // 6. payout/banks/query
         String bankCode = null;
         try {
             ApiResponse r = client.payoutBanksQuery(map("pay_method", "bank", "country", "PH", "currency", "PHP"));
@@ -82,7 +91,7 @@ public class DevSmoke {
             ok("payout/banks/query", banks != null, "count=" + (banks == null ? 0 : banks.size()) + " first=" + (bankCode == null ? "N/A" : bankCode));
         } catch (Exception e) { ok("payout/banks/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
-        // 6. payout/create
+        // 7. payout/create
         String outPayoutNo = "sdkw-" + tag;
         try {
             ApiResponse r = client.payoutCreate(map(
@@ -95,14 +104,14 @@ public class DevSmoke {
         } catch (ApiException e) { ok("payout/create", false, "ApiException code=" + e.code() + " " + e.getMessage() + " " + e.data()); }
         catch (Exception e) { ok("payout/create", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
-        // 7. payout/query
+        // 8. payout/query
         try {
             ApiResponse r = client.payoutQuery(map("out_payout_no", outPayoutNo));
             ok("payout/query", outPayoutNo.equals(r.dataAsMap().get("out_payout_no")),
                     "status=" + r.dataAsMap().get("status") + " sub_state=" + r.dataAsMap().get("sub_state"));
         } catch (Exception e) { ok("payout/query", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
-        // 8. 负例：错误密钥签名应被服务端拒（code 100104）
+        // 9. 负例：错误密钥签名应被服务端拒（code 100104）
         try {
             Client bad = new Client(Config.builder().merchantNo(mno).apiKey(key)
                     .apiSecretPay("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef").apiSecretPayout(pout).baseUrl(base).build());
@@ -111,7 +120,7 @@ public class DevSmoke {
         } catch (ApiException e) { ok("负例:错误签名被拒", e.code() == 100104 || e.code() == 100000, "code=" + e.code() + " " + e.getMessage()); }
         catch (Exception e) { ok("负例:错误签名被拒", false, e.getClass().getSimpleName() + " " + e.getMessage()); }
 
-        // 9. 回调验签自证
+        // 10. 回调验签自证
         Map<String, Object> cb = map("merchant_no", mno, "order_no", orderNo != null ? orderNo : "P_demo",
                 "out_order_no", outOrderNo, "amount", 10000, "currency", "PHP", "status", "success", "paid_at", "2026-06-23T08:00:00+08:00");
         cb.put("sign", Signer.sign(cb, pay));

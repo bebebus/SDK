@@ -41,7 +41,11 @@ catch (\Throwable $e) { ok('pay-methods/query', false, get_class($e) . ' ' . $e-
 try { $d = $client->balanceQuery([]); ok('balance/query', isset($d['balances']) && is_array($d['balances']), json_encode($d['balances'], JSON_UNESCAPED_UNICODE)); }
 catch (\Throwable $e) { ok('balance/query', false, get_class($e) . ' ' . $e->getMessage()); }
 
-// 3. pay/create
+// 3. countries/query
+try { $d = $client->countriesQuery([]); $cs = $d['countries'] ?? []; ok('countries/query', count($cs) > 0, 'countries=' . implode(',', array_column($cs, 'country'))); }
+catch (\Throwable $e) { ok('countries/query', false, get_class($e) . ' ' . $e->getMessage()); }
+
+// 4. pay/create
 $outOrderNo = "sdk-$tag";
 $orderNo = null;
 try {
@@ -55,16 +59,16 @@ try {
 } catch (ApiException $e) { ok('pay/create', false, "ApiException code={$e->apiCode} {$e->apiMessage} " . json_encode($e->data, JSON_UNESCAPED_UNICODE)); }
 catch (\Throwable $e) { ok('pay/create', false, get_class($e) . ' ' . $e->getMessage()); }
 
-// 4. pay/query
+// 5. pay/query
 try { $d = $client->payQuery(['out_order_no' => $outOrderNo]); ok('pay/query', ($d['out_order_no'] ?? '') === $outOrderNo, 'status=' . ($d['status'] ?? '') . ' notify_status=' . ($d['notify_status'] ?? '')); }
 catch (\Throwable $e) { ok('pay/query', false, get_class($e) . ' ' . $e->getMessage()); }
 
-// 5. payout/banks/query
+// 6. payout/banks/query
 $bankCode = null;
 try { $d = $client->payoutBanksQuery(['pay_method' => 'bank', 'country' => 'PH', 'currency' => 'PHP']); $banks = $d['banks'] ?? []; $bankCode = $banks[0]['code'] ?? null; ok('payout/banks/query', is_array($banks), 'count=' . count($banks) . ' first=' . ($bankCode ?? 'N/A')); }
 catch (\Throwable $e) { ok('payout/banks/query', false, get_class($e) . ' ' . $e->getMessage()); }
 
-// 6. payout/create
+// 7. payout/create
 $outPayoutNo = "sdkw-$tag";
 try {
     $params = [
@@ -79,11 +83,11 @@ try {
 } catch (ApiException $e) { ok('payout/create', false, "ApiException code={$e->apiCode} {$e->apiMessage} " . json_encode($e->data, JSON_UNESCAPED_UNICODE)); }
 catch (\Throwable $e) { ok('payout/create', false, get_class($e) . ' ' . $e->getMessage()); }
 
-// 7. payout/query
+// 8. payout/query
 try { $d = $client->payoutQuery(['out_payout_no' => $outPayoutNo]); ok('payout/query', ($d['out_payout_no'] ?? '') === $outPayoutNo, 'status=' . ($d['status'] ?? '') . ' sub_state=' . ($d['sub_state'] ?? '')); }
 catch (\Throwable $e) { ok('payout/query', false, get_class($e) . ' ' . $e->getMessage()); }
 
-// 8. 负例：错误密钥签名应被服务端拒（code 100104）
+// 9. 负例：错误密钥签名应被服务端拒（code 100104）
 try {
     $bad = new Client(new Config($mno, $key, str_repeat('deadbeef', 8), $pout, Environment::PRODUCTION, $base));
     $bad->payQuery(['out_order_no' => $outOrderNo]);
@@ -91,7 +95,7 @@ try {
 } catch (ApiException $e) { ok('负例:错误签名被拒', $e->apiCode === 100104 || $e->apiCode === 100000, "code={$e->apiCode} {$e->apiMessage}"); }
 catch (\Throwable $e) { ok('负例:错误签名被拒', false, get_class($e) . ' ' . $e->getMessage()); }
 
-// 9. 回调验签自证
+// 10. 回调验签自证
 $cb = ['merchant_no' => $mno, 'order_no' => $orderNo ?? 'P_demo', 'out_order_no' => $outOrderNo, 'amount' => 10000, 'currency' => 'PHP', 'status' => 'success', 'paid_at' => '2026-06-23T08:00:00+08:00'];
 $cb['sign'] = Signer::sign($cb, $pay);
 ok('回调验签 正例', $client->verifyPayCallback($cb) === true);
