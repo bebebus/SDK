@@ -14,7 +14,9 @@ SDK 已加入 OpenSSF Scorecard 工作流，扫描 `bebebus/SDK` 的仓库安全
 - 评估规则：[Scorecard checks](https://github.com/ossf/scorecard/blob/main/docs/checks.md)
 - 结果来源项目：[OpenSSF Scorecard](https://github.com/ossf/scorecard)
 
-报告会随 `main` 分支的 GitHub Actions 运行持续更新。当前基线结果（2026-07-11 07:23 UTC）为 **3.2/10**，扫描提交为 `b23e600`。具体问题与修复顺序见 [`SECURITY-REMEDIATION-PLAN.md`](./SECURITY-REMEDIATION-PLAN.md)。
+报告会随 `main` 分支的 GitHub Actions 运行持续更新。当前已复核基线（2026-08-22 07:06:24 UTC）为 **8.7/10**，扫描提交为 `59c4135`，Scorecard 版本为 `v5.5.0`。这是带时间戳的快照；查询最新状态时应以公共结果 API 为准。剩余扣分和修复边界见 [`SECURITY-REMEDIATION-PLAN.md`](./SECURITY-REMEDIATION-PLAN.md)。
+
+当前结果中，Security-Policy、Code-Review、Dependency-Update-Tool、Token-Permissions、Signed-Releases、Vulnerabilities、Packaging、Fuzzing、SAST、License 和 CI-Tests 等检查均为 10 分。尚未满分的检查包括：Pinned-Dependencies（8）、Branch-Protection（8）、CII-Best-Practices（5），以及受仓库年龄或贡献者组织分布影响的 Maintained（0）和 Contributors（0）。
 
 ## 依赖与供应链信息
 
@@ -29,8 +31,10 @@ SDK 运行时不声明第三方依赖；该来源主要用于复核发布包元�
 
 | 项目 | 状态 |
 | --- | --- |
-| OpenSSF Scorecard 工作流 | 已配置，当前公开结果为 3.2/10；会随工作流持续更新 |
-| GitHub Code Scanning | 由 Scorecard 工作流上传 SARIF |
+| OpenSSF Scorecard 工作流 | 已配置；2026-08-22 基线为 8.7/10，扫描提交 `59c4135` |
+| CI / CodeQL | `59c4135` 对应的 [CI](https://github.com/bebebus/SDK/actions/runs/32558710542) 和 [CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548) 均成功 |
+| GitHub Code Scanning | 2026-08-25 复核有 5 条 OpenSSF Pinned-Dependencies 中危告警，均来自工作流中的 npm 安装命令 |
+| Dependabot 安全告警 | 2026-08-25 复核为 0 条 open 告警 |
 | 依赖供应链复核 | 可通过 deps.dev 公开复核 |
 | 独立人工代码审计 / 渗透测试 | 尚未委托，不宣称已完成 |
 
