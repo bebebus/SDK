@@ -33,8 +33,8 @@ The SDK declares no runtime dependencies. This source is mainly useful for revie
 | --- | --- |
 | OpenSSF Scorecard workflow | Configured; the 2026-08-22 baseline is 8.7/10 for commit `59c4135` |
 | CI / CodeQL | [CI](https://github.com/bebebus/SDK/actions/runs/32558710542) and [CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548) both passed for `59c4135` |
-| GitHub Code Scanning | Five medium OpenSSF Pinned-Dependencies alerts were open on 2026-08-25; all point to npm installation commands in workflows |
-| Dependabot security alerts | Zero open alerts when verified on 2026-08-25 |
+| GitHub Code Scanning | [Five alerts were open](https://github.com/bebebus/SDK/security/code-scanning?query=is%3Aopen) on 2026-08-25; all were medium OpenSSF Pinned-Dependencies findings for npm installation commands in workflows |
+| Dependabot security alerts | [Zero alerts were open](https://github.com/bebebus/SDK/security/dependabot?query=is%3Aopen) when verified on 2026-08-25 |
 | Dependency supply-chain review | Publicly reviewable through deps.dev |
 | Independent manual code audit / penetration test | Not commissioned; not claimed as completed |
 

@@ -33,8 +33,8 @@ SDK 运行时不声明第三方依赖；该来源主要用于复核发布包元�
 | --- | --- |
 | OpenSSF Scorecard 工作流 | 已配置；2026-08-22 基线为 8.7/10，扫描提交 `59c4135` |
 | CI / CodeQL | `59c4135` 对应的 [CI](https://github.com/bebebus/SDK/actions/runs/32558710542) 和 [CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548) 均成功 |
-| GitHub Code Scanning | 2026-08-25 复核有 5 条 OpenSSF Pinned-Dependencies 中危告警，均来自工作流中的 npm 安装命令 |
-| Dependabot 安全告警 | 2026-08-25 复核为 0 条 open 告警 |
+| GitHub Code Scanning | 2026-08-25 [复核有 5 条 open 告警](https://github.com/bebebus/SDK/security/code-scanning?query=is%3Aopen)，均为工作流 npm 安装命令触发的 OpenSSF Pinned-Dependencies 中危告警 |
+| Dependabot 安全告警 | 2026-08-25 [复核为 0 条 open 告警](https://github.com/bebebus/SDK/security/dependabot?query=is%3Aopen) |
 | 依赖供应链复核 | 可通过 deps.dev 公开复核 |
 | 独立人工代码审计 / 渗透测试 | 尚未委托，不宣称已完成 |
 
