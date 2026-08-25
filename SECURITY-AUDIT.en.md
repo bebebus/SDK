@@ -14,7 +14,9 @@ The SDK includes an OpenSSF Scorecard workflow for the `bebebus/SDK` repository.
 - Check definitions: [Scorecard checks](https://github.com/ossf/scorecard/blob/main/docs/checks.md)
 - Source project: [OpenSSF Scorecard](https://github.com/ossf/scorecard)
 
-The report is updated by GitHub Actions runs on `main`. The current baseline (2026-07-11 07:23 UTC) is **3.2/10**, covering commit `b23e600`. See [`SECURITY-REMEDIATION-PLAN.en.md`](./SECURITY-REMEDIATION-PLAN.en.md) for the findings and remediation order.
+The report is updated by GitHub Actions runs on `main`. The current verified baseline (2026-08-22 07:06:24 UTC) is **8.7/10**, covering commit `59c4135` with Scorecard `v5.5.0`. This is a timestamped snapshot; use the public result API for the latest state. See [`SECURITY-REMEDIATION-PLAN.en.md`](./SECURITY-REMEDIATION-PLAN.en.md) for the remaining deductions and remediation boundaries.
+
+Security-Policy, Code-Review, Dependency-Update-Tool, Token-Permissions, Signed-Releases, Vulnerabilities, Packaging, Fuzzing, SAST, License, and CI-Tests are among the checks currently scoring 10. Checks that are not yet at full score include Pinned-Dependencies (8), Branch-Protection (8), CII-Best-Practices (5), and the repository-age or contributor-organization observations Maintained (0) and Contributors (0).
 
 ## Dependency and Supply-Chain Information
 
@@ -29,8 +31,10 @@ The SDK declares no runtime dependencies. This source is mainly useful for revie
 
 | Item | Status |
 | --- | --- |
-| OpenSSF Scorecard workflow | Configured; current public result is 3.2/10 and will be updated by future runs |
-| GitHub Code Scanning | SARIF uploaded by the Scorecard workflow |
+| OpenSSF Scorecard workflow | Configured; the 2026-08-22 baseline is 8.7/10 for commit `59c4135` |
+| CI / CodeQL | [CI](https://github.com/bebebus/SDK/actions/runs/32558710542) and [CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548) both passed for `59c4135` |
+| GitHub Code Scanning | [Five alerts were open](https://github.com/bebebus/SDK/security/code-scanning?query=is%3Aopen) on 2026-08-25; all were medium OpenSSF Pinned-Dependencies findings for npm installation commands in workflows |
+| Dependabot security alerts | [Zero alerts were open](https://github.com/bebebus/SDK/security/dependabot?query=is%3Aopen) when verified on 2026-08-25 |
 | Dependency supply-chain review | Publicly reviewable through deps.dev |
 | Independent manual code audit / penetration test | Not commissioned; not claimed as completed |
 
