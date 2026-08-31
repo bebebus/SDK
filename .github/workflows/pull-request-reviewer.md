@@ -7,6 +7,7 @@ on:
     workflows: [ci, CodeQL]
     types: [completed]
     branches: ["**"]
+  bots: ["dependabot[bot]"]
   permissions:
     pull-requests: read
   steps:
