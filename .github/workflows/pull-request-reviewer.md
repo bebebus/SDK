@@ -37,6 +37,10 @@ network: defaults
 
 if: needs.pre_activation.outputs.pr_target_result == 'success'
 
+concurrency:
+  group: "gh-aw-${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}"
+  cancel-in-progress: true
+
 jobs:
   pre-activation:
     outputs:
