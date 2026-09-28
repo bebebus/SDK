@@ -2,13 +2,15 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
-## Unreleased
+## v2.1.0 (2026-09-29) — countries/query
 
 New endpoint (all five languages): `POST /merchant/countries/query` — available countries/currencies, signed with `api_secret_pay`, request carries common fields only, response is `data.countries[]` of `{country, name, name_i18n{zh-CN,en-US}, currencies[]}`. Exposed as `countriesQuery` (Node.js/PHP/Java), `countries_query()` (Python) and `CountriesQuery` (Go), mirroring `payMethodsQuery`.
 
 `pay-methods/query` response documented with two additional per-method fields: `name_i18n` (`{zh-CN, en-US}` display names) and `logo_svg` (inline SVG string, nullable). No SDK code change is required to read them — every language passes `data` through untyped.
 
 Non-breaking: no signature-algorithm change (`test-vectors.json` untouched), no existing method signature changed. Upgrade impact: none for existing callers.
+
+- Version bumped to `2.1.0` across all five SDKs (`package.json`/`package-lock.json`, `pyproject.toml`, `Client::VERSION`/`Version`/`VERSION` constants, `java/pom.xml`, and the source-run version fallbacks). Go: `go get github.com/bebebus/SDK/go/v2@v2.1.0` (tag `go/v2.1.0`).
 
 ## v2.0.0 (2026-08-18) — OpenAPI v2 fully withdrawn
 

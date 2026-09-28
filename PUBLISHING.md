@@ -1,6 +1,6 @@
 # 发布到包索引
 
-五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `2.0.0`。
+五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `2.1.0`。
 
 > ⚠️ **发版必须在 `main` 上执行**（release.sh 假定 push origin main）：v1.2.0 曾从 feature 分支打 tag 发布，随后 PR squash 合并导致已发布 tag（v1.2.0 / go/v1.2.0）指向的提交游离于 main 历史之外（仅由 tag 保活，包索引不受影响）。此后规则：先以 merge/squash 合入 main，**在 main 的合并结果上打 tag 再发**；若 PR 采用 squash，绝不可在分支侧提前打 tag。
 
@@ -11,7 +11,7 @@
 | npm | `@bebebus/merchant-openapi-sdk` | `npm i @bebebus/merchant-openapi-sdk` |
 | PyPI | `bebebus-merchant-openapi-sdk`（import 名仍 `openapi_sdk`） | `pip install bebebus-merchant-openapi-sdk` |
 | Packagist | `bebebus/merchant-openapi-sdk` | `composer require bebebus/merchant-openapi-sdk` |
-| Go (pkg.go.dev) | `github.com/bebebus/SDK/go/v2`（2.0.0 起，SIV） | `go get github.com/bebebus/SDK/go/v2@v2.0.0` |
+| Go (pkg.go.dev) | `github.com/bebebus/SDK/go/v2`（2.0.0 起，SIV） | `go get github.com/bebebus/SDK/go/v2@v2.1.0` |
 | Java | —（不发 Maven） | 源码引入：把 `java/src/main/java` 加入工程，或 `cd java && mvn package` 自行打 jar |
 
 > ⚠️ 发布到公共索引**不可撤销**（版本号永久占用）。令牌只用于发布、勿入库。每次发版先 bump 版本号。
