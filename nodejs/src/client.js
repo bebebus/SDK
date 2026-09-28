@@ -21,7 +21,7 @@ const SDK_VERSION = (() => {
   } catch {
     // ignore：读不到就走兜底版本号。
   }
-  return '2.0.0';
+  return '2.1.0';
 })();
 const USER_AGENT = `openapi-sdk-nodejs/${SDK_VERSION}`;
 

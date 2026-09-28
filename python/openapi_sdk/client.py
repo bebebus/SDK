@@ -38,9 +38,9 @@ try:
     try:
         _SDK_VERSION = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        _SDK_VERSION = "2.0.0"
+        _SDK_VERSION = "2.1.0"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    _SDK_VERSION = "2.0.0"
+    _SDK_VERSION = "2.1.0"
 
 _JSON_HEADERS = {
     "Content-Type": "application/json",
