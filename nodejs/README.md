@@ -38,14 +38,16 @@ import { Client, Config, Environment, ApiError, TransportError } from './src/ind
 ```js
 import { Client, Config, Environment } from './src/index.js';
 
-const client = new Client(new Config({
-  merchantNo: 'M00000001',
-  apiKey: 'ak_xxx',
-  apiSecretPay: 'sk_pay_xxx',       // pay 类接口 / 代收·退款回调
-  apiSecretPayout: 'sk_payout_xxx', // payout 类接口 / 代付回调
-  // PRODUCTION 无内置 URL，必须显式传入
-  baseUrl: 'https://api.<service_domain>/api/open/v1',
-}));
+const client = new Client(
+  new Config({
+    merchantNo: 'M00000001',
+    apiKey: 'ak_xxx',
+    apiSecretPay: 'sk_pay_xxx', // pay 类接口 / 代收·退款回调
+    apiSecretPayout: 'sk_payout_xxx', // payout 类接口 / 代付回调
+    // PRODUCTION 无内置 URL，必须显式传入
+    baseUrl: 'https://api.<service_domain>/api/open/v1',
+  }),
+);
 
 // 代收下单（pay_method 必填；金额是最小单位整数，10000 = 1 元）
 const { data, raw } = await client.payCreate({
@@ -74,27 +76,27 @@ new Config({ /* ... */ environment: Environment.SANDBOX });
 new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 ```
 
-| 预设 | Base URL |
-|------|----------|
+| 预设                     | Base URL                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
 | `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v1`，并显式传入 `baseUrl` |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
+| `Environment.SANDBOX`    | `http://127.0.0.1:3090/api/open/v1`                                                         |
 
 ## 全部 13 个端点
 
-| 方法 | 端点 | 密钥 |
-|------|------|------|
-| `payCreate(params)` | `/merchant/pay/create` | pay |
-| `payQuery(params)` | `/merchant/pay/query` | pay |
-| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
-| `groupsQuery(params?)` | `/merchant/groups/query` | pay（兼容别名） |
-| `countriesQuery(params?)` | `/merchant/countries/query` | pay |
-| `balanceQuery(params?)` | `/merchant/balance/query` | pay |
-| `payTestComplete(params)` | `/merchant/pay/test/complete` | pay（仅测试密钥） |
-| `payoutCreate(params)` | `/merchant/payout/create` | payout |
-| `payoutQuery(params)` | `/merchant/payout/query` | payout |
-| `payoutBanksQuery(params)` | `/merchant/payout/banks/query` | payout |
-| `payoutProofQuery(params)` | `/merchant/payout/proof/query` | payout |
-| `payoutReceiptQuery(params)` | `/merchant/payout/receipt/query` | payout |
+| 方法                         | 端点                             | 密钥                 |
+| ---------------------------- | -------------------------------- | -------------------- |
+| `payCreate(params)`          | `/merchant/pay/create`           | pay                  |
+| `payQuery(params)`           | `/merchant/pay/query`            | pay                  |
+| `payMethodsQuery(params?)`   | `/merchant/pay-methods/query`    | pay                  |
+| `groupsQuery(params?)`       | `/merchant/groups/query`         | pay（兼容别名）      |
+| `countriesQuery(params?)`    | `/merchant/countries/query`      | pay                  |
+| `balanceQuery(params?)`      | `/merchant/balance/query`        | pay                  |
+| `payTestComplete(params)`    | `/merchant/pay/test/complete`    | pay（仅测试密钥）    |
+| `payoutCreate(params)`       | `/merchant/payout/create`        | payout               |
+| `payoutQuery(params)`        | `/merchant/payout/query`         | payout               |
+| `payoutBanksQuery(params)`   | `/merchant/payout/banks/query`   | payout               |
+| `payoutProofQuery(params)`   | `/merchant/payout/proof/query`   | payout               |
+| `payoutReceiptQuery(params)` | `/merchant/payout/receipt/query` | payout               |
 | `payoutTestComplete(params)` | `/merchant/payout/test/complete` | payout（仅测试密钥） |
 
 请求构建说明：
