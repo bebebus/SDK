@@ -15,7 +15,7 @@
         "ext-json": "*"
     },
     "require-dev": {
-        "phpstan/phpstan": "2.3.1"
+        "phpstan/phpstan": "2.3.3"
     },
     "scripts": {
         "lint": "phpstan analyse --configuration=phpstan.neon --no-progress"
