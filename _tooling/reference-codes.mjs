@@ -11,6 +11,7 @@ const unique = (rows, key) => assert.equal(new Set(rows.map(key)).size, rows.len
 
 export function validateReference(data) {
   assert.deepEqual(Object.keys(data).sort(), [
+    'bank_directories',
     'banks',
     'countries',
     'currencies',
@@ -57,13 +58,53 @@ export function validateReference(data) {
     // 严格白名单：禁止把 upstream / clearing / 凭据等内部字段带进公共数据。
     assert.deepEqual(Object.keys(bank).sort(), ['bank_code', 'bank_name', 'country', 'source']);
   }
+  unique(data.bank_directories, (directory) => `${directory.country}|${directory.scheme}`);
+  for (const directory of data.bank_directories) {
+    assert.ok(countries.has(directory.country));
+    assert.equal(directory.scheme, 'vietqr');
+    assert.ok(text(directory.publisher));
+    assert.match(directory.url, /^https:\/\//);
+    assert.match(directory.documentation_url, /^https:\/\//);
+    assert.match(directory.retrieved_at, /^\d{4}-\d{2}-\d{2}$/);
+    assert.match(directory.response_sha256, /^[a-f0-9]{64}$/);
+    assert.ok(directory.entries.length > 0);
+    unique(directory.entries, (entry) => entry.reference_code);
+    unique(directory.entries, (entry) => entry.bin);
+    for (const entry of directory.entries) {
+      assert.ok(text(entry.reference_code) && text(entry.name) && text(entry.short_name));
+      assert.match(entry.bin, /^\d{6}$/);
+      assert.ok(typeof entry.note === 'string');
+      assert.ok(
+        entry.platform_bank_code === null ||
+          data.banks.some((bank) => bank.country === directory.country && bank.bank_code === entry.platform_bank_code),
+        `未知平台银行码 ${entry.platform_bank_code}`,
+      );
+      assert.deepEqual(Object.keys(entry).sort(), [
+        'bin',
+        'name',
+        'note',
+        'platform_bank_code',
+        'reference_code',
+        'short_name',
+      ]);
+    }
+    for (const source of directory.mapping_sources) {
+      assert.match(source.url, /^https:\/\//);
+      assert.ok(
+        directory.entries.some(
+          (entry) =>
+            entry.reference_code === source.reference_code && entry.platform_bank_code === source.platform_bank_code,
+        ),
+      );
+    }
+  }
 }
 
 const md = (value) => String(value).replaceAll('|', '\\|').replaceAll('\n', '<br>');
 const table = (headers, rows) =>
   [headers, headers.map(() => '---'), ...rows].map((row) => `| ${row.map(md).join(' | ')} |`).join('\n');
 const csvCell = (value) => {
-  let s = Array.isArray(value) ? value.join(';') : String(value);
+  let s = value == null ? '' : Array.isArray(value) ? value.join(';') : String(value);
   if (/^[\s]*[=+@-]/.test(s)) s = `'${s}`;
   return `"${s.replaceAll('"', '""')}"`;
 };
@@ -96,10 +137,32 @@ export function buildFiles(data = reference) {
         )
       );
     });
+  const directorySections = data.bank_directories.map((directory) => {
+    const mapped = directory.entries.filter((entry) => entry.platform_bank_code !== null).length;
+    const renameSources = directory.mapping_sources
+      .map((source) => `[${source.reference_code} 更名依据](${source.url})`)
+      .join('；');
+    return (
+      `### ${directory.country} 公开银行/机构目录（${directory.entries.length} 项）\n\n` +
+      `发布方：${directory.publisher}；[公开 API](${directory.url}) / [字段说明](${directory.documentation_url})；采集日期：${directory.retrieved_at}。含银行、分支、数字品牌、钱包及金融机构，条目数不等于银行法人数量，也不表示覆盖该国全部银行。\n\n` +
+      `已关联 ${mapped} 个项目银行码；其余 ${directory.entries.length - mapped} 项的平台码未登记，不能把公开代码或 BIN 直接传给项目下单接口。项目码册另有 LIOBANK，当前公开目录未收录，仍在下方保留。公开名称沿用发布方，不覆盖项目历史助记码。${renameSources}。\n\n` +
+      table(
+        ['公开目录代码', 'BIN', '公开简称', '公开名称', '项目 bank_code', '备注'],
+        directory.entries.map((entry) => [
+          entry.reference_code,
+          entry.bin,
+          entry.short_name,
+          entry.name,
+          entry.platform_bank_code ?? '未登记',
+          entry.note,
+        ]),
+      )
+    );
+  });
   const doc = `<!-- 由 node _tooling/reference-codes.mjs 生成，请修改 reference-codes.json 后重新生成。 -->
 # 国家、币种、银行代码参考表
 
-更新日期：${data.updated_at}。共 ${countries.length} 个国家/地区、${currencies.length} 个币种、${banks.length} 个银行/机构代码。
+更新日期：${data.updated_at}。共 ${countries.length} 个国家/地区、${currencies.length} 个币种、${banks.length} 个项目银行/机构代码；另附 ${data.bank_directories.reduce((sum, directory) => sum + directory.entries.length, 0)} 项公开目录。两类清单有重叠，数量不可相加为银行总数。
 
 本表记录项目标准字典与区域码册，包含预登记、历史银行和钱包机构，不表示商户已获授权或当前可用。国家/地区以 \`countries/query\` 返回为准；下单组合以 \`pay-methods/query\` 返回为准；代付银行必须从 \`payout/banks/query\` 获取。调用方法与鉴权见 [接口文档](../INTERFACES.md)。
 
@@ -107,6 +170,7 @@ export function buildFiles(data = reference) {
 
 - [完整 JSON](./reference-codes.json)：唯一维护源；\`source\` 保存源项目提交和文件 SHA-256，银行项的 \`source\` 为源文件路径。
 - CSV：[国家](./countries.csv)、[币种](./currencies.csv)、[银行代码](./banks.csv)。UTF-8 BOM、CRLF；国家的多币种以分号分隔；疑似公式单元格加单引号。
+- [公开银行目录 CSV](./bank-directories.csv)：保留发布方代码、BIN 与项目码的显式映射；JSON 中的 bank_directories 保存发布方、采集日期及响应指纹，platform_bank_code 为 null 表示项目未登记。
 - \`country\` 使用 ISO 3166-1 alpha-2；\`currency\` 使用 ISO 4217，USDT 为平台加密货币例外。所有币种金额均按实际金额 × 10000 传整数。
 - 银行唯一键为 \`(country, bank_code)\`，不能仅按银行代码跨国家合并；\`bank_code\` 是平台助记码，保留原始大小写，不是 SWIFT、清算行号或上游私有码。
 - \`bank_name\` 沿用源码册机构名，可能含英文或繁体字。HK 的 FPS 是转账轨道，排除在银行清单外。PH 码册内的 USDTTRC / USDTERC 为历史目的地代码，不代表币种或新支付方式。
@@ -121,7 +185,11 @@ ${countriesTable}
 
 ${currenciesTable}
 
-## 银行/机构代码
+## 公开银行/机构目录
+
+${directorySections.join('\n\n')}
+
+## 项目已登记银行/机构代码
 
 ${bankSections.join('\n\n')}
 
@@ -129,7 +197,7 @@ ${bankSections.join('\n\n')}
 
 源项目：\`${data.source.project}\`；源码提交：\`${data.source.revision}\`。文件指纹见 JSON 的 \`source.files\`。字典不是运行中数据库或商户实时授权的快照。
 
-维护步骤见 [贡献指南](../CONTRIBUTING.md#参考代码表维护)。只编辑 \`appendix/reference-codes.json\`，运行 \`node _tooling/reference-codes.mjs\` 同步 Markdown、CSV 和五种语言的国家/币种附录；运行 \`node _tooling/reference-codes.mjs --check\` 校验生成结果。
+维护步骤见 [贡献指南](../CONTRIBUTING.md#参考代码表维护)。只编辑 \`appendix/reference-codes.json\`，运行 \`node _tooling/reference-codes.mjs\` 同步 Markdown、CSV 和五种语言的国家/币种附录；运行 \`node _tooling/reference-codes.mjs --check\` 校验生成结果。公开目录的响应指纹与源项目文件指纹分开维护。
 `;
   const php = `<?php
 
@@ -220,6 +288,24 @@ ${currencies.map((c) => `\t{Code: ${quote(c.code)}, NameZh: ${quote(c.name_zh)},
       csv(
         ['country', 'bank_code', 'bank_name'],
         banks.map((b) => [b.country, b.bank_code, b.bank_name]),
+      ),
+    ],
+    [
+      'appendix/bank-directories.csv',
+      csv(
+        ['country', 'scheme', 'reference_code', 'bin', 'bank_name', 'short_name', 'platform_bank_code', 'note'],
+        data.bank_directories.flatMap((directory) =>
+          directory.entries.map((entry) => [
+            directory.country,
+            directory.scheme,
+            entry.reference_code,
+            entry.bin,
+            entry.name,
+            entry.short_name,
+            entry.platform_bank_code,
+            entry.note,
+          ]),
+        ),
       ),
     ],
     ['nodejs/appendix/catalog.json', catalog],

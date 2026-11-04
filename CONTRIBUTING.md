@@ -50,7 +50,7 @@ go test -fuzz=FuzzVerifyCallbackNeverPanics -fuzztime=30s .
 
 ## 参考代码表维护
 
-国家、币种、银行代码统一维护在 [`appendix/reference-codes.json`](./appendix/reference-codes.json)，不维护支付方式表。`REFERENCE-CODES.md`、三份 CSV 与五种语言的 `catalog.*` 都是生成文件，请勿单独修改。
+国家、币种、银行代码统一维护在 [`appendix/reference-codes.json`](./appendix/reference-codes.json)，不维护支付方式表。`REFERENCE-CODES.md`、四份 CSV 与五种语言的 `catalog.*` 都是生成文件，请勿单独修改。
 
 1. 核对源项目 `project-p`：国家/币种来自 `web-shared/src/openapi/catalog.ts` 与基线迁移；香港扩展来自 `api/src/channels/ttpay/config.js`；银行来自 `api/src/channels/_shared/{ph,hk,cn,bd,mm,vn}Banks.js`。只读取源码，不读取生产库或商户授权数据。
 2. 新增、改名或停用地区、币种、银行代码时，在同一开发任务中检查 SDK 是否需要同步。更新 JSON 的数据、`updated_at`、`source.revision` 与所核对文件的 SHA-256。提交前确认源文件已提交，revision 能还原本次所用文件；指纹按文件原始字节计算。
@@ -67,6 +67,17 @@ go test -fuzz=FuzzVerifyCallbackNeverPanics -fuzztime=30s .
    `--verify-source` 比较源文件指纹，发现变化会失败并提示核对，不自动接受源码变化。CI 的 Node.js 测试检查唯一键、关联国家/币种、内部字段隔离、CSV 转义及全部生成文件一致性，不需要访问源项目。
 
 5. 审查生成差异与三类代码的条数、地区范围，并按上方开发流程提交 Pull Request。参考表包含预登记和历史项；商户当前可用国家、组合与银行始终通过接口确认。五语言 `catalog.*` 的原有字段与导出名保持兼容，银行完整数据通过通用 JSON/CSV 获取。
+
+### 公开银行目录维护
+
+`banks` 是项目已登记的助记码，`bank_directories` 是独立发布方的公开参考目录。通道支持子集不能作为某国银行全量。越南目录来源为 Casso 发布的 [VietQR.io Bank API](https://www.vietqr.io/api-bank)，不是越南监管机构的银行法人名录。
+
+- 核验并下载 `https://api.vietqr.io/v2/banks` 的响应，确认业务码为 `00`，更新 `entries`、采集日期与原始响应字节的 SHA-256。不按 `transferSupported` 等外部能力标记过滤，也不把它们当成项目可用状态。
+- `reference_code`、`bin`、`name`、`short_name` 保留发布方原文；外部代码可能包含空格或混合大小写，禁止自动改成项目银行码。BIN 保持字符串。
+- `platform_bank_code` 仅关联同一国家、已有项目码册的明确对应项；尚未登记的机构设为 null。同品牌跨国法人和不同分支不能自动映射，例如公开目录的 HSBC Vietnam 不能关联香港 HSBC。
+- 更名映射应记录核验来源，放在 `mapping_sources`，保留旧项目助记码以兼容既有接口。不得为凑齐目录新增未经后端码册登记的下单代码。
+- 保留项目有码而公开目录暂未收录的条目，例如 LIOBANK。公开目录与项目码册有重叠，两个条数不能直接相加。
+- 重新生成并运行检查，审查新增、消失及改名项；此过程不修改 API 的银行映射或扩大通道可用范围。
 
 ## 发布
 

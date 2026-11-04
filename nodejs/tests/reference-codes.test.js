@@ -69,3 +69,41 @@ test('CSV 保留 Unicode、转义逗号双引号换行并防止公式注入', ()
   assert.ok(value.includes('"\'=1+1"'));
   assert.ok(value.endsWith('\r\n'));
 });
+
+test('越南公开目录包含通道子集以外的机构，保留外部代码原文', () => {
+  const directory = reference.bank_directories.find((d) => d.country === 'VN' && d.scheme === 'vietqr');
+  const byCode = new Map(directory.entries.map((entry) => [entry.reference_code, entry]));
+  for (const code of ['PVCB', 'HSBC', 'CIMB', 'NHB HN', 'Ubank', 'TIMO', 'IBK - HN', 'KBHN']) {
+    assert.ok(byCode.has(code), `缺少 ${code}`);
+  }
+  assert.equal(byCode.get('HSBC').platform_bank_code, null);
+  assert.equal(byCode.get('CIMB').platform_bank_code, null);
+  assert.equal(byCode.get('VCB').platform_bank_code, 'VIETCOMBANK');
+  assert.equal(byCode.get('Vikki').platform_bank_code, 'DONGABANK');
+  assert.equal(byCode.get('MBV').platform_bank_code, 'OCEANBANK');
+  assert.equal(byCode.get('VCB').bin, '970436');
+  assert.equal(reference.banks.filter((bank) => bank.country === 'VN').length, 44);
+  assert.ok(directory.entries.length > 44);
+});
+
+test('公开目录不接受跨国家银行码、重复 BIN 或附带上游映射', () => {
+  for (const mutate of [
+    (d) => {
+      d.bank_directories[0].entries[0].platform_bank_code = 'HSBC';
+    },
+    (d) => {
+      d.bank_directories[0].entries[1].bin = d.bank_directories[0].entries[0].bin;
+    },
+    (d) => {
+      d.bank_directories[0].entries[0].upstream = 'private';
+    },
+  ]) {
+    const data = structuredClone(reference);
+    mutate(data);
+    assert.throws(() => validateReference(data));
+  }
+});
+
+test('公开目录未登记平台码在 CSV 中输出空值', () => {
+  assert.ok(csv(['platform_bank_code'], [[null]]).endsWith('""\r\n'));
+});
