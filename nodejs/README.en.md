@@ -38,14 +38,16 @@ This package is ESM (`"type": "module"`), so callers must use `import` (or dynam
 ```js
 import { Client, Config, Environment } from './src/index.js';
 
-const client = new Client(new Config({
-  merchantNo: 'M00000001',
-  apiKey: 'ak_xxx',
-  apiSecretPay: 'sk_pay_xxx',       // pay endpoints / collection & refund callbacks
-  apiSecretPayout: 'sk_payout_xxx', // payout endpoints / payout callbacks
-  // PRODUCTION has no built-in URL; must be passed explicitly
-  baseUrl: 'https://api.<service_domain>/api/open/v1',
-}));
+const client = new Client(
+  new Config({
+    merchantNo: 'M00000001',
+    apiKey: 'ak_xxx',
+    apiSecretPay: 'sk_pay_xxx', // pay endpoints / collection & refund callbacks
+    apiSecretPayout: 'sk_payout_xxx', // payout endpoints / payout callbacks
+    // PRODUCTION has no built-in URL; must be passed explicitly
+    baseUrl: 'https://api.<service_domain>/api/open/v1',
+  }),
+);
 
 // Create a collection order (pay_method required)
 const { data, raw } = await client.payCreate({
@@ -74,27 +76,27 @@ new Config({ /* ... */ environment: Environment.SANDBOX });
 new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 ```
 
-| Preset | Base URL |
-|------|----------|
+| Preset                   | Base URL                                                                                                               |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v1` from your service provider and pass it as `baseUrl` |
-| `Environment.SANDBOX` | `http://127.0.0.1:3090/api/open/v1` |
+| `Environment.SANDBOX`    | `http://127.0.0.1:3090/api/open/v1`                                                                                    |
 
 ## All 13 endpoints
 
-| Method | Endpoint | Secret |
-|------|------|------|
-| `payCreate(params)` | `/merchant/pay/create` | pay |
-| `payQuery(params)` | `/merchant/pay/query` | pay |
-| `payMethodsQuery(params?)` | `/merchant/pay-methods/query` | pay |
-| `groupsQuery(params?)` | `/merchant/groups/query` | pay (compatibility alias) |
-| `countriesQuery(params?)` | `/merchant/countries/query` | pay |
-| `balanceQuery(params?)` | `/merchant/balance/query` | pay |
-| `payTestComplete(params)` | `/merchant/pay/test/complete` | pay (test secret only) |
-| `payoutCreate(params)` | `/merchant/payout/create` | payout |
-| `payoutQuery(params)` | `/merchant/payout/query` | payout |
-| `payoutBanksQuery(params)` | `/merchant/payout/banks/query` | payout |
-| `payoutProofQuery(params)` | `/merchant/payout/proof/query` | payout |
-| `payoutReceiptQuery(params)` | `/merchant/payout/receipt/query` | payout |
+| Method                       | Endpoint                         | Secret                    |
+| ---------------------------- | -------------------------------- | ------------------------- |
+| `payCreate(params)`          | `/merchant/pay/create`           | pay                       |
+| `payQuery(params)`           | `/merchant/pay/query`            | pay                       |
+| `payMethodsQuery(params?)`   | `/merchant/pay-methods/query`    | pay                       |
+| `groupsQuery(params?)`       | `/merchant/groups/query`         | pay (compatibility alias) |
+| `countriesQuery(params?)`    | `/merchant/countries/query`      | pay                       |
+| `balanceQuery(params?)`      | `/merchant/balance/query`        | pay                       |
+| `payTestComplete(params)`    | `/merchant/pay/test/complete`    | pay (test secret only)    |
+| `payoutCreate(params)`       | `/merchant/payout/create`        | payout                    |
+| `payoutQuery(params)`        | `/merchant/payout/query`         | payout                    |
+| `payoutBanksQuery(params)`   | `/merchant/payout/banks/query`   | payout                    |
+| `payoutProofQuery(params)`   | `/merchant/payout/proof/query`   | payout                    |
+| `payoutReceiptQuery(params)` | `/merchant/payout/receipt/query` | payout                    |
 | `payoutTestComplete(params)` | `/merchant/payout/test/complete` | payout (test secret only) |
 
 Request-building notes:
