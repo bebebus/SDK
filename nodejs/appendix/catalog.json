@@ -87,6 +87,14 @@
       "currencies": [
         "CNY"
       ]
+    },
+    {
+      "code": "HK",
+      "name_zh": "中国香港",
+      "name_en": "Hong Kong",
+      "currencies": [
+        "HKD"
+      ]
     }
   ],
   "currencies": [
@@ -161,6 +169,12 @@
       "name_zh": "泰达币",
       "name_en": "Tether",
       "kind": "crypto"
+    },
+    {
+      "code": "HKD",
+      "name_zh": "港币",
+      "name_en": "Hong Kong dollar",
+      "kind": "fiat"
     }
   ]
 }
