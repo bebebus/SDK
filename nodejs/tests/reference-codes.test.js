@@ -76,14 +76,33 @@ test('越南公开目录包含通道子集以外的机构，保留外部代码�
   for (const code of ['PVCB', 'HSBC', 'CIMB', 'NHB HN', 'Ubank', 'TIMO', 'IBK - HN', 'KBHN']) {
     assert.ok(byCode.has(code), `缺少 ${code}`);
   }
-  assert.equal(byCode.get('HSBC').platform_bank_code, null);
-  assert.equal(byCode.get('CIMB').platform_bank_code, null);
+  assert.equal(byCode.get('HSBC').platform_bank_code, 'HSBCVN');
+  assert.equal(byCode.get('CIMB').platform_bank_code, 'CIMBVN');
   assert.equal(byCode.get('VCB').platform_bank_code, 'VIETCOMBANK');
   assert.equal(byCode.get('Vikki').platform_bank_code, 'DONGABANK');
   assert.equal(byCode.get('MBV').platform_bank_code, 'OCEANBANK');
   assert.equal(byCode.get('VCB').bin, '970436');
-  assert.equal(reference.banks.filter((bank) => bank.country === 'VN').length, 44);
-  assert.ok(directory.entries.length > 44);
+  assert.equal(reference.banks.filter((bank) => bank.country === 'VN').length, 77);
+  assert.equal(directory.entries.length, 76);
+  assert.ok(directory.entries.every((entry) => typeof entry.platform_bank_code === 'string'));
+  assert.equal(new Set(directory.entries.map((entry) => entry.platform_bank_code)).size, 76);
+  for (const [externalCode, platformCode] of Object.entries({
+    'IBK - HN': 'IBKHN',
+    'IBK - HCM': 'IBKHCM',
+    KBHN: 'KBHN',
+    KBHCM: 'KBHCM',
+    'BNP HN': 'BNPHN',
+    'BNP HCM': 'BNPHCM',
+    ICBC: 'ICBCHN',
+    momo: 'MOMO',
+    ZALOPAY: 'ZALOPAY',
+    PVDB: 'PVCOMBANKPAY',
+    PVCB: 'PVCOMBANK',
+    MVAS: 'MOBIFONEMONEY',
+    MAFC: 'MIRAEASSETVN',
+  })) {
+    assert.equal(byCode.get(externalCode).platform_bank_code, platformCode);
+  }
 });
 
 test('公开目录不接受跨国家银行码、重复 BIN 或附带上游映射', () => {

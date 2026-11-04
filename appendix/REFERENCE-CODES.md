@@ -1,7 +1,7 @@
 <!-- 由 node _tooling/reference-codes.mjs 生成，请修改 reference-codes.json 后重新生成。 -->
 # 国家、币种、银行代码参考表
 
-更新日期：2026-11-05。共 12 个国家/地区、13 个币种、426 个项目银行/机构代码；另附 76 项公开目录。两类清单有重叠，数量不可相加为银行总数。
+更新日期：2026-11-05。共 12 个国家/地区、13 个币种、459 个项目银行/机构代码；另附 76 项公开目录。两类清单有重叠，数量不可相加为银行总数。
 
 本表记录项目标准字典与区域码册，包含预登记、历史银行和钱包机构，不表示商户已获授权或当前可用。国家/地区以 `countries/query` 返回为准；下单组合以 `pay-methods/query` 返回为准；代付银行必须从 `payout/banks/query` 获取。调用方法与鉴权见 [接口文档](../INTERFACES.md)。
 
@@ -57,27 +57,27 @@
 
 发布方：Casso / VietQR.io；[公开 API](https://api.vietqr.io/v2/banks) / [字段说明](https://www.vietqr.io/api-bank)；采集日期：2026-11-05。含银行、分支、数字品牌、钱包及金融机构，条目数不等于银行法人数量，也不表示覆盖该国全部银行。
 
-已关联 43 个项目银行码；其余 33 项的平台码未登记，不能把公开代码或 BIN 直接传给项目下单接口。项目码册另有 LIOBANK，当前公开目录未收录，仍在下方保留。公开名称沿用发布方，不覆盖项目历史助记码。[MBV 更名依据](https://baochinhphu.vn/ngan-hang-dai-duong-oceanbank-doi-ten-thanh-ngan-hang-viet-nam-hien-dai-102241217163955761.htm)；[Vikki 更名依据](https://vikkibank.vn/thong-bao-v-v-donga-bank-doi-ten-thanh-ngan-hang-so-vikki/)。
+全部 76 项均已登记项目银行码。登记不表示商户或通道当前可用，不能把公开代码或 BIN 直接传给项目下单接口。项目码册另有 LIOBANK，当前公开目录未收录，仍在下方保留。公开名称沿用发布方，不覆盖项目历史助记码。[MBV 更名依据](https://baochinhphu.vn/ngan-hang-dai-duong-oceanbank-doi-ten-thanh-ngan-hang-viet-nam-hien-dai-102241217163955761.htm)；[Vikki 更名依据](https://vikkibank.vn/thong-bao-v-v-donga-bank-doi-ten-thanh-ngan-hang-so-vikki/)。
 
 | 公开目录代码 | BIN | 公开简称 | 公开名称 | 项目 bank_code | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| CUBHCM | 168999 | CUBHCM | Ngân hàng Cathay United Bank – Chi nhánh Hồ Chí Minh | 未登记 |  |
-| CIMB | 422589 | CIMB | Ngân hàng TNHH MTV CIMB Việt Nam | 未登记 |  |
-| HSBC | 458761 | HSBC | Ngân hàng TNHH MTV HSBC (Việt Nam) | 未登记 |  |
-| CITIBANK | 533948 | Citibank | Ngân hàng Citibank, N.A. - Chi nhánh Hà Nội | 未登记 |  |
+| CUBHCM | 168999 | CUBHCM | Ngân hàng Cathay United Bank – Chi nhánh Hồ Chí Minh | CUBHCM |  |
+| CIMB | 422589 | CIMB | Ngân hàng TNHH MTV CIMB Việt Nam | CIMBVN |  |
+| HSBC | 458761 | HSBC | Ngân hàng TNHH MTV HSBC (Việt Nam) | HSBCVN |  |
+| CITIBANK | 533948 | Citibank | Ngân hàng Citibank, N.A. - Chi nhánh Hà Nội | CITIVN |  |
 | CAKE | 546034 | CAKE | TMCP Việt Nam Thịnh Vượng - Ngân hàng số CAKE by VPBank | CAKE |  |
-| Ubank | 546035 | Ubank | TMCP Việt Nam Thịnh Vượng - Ngân hàng số Ubank by VPBank | 未登记 |  |
-| BIDC | 555666 | BIDC | Ngân hàng Đầu Tư Và Phát Triển Campuchia - Chi nhánh Hà Nội | 未登记 |  |
-| KBank | 668888 | KBank | Ngân hàng Đại chúng TNHH Kasikornbank | 未登记 |  |
-| DBS | 796500 | DBSBank | DBS Bank Ltd - Chi nhánh Thành phố Hồ Chí Minh | 未登记 |  |
-| NHB HN | 801011 | Nonghyup | Ngân hàng Nonghyup - Chi nhánh Hà Nội | 未登记 |  |
-| TNEX | 963326 | TNEX | TNEX by MSB | 未登记 |  |
-| TIMO | 963388 | Timo | Ngân hàng số Timo by Ban Viet Bank (Timo by Ban Viet Bank) | 未登记 |  |
-| BNP HCM | 963666 | BNP HCM | Ngân hàng BNP Paribas – Chi nhánh Thành phố Hồ Chí Minh | 未登记 |  |
-| BNP HN | 963668 | BNP HN | Ngân hàng BNP Paribas – Chi nhánh Hà Nội | 未登记 |  |
-| ICBC | 963669 | ICBC | Ngân hàng Công thương Trung Quốc – Chi nhánh thành phố Hà Nội | 未登记 |  |
-| ESUN | 963686 | ESUN | Ngân hàng Thương mại TNHH E.SUN – Chi nhánh Đồng Nai (ESUNBANK) | 未登记 |  |
-| BOCHK | 963688 | BOCHK | Ngân hàng Bank of China (Hong Kong) Limited – Chi nhánh Hồ Chí Minh | 未登记 |  |
+| Ubank | 546035 | Ubank | TMCP Việt Nam Thịnh Vượng - Ngân hàng số Ubank by VPBank | UBANK |  |
+| BIDC | 555666 | BIDC | Ngân hàng Đầu Tư Và Phát Triển Campuchia - Chi nhánh Hà Nội | BIDCVN |  |
+| KBank | 668888 | KBank | Ngân hàng Đại chúng TNHH Kasikornbank | KASIKORNVN |  |
+| DBS | 796500 | DBSBank | DBS Bank Ltd - Chi nhánh Thành phố Hồ Chí Minh | DBSVN |  |
+| NHB HN | 801011 | Nonghyup | Ngân hàng Nonghyup - Chi nhánh Hà Nội | NONGHYUPVN |  |
+| TNEX | 963326 | TNEX | TNEX by MSB | TNEX |  |
+| TIMO | 963388 | Timo | Ngân hàng số Timo by Ban Viet Bank (Timo by Ban Viet Bank) | TIMO |  |
+| BNP HCM | 963666 | BNP HCM | Ngân hàng BNP Paribas – Chi nhánh Thành phố Hồ Chí Minh | BNPHCM |  |
+| BNP HN | 963668 | BNP HN | Ngân hàng BNP Paribas – Chi nhánh Hà Nội | BNPHN |  |
+| ICBC | 963669 | ICBC | Ngân hàng Công thương Trung Quốc – Chi nhánh thành phố Hà Nội | ICBCHN |  |
+| ESUN | 963686 | ESUN | Ngân hàng Thương mại TNHH E.SUN – Chi nhánh Đồng Nai (ESUNBANK) | ESUNVN |  |
+| BOCHK | 963688 | BOCHK | Ngân hàng Bank of China (Hong Kong) Limited – Chi nhánh Hồ Chí Minh | BOCHKVN |  |
 | SGICB | 970400 | SaigonBank | Ngân hàng TMCP Sài Gòn Công Thương | SAIGONBANK |  |
 | STB | 970403 | Sacombank | Ngân hàng TMCP Sài Gòn Tài Lộc | SACOMBANK |  |
 | VBA | 970405 | Agribank | Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam | AGRIBANK |  |
@@ -85,8 +85,8 @@
 | TCB | 970407 | Techcombank | Ngân hàng TMCP Kỹ thương Việt Nam | TECHCOMBANK |  |
 | GPB | 970408 | GPBank | Ngân hàng Thương mại TNHH MTV Dầu Khí Toàn Cầu | GPB |  |
 | BAB | 970409 | BacABank | Ngân hàng TMCP Bắc Á | BAB |  |
-| SCVN | 970410 | StandardChartered | Ngân hàng TNHH MTV Standard Chartered Bank Việt Nam | 未登记 |  |
-| PVCB | 970412 | PVcomBank | Ngân hàng TMCP Đại Chúng Việt Nam | 未登记 |  |
+| SCVN | 970410 | StandardChartered | Ngân hàng TNHH MTV Standard Chartered Bank Việt Nam | SCVN |  |
+| PVCB | 970412 | PVcomBank | Ngân hàng TMCP Đại Chúng Việt Nam | PVCOMBANK |  |
 | MBV | 970414 | MBV | Ngân hàng TNHH MTV Việt Nam Hiện Đại | OCEANBANK | 公开品牌 MBV；项目保留历史助记码 OCEANBANK。 |
 | ICB | 970415 | VietinBank | Ngân hàng TMCP Công thương Việt Nam | VIETINBANK |  |
 | ACB | 970416 | ACB | Ngân hàng TMCP Á Châu | ACB |  |
@@ -114,29 +114,29 @@
 | VIB | 970441 | VIB | Ngân hàng TMCP Quốc tế Việt Nam | VIB |  |
 | HLBVN | 970442 | HongLeong | Ngân hàng TNHH MTV Hong Leong Việt Nam | HONGLEONGVN |  |
 | SHB | 970443 | SHB | Ngân hàng TMCP Sài Gòn - Hà Nội | SHB |  |
-| CBB | 970444 | CBBank | Ngân hàng Thương mại trách nhiệm hữu hạn một thành viên Ngoại thương Công nghệ số (Vietcombank Neo Limited) | 未登记 |  |
+| CBB | 970444 | CBBank | Ngân hàng Thương mại trách nhiệm hữu hạn một thành viên Ngoại thương Công nghệ số (Vietcombank Neo Limited) | CBBANK |  |
 | COOPBANK | 970446 | COOPBANK | Ngân hàng Hợp tác xã Việt Nam | COOPBANK |  |
 | OCB | 970448 | OCB | Ngân hàng TMCP Phương Đông | OCB |  |
 | LPB | 970449 | LPBank | Ngân hàng TMCP Lộc Phát Việt Nam | LPB |  |
 | KLB | 970452 | KienLongBank | Ngân hàng TMCP Kiên Long | KIENLONG |  |
 | VCCB | 970454 | VietCapitalBank | Ngân hàng TMCP Bản Việt | VIETCAPITAL |  |
-| IBK - HN | 970455 | IBKHN | Ngân hàng Công nghiệp Hàn Quốc - Chi nhánh Hà Nội | 未登记 |  |
+| IBK - HN | 970455 | IBKHN | Ngân hàng Công nghiệp Hàn Quốc - Chi nhánh Hà Nội | IBKHN |  |
 | IBK - HCM | 970456 | IBKHCM | Ngân hàng Công nghiệp Hàn Quốc - Chi nhánh TP. Hồ Chí Minh | IBKHCM |  |
 | WVN | 970457 | Woori | Ngân hàng TNHH MTV Woori Việt Nam | WOORIVN |  |
 | UOB | 970458 | UnitedOverseas | Ngân hàng United Overseas - Chi nhánh TP. Hồ Chí Minh | UOBVN |  |
-| KBHN | 970462 | KookminHN | Ngân hàng Kookmin - Chi nhánh Hà Nội | 未登记 |  |
-| KBHCM | 970463 | KookminHCM | Ngân hàng Kookmin - Chi nhánh Thành phố Hồ Chí Minh | 未登记 |  |
-| BSP | 970465 | BSP | Ngân hàng SinoPac - Chi nhánh Thành phố Hồ Chí Minh | 未登记 |  |
-| KEBHANAHCM | 970466 | KEBHanaHCM | Ngân hàng KEB Hana – Chi nhánh Thành phố Hồ Chí Minh | 未登记 |  |
-| KEBHANAHN | 970467 | KEBHANAHN | Ngân hàng KEB Hana – Chi nhánh Hà Nội | 未登记 |  |
-| VTLMONEY | 971005 | ViettelMoney | Tổng Công ty Dịch vụ số Viettel - Chi nhánh tập đoàn công nghiệp viễn thông Quân Đội | 未登记 |  |
-| VNPTMONEY | 971011 | VNPTMoney | Trung tâm dịch vụ tài chính số VNPT- Chi nhánh Tổng công ty truyền thông (VNPT Fintech) | 未登记 |  |
-| momo | 971025 | MoMo | CTCP Dịch Vụ Di Động Trực Tuyến | 未登记 |  |
-| MVAS | 971032 | MVAS | Trung tâm Dịch vụ số Mobifone – Chi nhánh Tổng Công ty viễn thông Mobifone | 未登记 |  |
-| ZALOPAY | 971101 | ZaloPay | Ví điện tử ZaloPay | 未登记 |  |
-| PVDB | 971133 | PVcomBank Pay | Ngân hàng số PVcomBank | 未登记 |  |
-| MAFC | 977777 | MAFC | Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam)  | 未登记 |  |
-| VBSP | 999888 | VBSP | Ngân hàng Chính sách Xã hội | 未登记 |  |
+| KBHN | 970462 | KookminHN | Ngân hàng Kookmin - Chi nhánh Hà Nội | KBHN |  |
+| KBHCM | 970463 | KookminHCM | Ngân hàng Kookmin - Chi nhánh Thành phố Hồ Chí Minh | KBHCM |  |
+| BSP | 970465 | BSP | Ngân hàng SinoPac - Chi nhánh Thành phố Hồ Chí Minh | SINOPACVN |  |
+| KEBHANAHCM | 970466 | KEBHanaHCM | Ngân hàng KEB Hana – Chi nhánh Thành phố Hồ Chí Minh | KEBHANAHCM |  |
+| KEBHANAHN | 970467 | KEBHANAHN | Ngân hàng KEB Hana – Chi nhánh Hà Nội | KEBHANAHN |  |
+| VTLMONEY | 971005 | ViettelMoney | Tổng Công ty Dịch vụ số Viettel - Chi nhánh tập đoàn công nghiệp viễn thông Quân Đội | VIETTELMONEY |  |
+| VNPTMONEY | 971011 | VNPTMoney | Trung tâm dịch vụ tài chính số VNPT- Chi nhánh Tổng công ty truyền thông (VNPT Fintech) | VNPTMONEY |  |
+| momo | 971025 | MoMo | CTCP Dịch Vụ Di Động Trực Tuyến | MOMO |  |
+| MVAS | 971032 | MVAS | Trung tâm Dịch vụ số Mobifone – Chi nhánh Tổng Công ty viễn thông Mobifone | MOBIFONEMONEY |  |
+| ZALOPAY | 971101 | ZaloPay | Ví điện tử ZaloPay | ZALOPAY |  |
+| PVDB | 971133 | PVcomBank Pay | Ngân hàng số PVcomBank | PVCOMBANKPAY |  |
+| MAFC | 977777 | MAFC | Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam)  | MIRAEASSETVN |  |
+| VBSP | 999888 | VBSP | Ngân hàng Chính sách Xã hội | VBSP |  |
 
 ## 项目已登记银行/机构代码
 
@@ -325,7 +325,7 @@
 | BD | UTTARABANK | Uttara Bank PLC |
 | BD | WOORI | Woori Bank |
 
-### 越南（VN，44 项）
+### 越南（VN，77 项）
 
 | country | bank_code | bank_name |
 | --- | --- | --- |
@@ -333,46 +333,79 @@
 | VN | ACB | Asia Commercial Bank (ACB) |
 | VN | AGRIBANK | Vietnam Bank for Agriculture and Rural Development (Agribank) |
 | VN | BAB | Bac A Commercial Joint Stock Bank |
+| VN | BIDCVN | BIDC, Hanoi Branch |
 | VN | BIDV | Bank for Investment and Development of Vietnam (BIDV) |
+| VN | BNPHCM | BNP Paribas, Ho Chi Minh City Branch |
+| VN | BNPHN | BNP Paribas, Hanoi Branch |
+| VN | BOCHKVN | Bank of China (Hong Kong), Ho Chi Minh City Branch |
 | VN | BVB | BaoViet Bank |
 | VN | CAKE | CAKE by VPBank |
+| VN | CBBANK | Vietnam Construction Bank (CBBank) |
+| VN | CIMBVN | CIMB Bank Vietnam |
+| VN | CITIVN | Citibank Vietnam |
 | VN | COOPBANK | Co-operative Bank of Vietnam |
+| VN | CUBHCM | Cathay United Bank, Ho Chi Minh City Branch |
+| VN | DBSVN | DBS Bank, Ho Chi Minh City Branch |
 | VN | DONGABANK | DongA Bank |
+| VN | ESUNVN | E.SUN Commercial Bank, Dong Nai Branch |
 | VN | EXIMVN | Vietnam Export Import Commercial Joint Stock Bank (Eximbank) |
 | VN | GPB | GPBank |
 | VN | HDB | HDBank |
 | VN | HONGLEONGVN | Hong Leong Bank Vietnam |
+| VN | HSBCVN | HSBC Bank Vietnam |
 | VN | IBKHCM | Industrial Bank of Korea, Ho Chi Minh City Branch |
+| VN | IBKHN | Industrial Bank of Korea, Hanoi Branch |
+| VN | ICBCHN | Ngân hàng Công thương Trung Quốc – Chi nhánh thành phố Hà Nội |
 | VN | INDOVINA | Indovina Bank |
+| VN | KASIKORNVN | Kasikornbank, Ho Chi Minh City Branch |
+| VN | KBHCM | Kookmin Bank, Ho Chi Minh City Branch |
+| VN | KBHN | Kookmin Bank, Hanoi Branch |
+| VN | KEBHANAHCM | KEB Hana Bank, Ho Chi Minh City Branch |
+| VN | KEBHANAHN | KEB Hana Bank, Hanoi Branch |
 | VN | KIENLONG | Kien Long Commercial Joint Stock Bank |
 | VN | LIOBANK | Digital Bank Lio (OCB) |
 | VN | LPB | LienVietPostBank |
 | VN | MB | Military Commercial Joint Stock Bank (MB) |
+| VN | MIRAEASSETVN | Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam)  |
+| VN | MOBIFONEMONEY | Trung tâm Dịch vụ số Mobifone – Chi nhánh Tổng Công ty viễn thông Mobifone |
+| VN | MOMO | CTCP Dịch Vụ Di Động Trực Tuyến |
 | VN | MSB | Vietnam Maritime Commercial Joint Stock Bank (MSB) |
 | VN | NAMABANK | Nam A Commercial Joint Stock Bank |
 | VN | NCBVN | National Citizen Commercial Joint Stock Bank (NCB) |
+| VN | NONGHYUPVN | NongHyup Bank, Hanoi Branch |
 | VN | OCB | Orient Commercial Joint Stock Bank (OCB) |
 | VN | OCEANBANK | OceanBank |
 | VN | PBVN | Public Bank Vietnam |
 | VN | PGBANK | Petrolimex Group Commercial Joint Stock Bank (PG Bank) |
+| VN | PVCOMBANK | Vietnam Public Joint Stock Commercial Bank (PVcomBank) |
+| VN | PVCOMBANKPAY | Ngân hàng số PVcomBank |
 | VN | SACOMBANK | Sacombank |
 | VN | SAIGONBANK | Saigon Bank for Industry and Trade |
 | VN | SCBVN | Saigon Commercial Bank (SCB) |
+| VN | SCVN | Standard Chartered Bank Vietnam |
 | VN | SEAVN | Southeast Asia Commercial Joint Stock Bank (SeABank) |
 | VN | SHB | Saigon-Hanoi Commercial Joint Stock Bank (SHB) |
 | VN | SHBVN | Shinhan Bank Vietnam |
+| VN | SINOPACVN | Bank SinoPac, Ho Chi Minh City Branch |
 | VN | TECHCOMBANK | Techcombank |
+| VN | TIMO | Timo by Ban Viet Bank |
+| VN | TNEX | TNEX by MSB |
 | VN | TPBANK | Tien Phong Commercial Joint Stock Bank (TPBank) |
+| VN | UBANK | Ubank by VPBank |
 | VN | UOBVN | United Overseas Bank Vietnam |
 | VN | VAB | VietA Bank |
+| VN | VBSP | Vietnam Bank for Social Policies |
 | VN | VIB | Vietnam International Commercial Joint Stock Bank (VIB) |
 | VN | VIETBANK | Vietnam Thuong Tin Commercial Joint Stock Bank (VietBank) |
 | VN | VIETCAPITAL | VietCapital Bank (Ban Viet) |
 | VN | VIETCOMBANK | Joint Stock Commercial Bank for Foreign Trade of Vietnam (Vietcombank) |
 | VN | VIETINBANK | Vietnam Joint Stock Commercial Bank for Industry and Trade (VietinBank) |
+| VN | VIETTELMONEY | Tổng Công ty Dịch vụ số Viettel - Chi nhánh tập đoàn công nghiệp viễn thông Quân Đội |
+| VN | VNPTMONEY | Trung tâm dịch vụ tài chính số VNPT- Chi nhánh Tổng công ty truyền thông (VNPT Fintech) |
 | VN | VPBANK | Vietnam Prosperity Joint Stock Commercial Bank (VPBank) |
 | VN | VRB | Vietnam-Russia Joint Venture Bank |
 | VN | WOORIVN | Woori Bank Vietnam |
+| VN | ZALOPAY | Ví điện tử ZaloPay |
 
 ### 缅甸（MM，36 项）
 
@@ -598,6 +631,6 @@
 
 ## 来源与更新
 
-源项目：`project-p`；源码提交：`0ef7f9c8101d8e34528e33e462b3a3a32f5ef74b`。文件指纹见 JSON 的 `source.files`。字典不是运行中数据库或商户实时授权的快照。
+源项目：`project-p`；源码提交：`dc7133b395d7704f7263b23b97cba2b4ef37343d`。文件指纹见 JSON 的 `source.files`。字典不是运行中数据库或商户实时授权的快照。
 
 维护步骤见 [贡献指南](../CONTRIBUTING.md#参考代码表维护)。只编辑 `appendix/reference-codes.json`，运行 `node _tooling/reference-codes.mjs` 同步 Markdown、CSV 和五种语言的国家/币种附录；运行 `node _tooling/reference-codes.mjs --check` 校验生成结果。公开目录的响应指纹与源项目文件指纹分开维护。

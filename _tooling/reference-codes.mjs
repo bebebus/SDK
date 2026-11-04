@@ -139,13 +139,17 @@ export function buildFiles(data = reference) {
     });
   const directorySections = data.bank_directories.map((directory) => {
     const mapped = directory.entries.filter((entry) => entry.platform_bank_code !== null).length;
+    const registration =
+      mapped === directory.entries.length
+        ? `全部 ${mapped} 项均已登记项目银行码。`
+        : `已关联 ${mapped} 个项目银行码；其余 ${directory.entries.length - mapped} 项的平台码未登记。`;
     const renameSources = directory.mapping_sources
       .map((source) => `[${source.reference_code} 更名依据](${source.url})`)
       .join('；');
     return (
       `### ${directory.country} 公开银行/机构目录（${directory.entries.length} 项）\n\n` +
       `发布方：${directory.publisher}；[公开 API](${directory.url}) / [字段说明](${directory.documentation_url})；采集日期：${directory.retrieved_at}。含银行、分支、数字品牌、钱包及金融机构，条目数不等于银行法人数量，也不表示覆盖该国全部银行。\n\n` +
-      `已关联 ${mapped} 个项目银行码；其余 ${directory.entries.length - mapped} 项的平台码未登记，不能把公开代码或 BIN 直接传给项目下单接口。项目码册另有 LIOBANK，当前公开目录未收录，仍在下方保留。公开名称沿用发布方，不覆盖项目历史助记码。${renameSources}。\n\n` +
+      `${registration}登记不表示商户或通道当前可用，不能把公开代码或 BIN 直接传给项目下单接口。项目码册另有 LIOBANK，当前公开目录未收录，仍在下方保留。公开名称沿用发布方，不覆盖项目历史助记码。${renameSources}。\n\n` +
       table(
         ['公开目录代码', 'BIN', '公开简称', '公开名称', '项目 bank_code', '备注'],
         directory.entries.map((entry) => [

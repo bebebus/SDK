@@ -6,7 +6,7 @@
 
 完整参考表：[在线阅读](./REFERENCE-CODES.md) · [JSON](./reference-codes.json) · CSV：[国家](./countries.csv) / [币种](./currencies.csv) / [银行代码](./banks.csv)。
 
-越南另补 [公开银行/机构目录 CSV](./bank-directories.csv)：依据 VietQR.io 公共 API 采集的 76 项，保留公开代码、BIN、名称与项目码映射。现有 44 个项目越南银行码来自 AiPay 子集，不能当成越南全部银行；公开目录中 33 项尚未在项目码册登记，`platform_bank_code` 为 null，不能直接用于下单。目录含分支、数字品牌、钱包及金融机构，也不代表越南银行法人全量。
+越南另补 [公开银行/机构目录 CSV](./bank-directories.csv)：依据 VietQR.io 公共 API 采集的 76 项，保留公开代码、BIN、名称与项目码映射。原剩余 33 项已复用或追加主项目统一码，76 项现在全部登记；另保留 LIOBANK，项目越南码册共 77 项。AiPay 的 44 项与 196VN 的 68 项仍是各通道支持子集，登记码不等于开通。目录含分支、数字品牌、钱包及金融机构，也不代表越南银行法人全量。
 
 JSON 是这三类代码的唯一维护源，包含更新日期、源代码提交与文件指纹，以及公开目录的来源和采集日期；Markdown、CSV 和下方五语言国家/币种附录统一生成。项目银行按 `(country, bank_code)` 定位，公开目录保留发布方独立代码体系。实际代付银行以 `payout/banks/query` 返回为准；本表包含预登记项，不表示已开通。不维护支付方式表。
 

@@ -98,7 +98,7 @@ console.log(data.order_no, data.pay_url);
 
 国家、币种、银行代码的完整参考表见 [代码表](./appendix/REFERENCE-CODES.md)，支持 [JSON](./appendix/reference-codes.json) 与 CSV（[国家](./appendix/countries.csv) / [币种](./appendix/currencies.csv) / [银行](./appendix/banks.csv)）下载。代码表包含标准字典与区域扩展，不表示商户当前已开通；实际范围以商户查询接口为准。
 
-越南银行参考包含 [76 项公开目录](./appendix/bank-directories.csv)，覆盖现有通道 44 项之外的机构。发布方代码、BIN 与项目下单银行码分别列出；未登记的项目码留空，不能直接用于下单。目录含银行、分支和其他机构，不应按条目数推断银行法人数量。
+越南银行参考包含 [76 项公开目录](./appendix/bank-directories.csv)，现已全部关联统一的项目银行码；项目码册另保留 LIOBANK，共 77 项。发布方代码、BIN 与项目银行码分别列出，实际可用银行仍需查询接口确认。目录含银行、分支和其他机构，不应按条目数推断银行法人数量。
 
 五语言国家/币种字典由同一份参考数据生成，客户端配置模板也在本仓库维护：
 

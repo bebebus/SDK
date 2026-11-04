@@ -3,7 +3,7 @@
   "updated_at": "2026-11-05",
   "source": {
     "project": "project-p",
-    "revision": "0ef7f9c8101d8e34528e33e462b3a3a32f5ef74b",
+    "revision": "dc7133b395d7704f7263b23b97cba2b4ef37343d",
     "files": [
       {
         "path": "web-shared/src/openapi/catalog.ts",
@@ -39,7 +39,7 @@
       },
       {
         "path": "api/src/channels/_shared/vnBanks.js",
-        "sha256": "00ec0bca1a2fd7493a978e0f8914bfb08dba5a872efb2e27034b706518be7540"
+        "sha256": "f9b30cdb0617acd25c88569b1155d055a73f4d32cf6c92d2ba42b8c075ffa2b4"
       }
     ]
   },
@@ -2540,8 +2540,32 @@
     },
     {
       "country": "VN",
+      "bank_code": "BIDCVN",
+      "bank_name": "BIDC, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "BIDV",
       "bank_name": "Bank for Investment and Development of Vietnam (BIDV)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BNPHCM",
+      "bank_name": "BNP Paribas, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BNPHN",
+      "bank_name": "BNP Paribas, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BOCHKVN",
+      "bank_name": "Bank of China (Hong Kong), Ho Chi Minh City Branch",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
@@ -2558,14 +2582,50 @@
     },
     {
       "country": "VN",
+      "bank_code": "CBBANK",
+      "bank_name": "Vietnam Construction Bank (CBBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "CIMBVN",
+      "bank_name": "CIMB Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "CITIVN",
+      "bank_name": "Citibank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "COOPBANK",
       "bank_name": "Co-operative Bank of Vietnam",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
       "country": "VN",
+      "bank_code": "CUBHCM",
+      "bank_name": "Cathay United Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "DBSVN",
+      "bank_name": "DBS Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "DONGABANK",
       "bank_name": "DongA Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ESUNVN",
+      "bank_name": "E.SUN Commercial Bank, Dong Nai Branch",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
@@ -2594,14 +2654,62 @@
     },
     {
       "country": "VN",
+      "bank_code": "HSBCVN",
+      "bank_name": "HSBC Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "IBKHCM",
       "bank_name": "Industrial Bank of Korea, Ho Chi Minh City Branch",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
       "country": "VN",
+      "bank_code": "IBKHN",
+      "bank_name": "Industrial Bank of Korea, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ICBCHN",
+      "bank_name": "Ngân hàng Công thương Trung Quốc – Chi nhánh thành phố Hà Nội",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "INDOVINA",
       "bank_name": "Indovina Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KASIKORNVN",
+      "bank_name": "Kasikornbank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KBHCM",
+      "bank_name": "Kookmin Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KBHN",
+      "bank_name": "Kookmin Bank, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KEBHANAHCM",
+      "bank_name": "KEB Hana Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KEBHANAHN",
+      "bank_name": "KEB Hana Bank, Hanoi Branch",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
@@ -2630,6 +2738,24 @@
     },
     {
       "country": "VN",
+      "bank_code": "MIRAEASSETVN",
+      "bank_name": "Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam) ",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "MOBIFONEMONEY",
+      "bank_name": "Trung tâm Dịch vụ số Mobifone – Chi nhánh Tổng Công ty viễn thông Mobifone",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "MOMO",
+      "bank_name": "CTCP Dịch Vụ Di Động Trực Tuyến",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "MSB",
       "bank_name": "Vietnam Maritime Commercial Joint Stock Bank (MSB)",
       "source": "api/src/channels/_shared/vnBanks.js"
@@ -2644,6 +2770,12 @@
       "country": "VN",
       "bank_code": "NCBVN",
       "bank_name": "National Citizen Commercial Joint Stock Bank (NCB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "NONGHYUPVN",
+      "bank_name": "NongHyup Bank, Hanoi Branch",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
@@ -2672,6 +2804,18 @@
     },
     {
       "country": "VN",
+      "bank_code": "PVCOMBANK",
+      "bank_name": "Vietnam Public Joint Stock Commercial Bank (PVcomBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "PVCOMBANKPAY",
+      "bank_name": "Ngân hàng số PVcomBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "SACOMBANK",
       "bank_name": "Sacombank",
       "source": "api/src/channels/_shared/vnBanks.js"
@@ -2686,6 +2830,12 @@
       "country": "VN",
       "bank_code": "SCBVN",
       "bank_name": "Saigon Commercial Bank (SCB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SCVN",
+      "bank_name": "Standard Chartered Bank Vietnam",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
@@ -2708,14 +2858,38 @@
     },
     {
       "country": "VN",
+      "bank_code": "SINOPACVN",
+      "bank_name": "Bank SinoPac, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "TECHCOMBANK",
       "bank_name": "Techcombank",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
       "country": "VN",
+      "bank_code": "TIMO",
+      "bank_name": "Timo by Ban Viet Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "TNEX",
+      "bank_name": "TNEX by MSB",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "TPBANK",
       "bank_name": "Tien Phong Commercial Joint Stock Bank (TPBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "UBANK",
+      "bank_name": "Ubank by VPBank",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
@@ -2728,6 +2902,12 @@
       "country": "VN",
       "bank_code": "VAB",
       "bank_name": "VietA Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VBSP",
+      "bank_name": "Vietnam Bank for Social Policies",
       "source": "api/src/channels/_shared/vnBanks.js"
     },
     {
@@ -2762,6 +2942,18 @@
     },
     {
       "country": "VN",
+      "bank_code": "VIETTELMONEY",
+      "bank_name": "Tổng Công ty Dịch vụ số Viettel - Chi nhánh tập đoàn công nghiệp viễn thông Quân Đội",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VNPTMONEY",
+      "bank_name": "Trung tâm dịch vụ tài chính số VNPT- Chi nhánh Tổng công ty truyền thông (VNPT Fintech)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
       "bank_code": "VPBANK",
       "bank_name": "Vietnam Prosperity Joint Stock Commercial Bank (VPBank)",
       "source": "api/src/channels/_shared/vnBanks.js"
@@ -2776,6 +2968,12 @@
       "country": "VN",
       "bank_code": "WOORIVN",
       "bank_name": "Woori Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ZALOPAY",
+      "bank_name": "Ví điện tử ZaloPay",
       "source": "api/src/channels/_shared/vnBanks.js"
     }
   ],
@@ -2806,7 +3004,7 @@
           "bin": "168999",
           "name": "Ngân hàng Cathay United Bank – Chi nhánh Hồ Chí Minh",
           "short_name": "CUBHCM",
-          "platform_bank_code": null,
+          "platform_bank_code": "CUBHCM",
           "note": ""
         },
         {
@@ -2814,7 +3012,7 @@
           "bin": "422589",
           "name": "Ngân hàng TNHH MTV CIMB Việt Nam",
           "short_name": "CIMB",
-          "platform_bank_code": null,
+          "platform_bank_code": "CIMBVN",
           "note": ""
         },
         {
@@ -2822,7 +3020,7 @@
           "bin": "458761",
           "name": "Ngân hàng TNHH MTV HSBC (Việt Nam)",
           "short_name": "HSBC",
-          "platform_bank_code": null,
+          "platform_bank_code": "HSBCVN",
           "note": ""
         },
         {
@@ -2830,7 +3028,7 @@
           "bin": "533948",
           "name": "Ngân hàng Citibank, N.A. - Chi nhánh Hà Nội",
           "short_name": "Citibank",
-          "platform_bank_code": null,
+          "platform_bank_code": "CITIVN",
           "note": ""
         },
         {
@@ -2846,7 +3044,7 @@
           "bin": "546035",
           "name": "TMCP Việt Nam Thịnh Vượng - Ngân hàng số Ubank by VPBank",
           "short_name": "Ubank",
-          "platform_bank_code": null,
+          "platform_bank_code": "UBANK",
           "note": ""
         },
         {
@@ -2854,7 +3052,7 @@
           "bin": "555666",
           "name": "Ngân hàng Đầu Tư Và Phát Triển Campuchia - Chi nhánh Hà Nội",
           "short_name": "BIDC",
-          "platform_bank_code": null,
+          "platform_bank_code": "BIDCVN",
           "note": ""
         },
         {
@@ -2862,7 +3060,7 @@
           "bin": "668888",
           "name": "Ngân hàng Đại chúng TNHH Kasikornbank",
           "short_name": "KBank",
-          "platform_bank_code": null,
+          "platform_bank_code": "KASIKORNVN",
           "note": ""
         },
         {
@@ -2870,7 +3068,7 @@
           "bin": "796500",
           "name": "DBS Bank Ltd - Chi nhánh Thành phố Hồ Chí Minh",
           "short_name": "DBSBank",
-          "platform_bank_code": null,
+          "platform_bank_code": "DBSVN",
           "note": ""
         },
         {
@@ -2878,7 +3076,7 @@
           "bin": "801011",
           "name": "Ngân hàng Nonghyup - Chi nhánh Hà Nội",
           "short_name": "Nonghyup",
-          "platform_bank_code": null,
+          "platform_bank_code": "NONGHYUPVN",
           "note": ""
         },
         {
@@ -2886,7 +3084,7 @@
           "bin": "963326",
           "name": "TNEX by MSB",
           "short_name": "TNEX",
-          "platform_bank_code": null,
+          "platform_bank_code": "TNEX",
           "note": ""
         },
         {
@@ -2894,7 +3092,7 @@
           "bin": "963388",
           "name": "Ngân hàng số Timo by Ban Viet Bank (Timo by Ban Viet Bank)",
           "short_name": "Timo",
-          "platform_bank_code": null,
+          "platform_bank_code": "TIMO",
           "note": ""
         },
         {
@@ -2902,7 +3100,7 @@
           "bin": "963666",
           "name": "Ngân hàng BNP Paribas – Chi nhánh Thành phố Hồ Chí Minh",
           "short_name": "BNP HCM",
-          "platform_bank_code": null,
+          "platform_bank_code": "BNPHCM",
           "note": ""
         },
         {
@@ -2910,7 +3108,7 @@
           "bin": "963668",
           "name": "Ngân hàng BNP Paribas – Chi nhánh Hà Nội",
           "short_name": "BNP HN",
-          "platform_bank_code": null,
+          "platform_bank_code": "BNPHN",
           "note": ""
         },
         {
@@ -2918,7 +3116,7 @@
           "bin": "963669",
           "name": "Ngân hàng Công thương Trung Quốc – Chi nhánh thành phố Hà Nội",
           "short_name": "ICBC",
-          "platform_bank_code": null,
+          "platform_bank_code": "ICBCHN",
           "note": ""
         },
         {
@@ -2926,7 +3124,7 @@
           "bin": "963686",
           "name": "Ngân hàng Thương mại TNHH E.SUN – Chi nhánh Đồng Nai (ESUNBANK)",
           "short_name": "ESUN",
-          "platform_bank_code": null,
+          "platform_bank_code": "ESUNVN",
           "note": ""
         },
         {
@@ -2934,7 +3132,7 @@
           "bin": "963688",
           "name": "Ngân hàng Bank of China (Hong Kong) Limited – Chi nhánh Hồ Chí Minh",
           "short_name": "BOCHK",
-          "platform_bank_code": null,
+          "platform_bank_code": "BOCHKVN",
           "note": ""
         },
         {
@@ -2998,7 +3196,7 @@
           "bin": "970410",
           "name": "Ngân hàng TNHH MTV Standard Chartered Bank Việt Nam",
           "short_name": "StandardChartered",
-          "platform_bank_code": null,
+          "platform_bank_code": "SCVN",
           "note": ""
         },
         {
@@ -3006,7 +3204,7 @@
           "bin": "970412",
           "name": "Ngân hàng TMCP Đại Chúng Việt Nam",
           "short_name": "PVcomBank",
-          "platform_bank_code": null,
+          "platform_bank_code": "PVCOMBANK",
           "note": ""
         },
         {
@@ -3230,7 +3428,7 @@
           "bin": "970444",
           "name": "Ngân hàng Thương mại trách nhiệm hữu hạn một thành viên Ngoại thương Công nghệ số (Vietcombank Neo Limited)",
           "short_name": "CBBank",
-          "platform_bank_code": null,
+          "platform_bank_code": "CBBANK",
           "note": ""
         },
         {
@@ -3278,7 +3476,7 @@
           "bin": "970455",
           "name": "Ngân hàng Công nghiệp Hàn Quốc - Chi nhánh Hà Nội",
           "short_name": "IBKHN",
-          "platform_bank_code": null,
+          "platform_bank_code": "IBKHN",
           "note": ""
         },
         {
@@ -3310,7 +3508,7 @@
           "bin": "970462",
           "name": "Ngân hàng Kookmin - Chi nhánh Hà Nội",
           "short_name": "KookminHN",
-          "platform_bank_code": null,
+          "platform_bank_code": "KBHN",
           "note": ""
         },
         {
@@ -3318,7 +3516,7 @@
           "bin": "970463",
           "name": "Ngân hàng Kookmin - Chi nhánh Thành phố Hồ Chí Minh",
           "short_name": "KookminHCM",
-          "platform_bank_code": null,
+          "platform_bank_code": "KBHCM",
           "note": ""
         },
         {
@@ -3326,7 +3524,7 @@
           "bin": "970465",
           "name": "Ngân hàng SinoPac - Chi nhánh Thành phố Hồ Chí Minh",
           "short_name": "BSP",
-          "platform_bank_code": null,
+          "platform_bank_code": "SINOPACVN",
           "note": ""
         },
         {
@@ -3334,7 +3532,7 @@
           "bin": "970466",
           "name": "Ngân hàng KEB Hana – Chi nhánh Thành phố Hồ Chí Minh",
           "short_name": "KEBHanaHCM",
-          "platform_bank_code": null,
+          "platform_bank_code": "KEBHANAHCM",
           "note": ""
         },
         {
@@ -3342,7 +3540,7 @@
           "bin": "970467",
           "name": "Ngân hàng KEB Hana – Chi nhánh Hà Nội",
           "short_name": "KEBHANAHN",
-          "platform_bank_code": null,
+          "platform_bank_code": "KEBHANAHN",
           "note": ""
         },
         {
@@ -3350,7 +3548,7 @@
           "bin": "971005",
           "name": "Tổng Công ty Dịch vụ số Viettel - Chi nhánh tập đoàn công nghiệp viễn thông Quân Đội",
           "short_name": "ViettelMoney",
-          "platform_bank_code": null,
+          "platform_bank_code": "VIETTELMONEY",
           "note": ""
         },
         {
@@ -3358,7 +3556,7 @@
           "bin": "971011",
           "name": "Trung tâm dịch vụ tài chính số VNPT- Chi nhánh Tổng công ty truyền thông (VNPT Fintech)",
           "short_name": "VNPTMoney",
-          "platform_bank_code": null,
+          "platform_bank_code": "VNPTMONEY",
           "note": ""
         },
         {
@@ -3366,7 +3564,7 @@
           "bin": "971025",
           "name": "CTCP Dịch Vụ Di Động Trực Tuyến",
           "short_name": "MoMo",
-          "platform_bank_code": null,
+          "platform_bank_code": "MOMO",
           "note": ""
         },
         {
@@ -3374,7 +3572,7 @@
           "bin": "971032",
           "name": "Trung tâm Dịch vụ số Mobifone – Chi nhánh Tổng Công ty viễn thông Mobifone",
           "short_name": "MVAS",
-          "platform_bank_code": null,
+          "platform_bank_code": "MOBIFONEMONEY",
           "note": ""
         },
         {
@@ -3382,7 +3580,7 @@
           "bin": "971101",
           "name": "Ví điện tử ZaloPay",
           "short_name": "ZaloPay",
-          "platform_bank_code": null,
+          "platform_bank_code": "ZALOPAY",
           "note": ""
         },
         {
@@ -3390,7 +3588,7 @@
           "bin": "971133",
           "name": "Ngân hàng số PVcomBank",
           "short_name": "PVcomBank Pay",
-          "platform_bank_code": null,
+          "platform_bank_code": "PVCOMBANKPAY",
           "note": ""
         },
         {
@@ -3398,7 +3596,7 @@
           "bin": "977777",
           "name": "Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam) ",
           "short_name": "MAFC",
-          "platform_bank_code": null,
+          "platform_bank_code": "MIRAEASSETVN",
           "note": ""
         },
         {
@@ -3406,7 +3604,7 @@
           "bin": "999888",
           "name": "Ngân hàng Chính sách Xã hội",
           "short_name": "VBSP",
-          "platform_bank_code": null,
+          "platform_bank_code": "VBSP",
           "note": ""
         }
       ]
