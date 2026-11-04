@@ -1,0 +1,3613 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-11-05",
+  "source": {
+    "project": "project-p",
+    "revision": "dc7133b395d7704f7263b23b97cba2b4ef37343d",
+    "files": [
+      {
+        "path": "web-shared/src/openapi/catalog.ts",
+        "sha256": "6320d971f82dea84b9aeb424340e8abd014084b58a03e7349476681cee515710"
+      },
+      {
+        "path": "api/sql/migrations/20260731_120000_seed_country_paymethod_catalog_baseline.sql",
+        "sha256": "4a0115d43eb1f5e85eff603b411587b7b44799acbad6fe559487bd0ab27fe79d"
+      },
+      {
+        "path": "api/src/channels/ttpay/config.js",
+        "sha256": "45385f09dddb53995b29e234d602288d27088162ca96edbe133353049215594a"
+      },
+      {
+        "path": "api/src/channels/_shared/phBanks.js",
+        "sha256": "d5885dc8056e0d4a6b9f2a403ca0b23f40968681a0c6324fb0263e63929192ec"
+      },
+      {
+        "path": "api/src/channels/_shared/hkBanks.js",
+        "sha256": "bbe6e9d58ef4f30ef4911a4992ae6a55445c309c092e9ed003e7848944980da2"
+      },
+      {
+        "path": "api/src/channels/_shared/cnBanks.js",
+        "sha256": "4ee09cc57a7d62f9ff764c44bcd5ab554156aadeb1955022aa9f39e3ced006a4"
+      },
+      {
+        "path": "api/src/channels/_shared/bdBanks.js",
+        "sha256": "bb5b534239507b48e60cb243270178b05e8585c17f1743b8acadf57fa9e34f0c"
+      },
+      {
+        "path": "api/src/channels/_shared/mmBanks.js",
+        "sha256": "31c6e8fe0ac14092c659daec75d484af3eee71460b09a58b20c9089a3bba71d7"
+      },
+      {
+        "path": "api/src/channels/_shared/vnBanks.js",
+        "sha256": "f9b30cdb0617acd25c88569b1155d055a73f4d32cf6c92d2ba42b8c075ffa2b4"
+      }
+    ]
+  },
+  "countries": [
+    {
+      "code": "PH",
+      "name_zh": "菲律宾",
+      "name_en": "Philippines",
+      "currencies": [
+        "PHP"
+      ]
+    },
+    {
+      "code": "ID",
+      "name_zh": "印度尼西亚",
+      "name_en": "Indonesia",
+      "currencies": [
+        "IDR"
+      ]
+    },
+    {
+      "code": "IN",
+      "name_zh": "印度",
+      "name_en": "India",
+      "currencies": [
+        "INR"
+      ]
+    },
+    {
+      "code": "BD",
+      "name_zh": "孟加拉国",
+      "name_en": "Bangladesh",
+      "currencies": [
+        "BDT"
+      ]
+    },
+    {
+      "code": "VN",
+      "name_zh": "越南",
+      "name_en": "Vietnam",
+      "currencies": [
+        "VND"
+      ]
+    },
+    {
+      "code": "TH",
+      "name_zh": "泰国",
+      "name_en": "Thailand",
+      "currencies": [
+        "THB"
+      ]
+    },
+    {
+      "code": "MM",
+      "name_zh": "缅甸",
+      "name_en": "Myanmar",
+      "currencies": [
+        "MMK"
+      ]
+    },
+    {
+      "code": "MY",
+      "name_zh": "马来西亚",
+      "name_en": "Malaysia",
+      "currencies": [
+        "MYR"
+      ]
+    },
+    {
+      "code": "BR",
+      "name_zh": "巴西",
+      "name_en": "Brazil",
+      "currencies": [
+        "BRL"
+      ]
+    },
+    {
+      "code": "MX",
+      "name_zh": "墨西哥",
+      "name_en": "Mexico",
+      "currencies": [
+        "MXN"
+      ]
+    },
+    {
+      "code": "CN",
+      "name_zh": "中国",
+      "name_en": "China",
+      "currencies": [
+        "CNY"
+      ]
+    },
+    {
+      "code": "HK",
+      "name_zh": "中国香港",
+      "name_en": "Hong Kong",
+      "currencies": [
+        "HKD"
+      ]
+    }
+  ],
+  "currencies": [
+    {
+      "code": "PHP",
+      "name_zh": "菲律宾比索",
+      "name_en": "Philippine peso",
+      "kind": "fiat"
+    },
+    {
+      "code": "IDR",
+      "name_zh": "印尼盾",
+      "name_en": "Indonesian rupiah",
+      "kind": "fiat"
+    },
+    {
+      "code": "INR",
+      "name_zh": "印度卢比",
+      "name_en": "Indian rupee",
+      "kind": "fiat"
+    },
+    {
+      "code": "BDT",
+      "name_zh": "孟加拉塔卡",
+      "name_en": "Bangladeshi taka",
+      "kind": "fiat"
+    },
+    {
+      "code": "VND",
+      "name_zh": "越南盾",
+      "name_en": "Vietnamese dong",
+      "kind": "fiat"
+    },
+    {
+      "code": "THB",
+      "name_zh": "泰铢",
+      "name_en": "Thai baht",
+      "kind": "fiat"
+    },
+    {
+      "code": "MMK",
+      "name_zh": "缅元",
+      "name_en": "Myanmar kyat",
+      "kind": "fiat"
+    },
+    {
+      "code": "MYR",
+      "name_zh": "马来西亚林吉特",
+      "name_en": "Malaysian ringgit",
+      "kind": "fiat"
+    },
+    {
+      "code": "BRL",
+      "name_zh": "巴西雷亚尔",
+      "name_en": "Brazilian real",
+      "kind": "fiat"
+    },
+    {
+      "code": "MXN",
+      "name_zh": "墨西哥比索",
+      "name_en": "Mexican peso",
+      "kind": "fiat"
+    },
+    {
+      "code": "CNY",
+      "name_zh": "人民币",
+      "name_en": "Chinese yuan",
+      "kind": "fiat"
+    },
+    {
+      "code": "USDT",
+      "name_zh": "泰达币",
+      "name_en": "Tether",
+      "kind": "crypto"
+    },
+    {
+      "code": "HKD",
+      "name_zh": "港币",
+      "name_en": "Hong Kong dollar",
+      "kind": "fiat"
+    }
+  ],
+  "banks": [
+    {
+      "country": "BD",
+      "bank_code": "ABBANK",
+      "bank_name": "AB Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "AGRANI",
+      "bank_name": "Agrani Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "ALARAFAH",
+      "bank_name": "Al-Arafah Islami Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BANKALFALAH",
+      "bank_name": "Bank Alfalah Limited",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BANKASIA",
+      "bank_name": "Bank Asia PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BASIC",
+      "bank_name": "BASIC Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BDBL",
+      "bank_name": "Bangladesh Development Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BENGALCOMMERCIAL",
+      "bank_name": "Bengal Commercial Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BKASH",
+      "bank_name": "bKash",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BKB",
+      "bank_name": "Bangladesh Krishi Bank",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "BRACBANK",
+      "bank_name": "BRAC Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "CITI",
+      "bank_name": "Citibank N.A. Bangladesh",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "CITIZENSBANK",
+      "bank_name": "Citizens Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "CITYBANK",
+      "bank_name": "The City Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "COMMERCIALCEYLON",
+      "bank_name": "Commercial Bank of Ceylon PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "COMMUNITYBANK",
+      "bank_name": "Community Bank Bangladesh PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "DHAKABANK",
+      "bank_name": "Dhaka Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "DUTCHBANGLA",
+      "bank_name": "Dutch-Bangla Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "EASTERNBANK",
+      "bank_name": "Eastern Bank PLC (EBL)",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "EXIMBANK",
+      "bank_name": "EXIM Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "FIRSTSECURITY",
+      "bank_name": "First Security Islami Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "GLOBALISLAMI",
+      "bank_name": "Global Islami Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "HABIB",
+      "bank_name": "Habib Bank Limited",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "HSBC",
+      "bank_name": "HSBC Bangladesh",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "IFICBANK",
+      "bank_name": "IFIC Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "ISLAMIBANK",
+      "bank_name": "Islami Bank Bangladesh PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "JAMUNABANK",
+      "bank_name": "Jamuna Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "JANATA",
+      "bank_name": "Janata Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "MCASH",
+      "bank_name": "mCash (Islami Bank)",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "MEGHNABANK",
+      "bank_name": "Meghna Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "MERCANTILEBANK",
+      "bank_name": "Mercantile Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "MIDLANDBANK",
+      "bank_name": "Midland Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "MODHUMOTIBANK",
+      "bank_name": "Modhumoti Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "MTB",
+      "bank_name": "Mutual Trust Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "NAGAD",
+      "bank_name": "Nagad",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "NATIONALBANK",
+      "bank_name": "National Bank Limited",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "NBP",
+      "bank_name": "National Bank of Pakistan",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "NCCBANK",
+      "bank_name": "NCC Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "NRBBANK",
+      "bank_name": "NRB Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "NRBCBANK",
+      "bank_name": "NRB Commercial Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "OKWALLET",
+      "bank_name": "OK Wallet (ONE Bank)",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "ONEBANK",
+      "bank_name": "ONE Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "PADMABANK",
+      "bank_name": "Padma Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "PREMIERBANK",
+      "bank_name": "The Premier Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "PRIMEBANK",
+      "bank_name": "Prime Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "PROBASHIKALLYAN",
+      "bank_name": "Probashi Kallyan Bank",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "PUBALIBANK",
+      "bank_name": "Pubali Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "RAKUB",
+      "bank_name": "Rajshahi Krishi Unnayan Bank",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "ROCKET",
+      "bank_name": "Rocket (Dutch-Bangla Bank Mobile Banking)",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "RUPALI",
+      "bank_name": "Rupali Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "SBI",
+      "bank_name": "State Bank of India",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "SCB",
+      "bank_name": "Standard Chartered Bank (Bangladesh)",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "SHAHJALAL",
+      "bank_name": "Shahjalal Islami Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "SIBL",
+      "bank_name": "Social Islami Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "SONALI",
+      "bank_name": "Sonali Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "SOUTHEASTBANK",
+      "bank_name": "Southeast Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "STANDARDBANK",
+      "bank_name": "Standard Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "SURECASH",
+      "bank_name": "SureCash",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "TAP",
+      "bank_name": "Tap (Trust Axiata Pay)",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "TRUSTBANK",
+      "bank_name": "Trust Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "UCB",
+      "bank_name": "United Commercial Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "UNIONBANK",
+      "bank_name": "Union Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "UPAY",
+      "bank_name": "Upay (UCB Fintech)",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "UTTARABANK",
+      "bank_name": "Uttara Bank PLC",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "BD",
+      "bank_code": "WOORI",
+      "bank_name": "Woori Bank",
+      "source": "api/src/channels/_shared/bdBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "ABC",
+      "bank_name": "中国农业银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "BOB",
+      "bank_name": "北京银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "BOC",
+      "bank_name": "中国银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "BOCOM",
+      "bank_name": "交通银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "CCB",
+      "bank_name": "中国建设银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "CEB",
+      "bank_name": "中国光大银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "CIB",
+      "bank_name": "兴业银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "CITIC",
+      "bank_name": "中信银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "CMB",
+      "bank_name": "招商银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "CMBC",
+      "bank_name": "中国民生银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "GDB",
+      "bank_name": "广发银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "HXB",
+      "bank_name": "华夏银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "ICBC",
+      "bank_name": "中国工商银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "PAB",
+      "bank_name": "平安银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "PSBC",
+      "bank_name": "中国邮政储蓄银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "CN",
+      "bank_code": "SPDB",
+      "bank_name": "浦发银行",
+      "source": "api/src/channels/_shared/cnBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ABC",
+      "bank_name": "中國農業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "AIRSTAR",
+      "bank_name": "天星銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ANTBANK",
+      "bank_name": "螞蟻銀行(香港)有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ANZ",
+      "bank_name": "澳新銀行集團有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BANGKOK",
+      "bank_name": "盤谷銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BARCLAYS",
+      "bank_name": "Barclays Bank Plc.",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BBVA",
+      "bank_name": "西班牙對外銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BDO",
+      "bank_name": "金融銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BEA",
+      "bank_name": "東亞銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BMO",
+      "bank_name": "滿地可銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BNI",
+      "bank_name": "印尼國家銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BNP",
+      "bank_name": "法國巴黎銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BNYMELLON",
+      "bank_name": "紐約梅隆銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOC",
+      "bank_name": "中國銀行香港分行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOCHK",
+      "bank_name": "中國銀行（香港）有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOCOM",
+      "bank_name": "交通銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOCOMHK",
+      "bank_name": "交通銀行(香港)有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOFA",
+      "bank_name": "美國銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOI",
+      "bank_name": "印度銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOS",
+      "bank_name": "新加坡銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOSHK",
+      "bank_name": "上海銀行(香港)有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "BOT",
+      "bank_name": "臺灣銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CACIB",
+      "bank_name": "東方匯理銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CATHAYBANK",
+      "bank_name": "國泰銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CATHAYUNITED",
+      "bank_name": "國泰世華商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CBA",
+      "bank_name": "澳洲聯邦銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CBHB",
+      "bank_name": "渤海银行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CCB",
+      "bank_name": "中國建設銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CCBASIA",
+      "bank_name": "中國建設銀行（亞洲）股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CDB",
+      "bank_name": "國家開發銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CEB",
+      "bank_name": "中國光大銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CHANGHWA",
+      "bank_name": "彰化商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CHIBA",
+      "bank_name": "千葉銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CHIYU",
+      "bank_name": "集友銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CHONGHING",
+      "bank_name": "創興銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CHUGOKU",
+      "bank_name": "The Chugoku Bank Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CIB",
+      "bank_name": "興業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CIBC",
+      "bank_name": "加拿大帝國商業銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CIC",
+      "bank_name": "Credit Industriel et Commercial",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CIMB",
+      "bank_name": "CIMB Bank Berhad",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CITIBANK",
+      "bank_name": "花旗銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CITIC",
+      "bank_name": "中信銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CITIHK",
+      "bank_name": "花旗銀行(香港)有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CLS",
+      "bank_name": "CLS Bank International",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CMB",
+      "bank_name": "招商銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CMBC",
+      "bank_name": "中國民生銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CMBWLB",
+      "bank_name": "招商永隆銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CNCBI",
+      "bank_name": "中信銀行國際有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CREDITSUISSE",
+      "bank_name": "Credit Suisse AG",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CTBC",
+      "bank_name": "中國信託商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "CZB",
+      "bank_name": "浙商銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "DAHSING",
+      "bank_name": "大新銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "DBS",
+      "bank_name": "星展銀行（香港）有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "DBSSG",
+      "bank_name": "星展銀行香港分行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "DEUTSCHE",
+      "bank_name": "德意志銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "DONGGUAN",
+      "bank_name": "東莞銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "DZBANK",
+      "bank_name": "德國中央合作銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "EASTWEST",
+      "bank_name": "華美銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "EFG",
+      "bank_name": "瑞士盈豐銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ERSTE",
+      "bank_name": "Erste Group Bank AG",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ESUN",
+      "bank_name": "玉山商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "FAB",
+      "bank_name": "First Abu Dhabi Bank PJSC",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "FEIB",
+      "bank_name": "逺東國際商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "FIRSTBANK",
+      "bank_name": "第一商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "FUBONHK",
+      "bank_name": "富邦銀行(香港)有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "FUSION",
+      "bank_name": "富融銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "GDB",
+      "bank_name": "廣發銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HANGSENG",
+      "bank_name": "恒生銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HDFC",
+      "bank_name": "HDFC Bank Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HKMACMU",
+      "bank_name": "香港金融管理局-CMU Digital",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HKMACTB",
+      "bank_name": "香港金融管理局-CTB A",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HKMAMBRIDGE",
+      "bank_name": "香港金融管理局-mBridge",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HKSCC",
+      "bank_name": "Hong Kong Securities Clearing Company Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HONGLEONG",
+      "bank_name": "豐隆銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HSBC",
+      "bank_name": "香港上海滙豐銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HSBCUS",
+      "bank_name": "美國滙豐銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HUANAN",
+      "bank_name": "華南商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "HXB",
+      "bank_name": "華夏銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "IBK",
+      "bank_name": "Industrial Bank of Korea",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ICBC",
+      "bank_name": "中國工商銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ICBCASIA",
+      "bank_name": "中國工商銀行（亞洲）有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ICICI",
+      "bank_name": "ICICI Bank Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "INDOSUEZ",
+      "bank_name": "CA Indosuez (Switzerland) SA",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ING",
+      "bank_name": "ING Bank N.V.",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "INTESA",
+      "bank_name": "義大利聯合聖保羅銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "IOB",
+      "bank_name": "印度海外銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "JPMORGAN",
+      "bank_name": "摩根大通銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "JULIUSBAER",
+      "bank_name": "Bank Julius Baer & Co. Ltd.",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "KBC",
+      "bank_name": "比利時聯合銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "KDB",
+      "bank_name": "The Korea Development Bank",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "KEBHANA",
+      "bank_name": "KEB Hana Bank",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "KOOKMIN",
+      "bank_name": "Kookmin Bank",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "LANDBANKTW",
+      "bank_name": "台灣土地銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "LGT",
+      "bank_name": "LGT 皇家銀行（香港）",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "LIVIBANK",
+      "bank_name": "理慧銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MASHREQ",
+      "bank_name": "Mashreq Bank - Public Shareholding Company",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MAYBANK",
+      "bank_name": "馬來亞銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MEGA",
+      "bank_name": "兆豐國際商業銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MELLI",
+      "bank_name": "Melli Bank plc",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MIZUHO",
+      "bank_name": "瑞穗銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MORGANSTANLEY",
+      "bank_name": "摩根士丹利銀行亞洲有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MOX",
+      "bank_name": "Mox Bank Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MUFG",
+      "bank_name": "三菱UFJ銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "MUFGTRUST",
+      "bank_name": "三菱UFJ信託銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "NAB",
+      "bank_name": "澳大利亞國民銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "NATIXIS",
+      "bank_name": "法國外貿銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "NBP",
+      "bank_name": "巴基斯坦國民銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "NCB",
+      "bank_name": "南洋商業銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "NONGHYUP",
+      "bank_name": "農協銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "OBANK",
+      "bank_name": "王道商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "OCBC",
+      "bank_name": "Oversea-Chinese Banking Corporation Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "OCBCHK",
+      "bank_name": "華僑銀行 (香港) 有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "PAB",
+      "bank_name": "平安銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "PAOB",
+      "bank_name": "PAO Bank Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "PICTET",
+      "bank_name": "Banque Pictet & Cie SA",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "PNB",
+      "bank_name": "Philippine National Bank",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "PUBLICBANK",
+      "bank_name": "大衆銀行(香港)有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "QNB",
+      "bank_name": "卡塔爾國家銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "RABOBANK",
+      "bank_name": "荷蘭合作銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "RBC",
+      "bank_name": "加拿大皇家銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SAFRASARASIN",
+      "bank_name": "Bank J. Safra Sarasin Ltd",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SANTANDER",
+      "bank_name": "西班牙桑坦德銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SBI",
+      "bank_name": "印度國家銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SCB",
+      "bank_name": "渣打銀行（香港）有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SCBUK",
+      "bank_name": "渣打銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SCOTIABANK",
+      "bank_name": "加拿大豐業銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SCSB",
+      "bank_name": "上海商業儲蓄銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SEB",
+      "bank_name": "Skandinaviska Enskilda Banken AB",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SHACOM",
+      "bank_name": "上海商業銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SHIGA",
+      "bank_name": "滋賀銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SHINHAN",
+      "bank_name": "Shinhan Bank",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SHINKONG",
+      "bank_name": "臺灣新光商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SHIZUOKA",
+      "bank_name": "靜岡銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SINOPAC",
+      "bank_name": "永豐商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SMBC",
+      "bank_name": "三井住友銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SMTB",
+      "bank_name": "三井住友信託銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SOCGEN",
+      "bank_name": "法國興業銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "SPDB",
+      "bank_name": "上海浦東發展銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "STATESTREET",
+      "bank_name": "美國道富銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "TAIPEIFUBON",
+      "bank_name": "台北富邦商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "TAISANG",
+      "bank_name": "大生銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "TAISHIN",
+      "bank_name": "台新國際商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "TAIYAU",
+      "bank_name": "大有銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "TBB",
+      "bank_name": "臺灣中小企業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "TCB",
+      "bank_name": "合作金庫商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "TDBANK",
+      "bank_name": "多倫多道明銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "UBP",
+      "bank_name": "Union Bancaire Privée, UBP SA",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "UBS",
+      "bank_name": "瑞士銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "UCO",
+      "bank_name": "UCO Bank",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "UOB",
+      "bank_name": "大華銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "WELAB",
+      "bank_name": "Welab Bank Limited",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "WELLSFARGO",
+      "bank_name": "富國銀行香港分行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "WOORI",
+      "bank_name": "友利銀行",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "YUANTA",
+      "bank_name": "元大商業銀行股份有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "HK",
+      "bank_code": "ZABANK",
+      "bank_name": "眾安銀行有限公司",
+      "source": "api/src/channels/_shared/hkBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "ABANK",
+      "bank_name": "A Bank (Ayeyarwady Farmers Development Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "AGD",
+      "bank_name": "Asia Green Development Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "AYA",
+      "bank_name": "AYA Bank (Ayeyarwady Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "AYAPAY",
+      "bank_name": "AYA Pay (AYA Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "CB",
+      "bank_name": "CB Bank (Co-operative Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "CBPAY",
+      "bank_name": "CB Pay (CB Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "CHDB",
+      "bank_name": "Construction and Housing Development Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "CITIZENSPAY",
+      "bank_name": "Citizens Pay",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "FPB",
+      "bank_name": "First Private Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "GTB",
+      "bank_name": "Global Treasure Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "INNWA",
+      "bank_name": "Innwa Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "KBZ",
+      "bank_name": "KBZ Bank (Kanbawza Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "KBZPAY",
+      "bank_name": "KBZPay (KBZ Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MAB",
+      "bank_name": "Myanma Apex Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MADB",
+      "bank_name": "Myanmar Agricultural Development Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MCB",
+      "bank_name": "Myanmar Citizens Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MEB",
+      "bank_name": "Myanma Economic Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MFTB",
+      "bank_name": "Myanma Foreign Trade Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MICB",
+      "bank_name": "Myanma Investment and Commercial Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MMTB",
+      "bank_name": "Myanmar Tourism Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MOB",
+      "bank_name": "Myanmar Oriental Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MPITESAN",
+      "bank_name": "M-Pitesan (Ooredoo)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MPU",
+      "bank_name": "Myanmar Payment Union (MPU card)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "MYTELPAY",
+      "bank_name": "Mytel Pay",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "OKDOLLAR",
+      "bank_name": "OK Dollar",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "ONEPAY",
+      "bank_name": "OnePay",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "RDB",
+      "bank_name": "Rural Development Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "SHWE",
+      "bank_name": "Shwe Bank (Shwe Rural and Urban Development Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "SMIDB",
+      "bank_name": "Small and Medium Industrial Development Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "TFB",
+      "bank_name": "Tun Foundation Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "TRUEMONEY",
+      "bank_name": "TrueMoney Myanmar",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "UAB",
+      "bank_name": "UAB Bank (United Amara Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "UABPAY",
+      "bank_name": "UAB Pay (UAB Bank)",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "WAVEPAY",
+      "bank_name": "WavePay / Wave Money",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "YADANABON",
+      "bank_name": "Yadanabon Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "MM",
+      "bank_code": "YOMA",
+      "bank_name": "Yoma Bank",
+      "source": "api/src/channels/_shared/mmBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "ALLBANK",
+      "bank_name": "ALLBANK (A Thrift Bank)",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "ANZ",
+      "bank_name": "ANZ Banking Group Ltd",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "ASENSO",
+      "bank_name": "Rural Bank of Guinobatan / Asenso",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "AUB",
+      "bank_name": "Asia United Bank Corporation",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BANANAPAY",
+      "bank_name": "BananaPay",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BANGKOMABUHAY",
+      "bank_name": "Bangko Mabuhay",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BANKO",
+      "bank_name": "BanKo, A Subsidiary of BPI",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BANKOFCHINA",
+      "bank_name": "Bank of China",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BANKOFCOMMERCE",
+      "bank_name": "Bank of Commerce",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BAYAD",
+      "bank_name": "CIS Bayad Center / Bayad",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BDO",
+      "bank_name": "BDO Unibank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BDONETWORK",
+      "bank_name": "BDO Network Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BIZMOTO",
+      "bank_name": "Bizmoto Wallet",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BPI",
+      "bank_name": "BPI / BPI Family Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "BRBDIGITAL",
+      "bank_name": "Binangonan Rural Bank / BRBDigital",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CAMALIGBANK",
+      "bank_name": "Camalig Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CANTILANBANK",
+      "bank_name": "Cantilan Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CARDBANK",
+      "bank_name": "Card Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CARDMRIRBI",
+      "bank_name": "CARD MRI RBI",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CARDSMEBANK",
+      "bank_name": "CARD SME Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CEBUANA",
+      "bank_name": "Cebuana Lhuillier Bank / Cebuana Xpress",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CHINABANK",
+      "bank_name": "China Banking Corporation",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CHINABANKSAVINGS",
+      "bank_name": "China Bank Savings",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CIMB",
+      "bank_name": "CIMB Philippines, Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CITYSAVINGS",
+      "bank_name": "City Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CITYSTATE",
+      "bank_name": "Citystate Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "COINSPH",
+      "bank_name": "DCPay / COINS.PH",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "CTBC",
+      "bank_name": "CTBC Bank (Philippines) Corporation",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "DBP",
+      "bank_name": "Development Bank of the Philippines",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "DUMAGUETEBANK",
+      "bank_name": "Dumaguete City Development Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "DUNGGANONBANK",
+      "bank_name": "Dungganon Bank (A Microfinance Rural Bank), Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "EASTWESTBANK",
+      "bank_name": "East West Banking Corporation",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "EASYPAYGLOBAL",
+      "bank_name": "Easy Pay Global EMI Corp",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "ENTRP",
+      "bank_name": "Entrepreneur Rural Bank, Inc. / ENTRP",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "EQUICOM",
+      "bank_name": "Equicom Savings Bank, Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "GCASH",
+      "bank_name": "GCash",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "GOTYME",
+      "bank_name": "GoTyme Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "GRABPAY",
+      "bank_name": "GrabPay",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "HSBC",
+      "bank_name": "HSBC",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "INGBANK",
+      "bank_name": "ING Bank N.V.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "IREMIT",
+      "bank_name": "I-Remit / iCASH",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "ISLABANK",
+      "bank_name": "ISLA Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "JUANCASH",
+      "bank_name": "Zybi Tech Inc. / JuanCash",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "KOMO",
+      "bank_name": "East West Rural Bank / Komo",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "LANDBANK",
+      "bank_name": "LANDBANK / OFBank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "LAZADAWALLET",
+      "bank_name": "Alipay / Lazada Wallet",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "LEGAZPISAVINGS",
+      "bank_name": "Legazpi Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "LULUMONEY",
+      "bank_name": "Lulu Money",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "LUZONDEV",
+      "bank_name": "Luzon Development Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MALAYANBANK",
+      "bank_name": "Malayan Bank Savings and Mortgage Bank, Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MARCOPAY",
+      "bank_name": "MARCOPAY",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MAYA",
+      "bank_name": "PayMaya Philippines / Maya Wallet",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MAYABANK",
+      "bank_name": "Maya Bank, Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MAYABUSINESS",
+      "bank_name": "Maya Business",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MAYBANK",
+      "bank_name": "Maybank Philippines",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "METROBANK",
+      "bank_name": "Metropolitan Bank and Trust Co",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MINDANAOCOOP",
+      "bank_name": "Mindanao Consolidated CoopBank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "MONEYMALL",
+      "bank_name": "Money Mall Rural Bank, Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "NATIONLINK",
+      "bank_name": "Infoserve / Nationlink",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "NETBANK",
+      "bank_name": "Netbank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "OMNIPAY",
+      "bank_name": "OmniPay, Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "OWNBANK",
+      "bank_name": "Own Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PACIFICACE",
+      "bank_name": "Pacific Ace Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PALAWANPAY",
+      "bank_name": "PalawanPay",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PARTNERRURAL",
+      "bank_name": "Partner Rural Bank (Cotabato), Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PAYMONGO",
+      "bank_name": "PayMongo",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PAYNAMICS",
+      "bank_name": "Paynamics Technologies, Inc",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PBB",
+      "bank_name": "Philippine Business Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PBCOM",
+      "bank_name": "Philippine Bank of Communications",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PDAX",
+      "bank_name": "Philippine Digital Asset Exchange, Inc / PDAX",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PHILTRUST",
+      "bank_name": "PhilTrust Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PHILTRUSTCO",
+      "bank_name": "Philippine Trust Company",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PNB",
+      "bank_name": "Philippine National Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PNBSAVINGS",
+      "bank_name": "PNB Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PRODUCERSBANK",
+      "bank_name": "Producers Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "PSBANK",
+      "bank_name": "Philippine Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "QUEENBANK",
+      "bank_name": "Queenbank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "QUEZONCAPITAL",
+      "bank_name": "Quezon Capital Rural Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "RANGAYBANK",
+      "bank_name": "Rang-Ay Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "RBAPALIT",
+      "bank_name": "Rural Bank of Apalit, Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "RCBC",
+      "bank_name": "RCBC / DiskarTech",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "RCBCSAVINGS",
+      "bank_name": "RCBC Saving Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "ROBINSONSBANK",
+      "bank_name": "Robinsons Bank Corporation",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "SEABANK",
+      "bank_name": "MariBank Philippines (formerly Seabank PH)",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "SECURITYBANK",
+      "bank_name": "Security Bank Corporation",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "SHOPEEPAY",
+      "bank_name": "ShopeePay",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "SPEEDYPAY",
+      "bank_name": "SpeedyPay / eMango Pay",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "STANDARDCHARTERED",
+      "bank_name": "Standard Chartered Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "STARPAY",
+      "bank_name": "Starpay",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "STERLINGBANK",
+      "bank_name": "Sterling Bank of Asia, Inc (A Savings Bank)",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "SUNSAVINGS",
+      "bank_name": "Sun Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "TAYOCASH",
+      "bank_name": "TayoCash",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "TOKTOKWALLET",
+      "bank_name": "TOKTOKWALLET",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "TONIKBANK",
+      "bank_name": "Tonik Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "TOPJUAN",
+      "bank_name": "Topjuan Tech Corporation",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "TRAXIONPAY",
+      "bank_name": "TraxionPay / DigiCOOP / COOPNET",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "UCPB",
+      "bank_name": "United Coconut Planters Bank (UCPB)",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "UCPBSAVINGS",
+      "bank_name": "UCPB Savings Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "UNIONBANK",
+      "bank_name": "Union Bank of the Philippines",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "UNIONBANKBA",
+      "bank_name": "UnionBank BA",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "UNIONDIGITAL",
+      "bank_name": "UnionDigital Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "UNOBANK",
+      "bank_name": "UNObank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "USDTERC",
+      "bank_name": "USDT (ERC)",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "USDTTRC",
+      "bank_name": "USDT (TRC)",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "USSC",
+      "bank_name": "USSC Money Services",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "VBANK",
+      "bank_name": "VBank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "VETERANSBANK",
+      "bank_name": "Veterans Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "WEALTHBANK",
+      "bank_name": "Wealth Development Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "WISEPILIPINAS",
+      "bank_name": "Wise Pilipinas Inc.",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "PH",
+      "bank_code": "YUANTABANK",
+      "bank_name": "Yuanta Bank",
+      "source": "api/src/channels/_shared/phBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ABBVN",
+      "bank_name": "An Binh Commercial Joint Stock Bank (ABBANK)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ACB",
+      "bank_name": "Asia Commercial Bank (ACB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "AGRIBANK",
+      "bank_name": "Vietnam Bank for Agriculture and Rural Development (Agribank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BAB",
+      "bank_name": "Bac A Commercial Joint Stock Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BIDCVN",
+      "bank_name": "BIDC, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BIDV",
+      "bank_name": "Bank for Investment and Development of Vietnam (BIDV)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BNPHCM",
+      "bank_name": "BNP Paribas, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BNPHN",
+      "bank_name": "BNP Paribas, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BOCHKVN",
+      "bank_name": "Bank of China (Hong Kong), Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "BVB",
+      "bank_name": "BaoViet Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "CAKE",
+      "bank_name": "CAKE by VPBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "CBBANK",
+      "bank_name": "Vietnam Construction Bank (CBBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "CIMBVN",
+      "bank_name": "CIMB Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "CITIVN",
+      "bank_name": "Citibank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "COOPBANK",
+      "bank_name": "Co-operative Bank of Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "CUBHCM",
+      "bank_name": "Cathay United Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "DBSVN",
+      "bank_name": "DBS Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "DONGABANK",
+      "bank_name": "DongA Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ESUNVN",
+      "bank_name": "E.SUN Commercial Bank, Dong Nai Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "EXIMVN",
+      "bank_name": "Vietnam Export Import Commercial Joint Stock Bank (Eximbank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "GPB",
+      "bank_name": "GPBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "HDB",
+      "bank_name": "HDBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "HONGLEONGVN",
+      "bank_name": "Hong Leong Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "HSBCVN",
+      "bank_name": "HSBC Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "IBKHCM",
+      "bank_name": "Industrial Bank of Korea, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "IBKHN",
+      "bank_name": "Industrial Bank of Korea, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ICBCHN",
+      "bank_name": "Ngân hàng Công thương Trung Quốc – Chi nhánh thành phố Hà Nội",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "INDOVINA",
+      "bank_name": "Indovina Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KASIKORNVN",
+      "bank_name": "Kasikornbank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KBHCM",
+      "bank_name": "Kookmin Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KBHN",
+      "bank_name": "Kookmin Bank, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KEBHANAHCM",
+      "bank_name": "KEB Hana Bank, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KEBHANAHN",
+      "bank_name": "KEB Hana Bank, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "KIENLONG",
+      "bank_name": "Kien Long Commercial Joint Stock Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "LIOBANK",
+      "bank_name": "Digital Bank Lio (OCB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "LPB",
+      "bank_name": "LienVietPostBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "MB",
+      "bank_name": "Military Commercial Joint Stock Bank (MB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "MIRAEASSETVN",
+      "bank_name": "Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam) ",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "MOBIFONEMONEY",
+      "bank_name": "Trung tâm Dịch vụ số Mobifone – Chi nhánh Tổng Công ty viễn thông Mobifone",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "MOMO",
+      "bank_name": "CTCP Dịch Vụ Di Động Trực Tuyến",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "MSB",
+      "bank_name": "Vietnam Maritime Commercial Joint Stock Bank (MSB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "NAMABANK",
+      "bank_name": "Nam A Commercial Joint Stock Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "NCBVN",
+      "bank_name": "National Citizen Commercial Joint Stock Bank (NCB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "NONGHYUPVN",
+      "bank_name": "NongHyup Bank, Hanoi Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "OCB",
+      "bank_name": "Orient Commercial Joint Stock Bank (OCB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "OCEANBANK",
+      "bank_name": "OceanBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "PBVN",
+      "bank_name": "Public Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "PGBANK",
+      "bank_name": "Petrolimex Group Commercial Joint Stock Bank (PG Bank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "PVCOMBANK",
+      "bank_name": "Vietnam Public Joint Stock Commercial Bank (PVcomBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "PVCOMBANKPAY",
+      "bank_name": "Ngân hàng số PVcomBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SACOMBANK",
+      "bank_name": "Sacombank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SAIGONBANK",
+      "bank_name": "Saigon Bank for Industry and Trade",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SCBVN",
+      "bank_name": "Saigon Commercial Bank (SCB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SCVN",
+      "bank_name": "Standard Chartered Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SEAVN",
+      "bank_name": "Southeast Asia Commercial Joint Stock Bank (SeABank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SHB",
+      "bank_name": "Saigon-Hanoi Commercial Joint Stock Bank (SHB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SHBVN",
+      "bank_name": "Shinhan Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "SINOPACVN",
+      "bank_name": "Bank SinoPac, Ho Chi Minh City Branch",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "TECHCOMBANK",
+      "bank_name": "Techcombank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "TIMO",
+      "bank_name": "Timo by Ban Viet Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "TNEX",
+      "bank_name": "TNEX by MSB",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "TPBANK",
+      "bank_name": "Tien Phong Commercial Joint Stock Bank (TPBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "UBANK",
+      "bank_name": "Ubank by VPBank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "UOBVN",
+      "bank_name": "United Overseas Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VAB",
+      "bank_name": "VietA Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VBSP",
+      "bank_name": "Vietnam Bank for Social Policies",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VIB",
+      "bank_name": "Vietnam International Commercial Joint Stock Bank (VIB)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VIETBANK",
+      "bank_name": "Vietnam Thuong Tin Commercial Joint Stock Bank (VietBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VIETCAPITAL",
+      "bank_name": "VietCapital Bank (Ban Viet)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VIETCOMBANK",
+      "bank_name": "Joint Stock Commercial Bank for Foreign Trade of Vietnam (Vietcombank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VIETINBANK",
+      "bank_name": "Vietnam Joint Stock Commercial Bank for Industry and Trade (VietinBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VIETTELMONEY",
+      "bank_name": "Tổng Công ty Dịch vụ số Viettel - Chi nhánh tập đoàn công nghiệp viễn thông Quân Đội",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VNPTMONEY",
+      "bank_name": "Trung tâm dịch vụ tài chính số VNPT- Chi nhánh Tổng công ty truyền thông (VNPT Fintech)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VPBANK",
+      "bank_name": "Vietnam Prosperity Joint Stock Commercial Bank (VPBank)",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "VRB",
+      "bank_name": "Vietnam-Russia Joint Venture Bank",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "WOORIVN",
+      "bank_name": "Woori Bank Vietnam",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    },
+    {
+      "country": "VN",
+      "bank_code": "ZALOPAY",
+      "bank_name": "Ví điện tử ZaloPay",
+      "source": "api/src/channels/_shared/vnBanks.js"
+    }
+  ],
+  "bank_directories": [
+    {
+      "country": "VN",
+      "scheme": "vietqr",
+      "publisher": "Casso / VietQR.io",
+      "url": "https://api.vietqr.io/v2/banks",
+      "documentation_url": "https://www.vietqr.io/api-bank",
+      "retrieved_at": "2026-11-05",
+      "response_sha256": "7f905bc2da19a8848bd805646e74c64fee8531314f68ce2476fcccb977dd6596",
+      "mapping_sources": [
+        {
+          "url": "https://baochinhphu.vn/ngan-hang-dai-duong-oceanbank-doi-ten-thanh-ngan-hang-viet-nam-hien-dai-102241217163955761.htm",
+          "reference_code": "MBV",
+          "platform_bank_code": "OCEANBANK"
+        },
+        {
+          "url": "https://vikkibank.vn/thong-bao-v-v-donga-bank-doi-ten-thanh-ngan-hang-so-vikki/",
+          "reference_code": "Vikki",
+          "platform_bank_code": "DONGABANK"
+        }
+      ],
+      "entries": [
+        {
+          "reference_code": "CUBHCM",
+          "bin": "168999",
+          "name": "Ngân hàng Cathay United Bank – Chi nhánh Hồ Chí Minh",
+          "short_name": "CUBHCM",
+          "platform_bank_code": "CUBHCM",
+          "note": ""
+        },
+        {
+          "reference_code": "CIMB",
+          "bin": "422589",
+          "name": "Ngân hàng TNHH MTV CIMB Việt Nam",
+          "short_name": "CIMB",
+          "platform_bank_code": "CIMBVN",
+          "note": ""
+        },
+        {
+          "reference_code": "HSBC",
+          "bin": "458761",
+          "name": "Ngân hàng TNHH MTV HSBC (Việt Nam)",
+          "short_name": "HSBC",
+          "platform_bank_code": "HSBCVN",
+          "note": ""
+        },
+        {
+          "reference_code": "CITIBANK",
+          "bin": "533948",
+          "name": "Ngân hàng Citibank, N.A. - Chi nhánh Hà Nội",
+          "short_name": "Citibank",
+          "platform_bank_code": "CITIVN",
+          "note": ""
+        },
+        {
+          "reference_code": "CAKE",
+          "bin": "546034",
+          "name": "TMCP Việt Nam Thịnh Vượng - Ngân hàng số CAKE by VPBank",
+          "short_name": "CAKE",
+          "platform_bank_code": "CAKE",
+          "note": ""
+        },
+        {
+          "reference_code": "Ubank",
+          "bin": "546035",
+          "name": "TMCP Việt Nam Thịnh Vượng - Ngân hàng số Ubank by VPBank",
+          "short_name": "Ubank",
+          "platform_bank_code": "UBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "BIDC",
+          "bin": "555666",
+          "name": "Ngân hàng Đầu Tư Và Phát Triển Campuchia - Chi nhánh Hà Nội",
+          "short_name": "BIDC",
+          "platform_bank_code": "BIDCVN",
+          "note": ""
+        },
+        {
+          "reference_code": "KBank",
+          "bin": "668888",
+          "name": "Ngân hàng Đại chúng TNHH Kasikornbank",
+          "short_name": "KBank",
+          "platform_bank_code": "KASIKORNVN",
+          "note": ""
+        },
+        {
+          "reference_code": "DBS",
+          "bin": "796500",
+          "name": "DBS Bank Ltd - Chi nhánh Thành phố Hồ Chí Minh",
+          "short_name": "DBSBank",
+          "platform_bank_code": "DBSVN",
+          "note": ""
+        },
+        {
+          "reference_code": "NHB HN",
+          "bin": "801011",
+          "name": "Ngân hàng Nonghyup - Chi nhánh Hà Nội",
+          "short_name": "Nonghyup",
+          "platform_bank_code": "NONGHYUPVN",
+          "note": ""
+        },
+        {
+          "reference_code": "TNEX",
+          "bin": "963326",
+          "name": "TNEX by MSB",
+          "short_name": "TNEX",
+          "platform_bank_code": "TNEX",
+          "note": ""
+        },
+        {
+          "reference_code": "TIMO",
+          "bin": "963388",
+          "name": "Ngân hàng số Timo by Ban Viet Bank (Timo by Ban Viet Bank)",
+          "short_name": "Timo",
+          "platform_bank_code": "TIMO",
+          "note": ""
+        },
+        {
+          "reference_code": "BNP HCM",
+          "bin": "963666",
+          "name": "Ngân hàng BNP Paribas – Chi nhánh Thành phố Hồ Chí Minh",
+          "short_name": "BNP HCM",
+          "platform_bank_code": "BNPHCM",
+          "note": ""
+        },
+        {
+          "reference_code": "BNP HN",
+          "bin": "963668",
+          "name": "Ngân hàng BNP Paribas – Chi nhánh Hà Nội",
+          "short_name": "BNP HN",
+          "platform_bank_code": "BNPHN",
+          "note": ""
+        },
+        {
+          "reference_code": "ICBC",
+          "bin": "963669",
+          "name": "Ngân hàng Công thương Trung Quốc – Chi nhánh thành phố Hà Nội",
+          "short_name": "ICBC",
+          "platform_bank_code": "ICBCHN",
+          "note": ""
+        },
+        {
+          "reference_code": "ESUN",
+          "bin": "963686",
+          "name": "Ngân hàng Thương mại TNHH E.SUN – Chi nhánh Đồng Nai (ESUNBANK)",
+          "short_name": "ESUN",
+          "platform_bank_code": "ESUNVN",
+          "note": ""
+        },
+        {
+          "reference_code": "BOCHK",
+          "bin": "963688",
+          "name": "Ngân hàng Bank of China (Hong Kong) Limited – Chi nhánh Hồ Chí Minh",
+          "short_name": "BOCHK",
+          "platform_bank_code": "BOCHKVN",
+          "note": ""
+        },
+        {
+          "reference_code": "SGICB",
+          "bin": "970400",
+          "name": "Ngân hàng TMCP Sài Gòn Công Thương",
+          "short_name": "SaigonBank",
+          "platform_bank_code": "SAIGONBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "STB",
+          "bin": "970403",
+          "name": "Ngân hàng TMCP Sài Gòn Tài Lộc",
+          "short_name": "Sacombank",
+          "platform_bank_code": "SACOMBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "VBA",
+          "bin": "970405",
+          "name": "Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam",
+          "short_name": "Agribank",
+          "platform_bank_code": "AGRIBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "Vikki",
+          "bin": "970406",
+          "name": "Ngân hàng TNHH Một thành viên số Vikki",
+          "short_name": "Vikki",
+          "platform_bank_code": "DONGABANK",
+          "note": "公开品牌 Vikki；项目保留历史助记码 DONGABANK。"
+        },
+        {
+          "reference_code": "TCB",
+          "bin": "970407",
+          "name": "Ngân hàng TMCP Kỹ thương Việt Nam",
+          "short_name": "Techcombank",
+          "platform_bank_code": "TECHCOMBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "GPB",
+          "bin": "970408",
+          "name": "Ngân hàng Thương mại TNHH MTV Dầu Khí Toàn Cầu",
+          "short_name": "GPBank",
+          "platform_bank_code": "GPB",
+          "note": ""
+        },
+        {
+          "reference_code": "BAB",
+          "bin": "970409",
+          "name": "Ngân hàng TMCP Bắc Á",
+          "short_name": "BacABank",
+          "platform_bank_code": "BAB",
+          "note": ""
+        },
+        {
+          "reference_code": "SCVN",
+          "bin": "970410",
+          "name": "Ngân hàng TNHH MTV Standard Chartered Bank Việt Nam",
+          "short_name": "StandardChartered",
+          "platform_bank_code": "SCVN",
+          "note": ""
+        },
+        {
+          "reference_code": "PVCB",
+          "bin": "970412",
+          "name": "Ngân hàng TMCP Đại Chúng Việt Nam",
+          "short_name": "PVcomBank",
+          "platform_bank_code": "PVCOMBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "MBV",
+          "bin": "970414",
+          "name": "Ngân hàng TNHH MTV Việt Nam Hiện Đại",
+          "short_name": "MBV",
+          "platform_bank_code": "OCEANBANK",
+          "note": "公开品牌 MBV；项目保留历史助记码 OCEANBANK。"
+        },
+        {
+          "reference_code": "ICB",
+          "bin": "970415",
+          "name": "Ngân hàng TMCP Công thương Việt Nam",
+          "short_name": "VietinBank",
+          "platform_bank_code": "VIETINBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "ACB",
+          "bin": "970416",
+          "name": "Ngân hàng TMCP Á Châu",
+          "short_name": "ACB",
+          "platform_bank_code": "ACB",
+          "note": ""
+        },
+        {
+          "reference_code": "BIDV",
+          "bin": "970418",
+          "name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam",
+          "short_name": "BIDV",
+          "platform_bank_code": "BIDV",
+          "note": ""
+        },
+        {
+          "reference_code": "NCB",
+          "bin": "970419",
+          "name": "Ngân hàng TMCP Quốc Dân",
+          "short_name": "NCB",
+          "platform_bank_code": "NCBVN",
+          "note": ""
+        },
+        {
+          "reference_code": "VRB",
+          "bin": "970421",
+          "name": "Ngân hàng Liên doanh Việt - Nga",
+          "short_name": "VRB",
+          "platform_bank_code": "VRB",
+          "note": ""
+        },
+        {
+          "reference_code": "MB",
+          "bin": "970422",
+          "name": "Ngân hàng TMCP Quân đội",
+          "short_name": "MBBank",
+          "platform_bank_code": "MB",
+          "note": ""
+        },
+        {
+          "reference_code": "TPB",
+          "bin": "970423",
+          "name": "Ngân hàng TMCP Tiên Phong",
+          "short_name": "TPBank",
+          "platform_bank_code": "TPBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "SHBVN",
+          "bin": "970424",
+          "name": "Ngân hàng TNHH MTV Shinhan Việt Nam",
+          "short_name": "ShinhanBank",
+          "platform_bank_code": "SHBVN",
+          "note": ""
+        },
+        {
+          "reference_code": "ABB",
+          "bin": "970425",
+          "name": "Ngân hàng TMCP An Bình",
+          "short_name": "ABBANK",
+          "platform_bank_code": "ABBVN",
+          "note": ""
+        },
+        {
+          "reference_code": "MSB",
+          "bin": "970426",
+          "name": "Ngân hàng TMCP Hàng Hải",
+          "short_name": "MSB",
+          "platform_bank_code": "MSB",
+          "note": ""
+        },
+        {
+          "reference_code": "VAB",
+          "bin": "970427",
+          "name": "Ngân hàng TMCP Việt Á",
+          "short_name": "VietABank",
+          "platform_bank_code": "VAB",
+          "note": ""
+        },
+        {
+          "reference_code": "NAB",
+          "bin": "970428",
+          "name": "Ngân hàng TMCP Nam Á",
+          "short_name": "NamABank",
+          "platform_bank_code": "NAMABANK",
+          "note": ""
+        },
+        {
+          "reference_code": "SCB",
+          "bin": "970429",
+          "name": "Ngân hàng TMCP Sài Gòn",
+          "short_name": "SCB",
+          "platform_bank_code": "SCBVN",
+          "note": ""
+        },
+        {
+          "reference_code": "PGB",
+          "bin": "970430",
+          "name": "Ngân hàng TMCP Thịnh vượng và Phát triển",
+          "short_name": "PGBank",
+          "platform_bank_code": "PGBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "EIB",
+          "bin": "970431",
+          "name": "Ngân hàng TMCP Xuất Nhập khẩu Việt Nam",
+          "short_name": "Eximbank",
+          "platform_bank_code": "EXIMVN",
+          "note": ""
+        },
+        {
+          "reference_code": "VPB",
+          "bin": "970432",
+          "name": "Ngân hàng TMCP Việt Nam Thịnh Vượng",
+          "short_name": "VPBank",
+          "platform_bank_code": "VPBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "VIETBANK",
+          "bin": "970433",
+          "name": "Ngân hàng TMCP Việt Nam Thương Tín",
+          "short_name": "VietBank",
+          "platform_bank_code": "VIETBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "IVB",
+          "bin": "970434",
+          "name": "Ngân hàng TNHH Indovina",
+          "short_name": "IndovinaBank",
+          "platform_bank_code": "INDOVINA",
+          "note": ""
+        },
+        {
+          "reference_code": "VCB",
+          "bin": "970436",
+          "name": "Ngân hàng TMCP Ngoại Thương Việt Nam",
+          "short_name": "Vietcombank",
+          "platform_bank_code": "VIETCOMBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "HDB",
+          "bin": "970437",
+          "name": "Ngân hàng TMCP Phát triển Thành phố Hồ Chí Minh",
+          "short_name": "HDBank",
+          "platform_bank_code": "HDB",
+          "note": ""
+        },
+        {
+          "reference_code": "BVB",
+          "bin": "970438",
+          "name": "Ngân hàng TMCP Bảo Việt",
+          "short_name": "BaoVietBank",
+          "platform_bank_code": "BVB",
+          "note": ""
+        },
+        {
+          "reference_code": "PBVN",
+          "bin": "970439",
+          "name": "Ngân hàng TNHH MTV Public Việt Nam",
+          "short_name": "PublicBank",
+          "platform_bank_code": "PBVN",
+          "note": ""
+        },
+        {
+          "reference_code": "SEAB",
+          "bin": "970440",
+          "name": "Ngân hàng TMCP Đông Nam Á",
+          "short_name": "SeABank",
+          "platform_bank_code": "SEAVN",
+          "note": ""
+        },
+        {
+          "reference_code": "VIB",
+          "bin": "970441",
+          "name": "Ngân hàng TMCP Quốc tế Việt Nam",
+          "short_name": "VIB",
+          "platform_bank_code": "VIB",
+          "note": ""
+        },
+        {
+          "reference_code": "HLBVN",
+          "bin": "970442",
+          "name": "Ngân hàng TNHH MTV Hong Leong Việt Nam",
+          "short_name": "HongLeong",
+          "platform_bank_code": "HONGLEONGVN",
+          "note": ""
+        },
+        {
+          "reference_code": "SHB",
+          "bin": "970443",
+          "name": "Ngân hàng TMCP Sài Gòn - Hà Nội",
+          "short_name": "SHB",
+          "platform_bank_code": "SHB",
+          "note": ""
+        },
+        {
+          "reference_code": "CBB",
+          "bin": "970444",
+          "name": "Ngân hàng Thương mại trách nhiệm hữu hạn một thành viên Ngoại thương Công nghệ số (Vietcombank Neo Limited)",
+          "short_name": "CBBank",
+          "platform_bank_code": "CBBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "COOPBANK",
+          "bin": "970446",
+          "name": "Ngân hàng Hợp tác xã Việt Nam",
+          "short_name": "COOPBANK",
+          "platform_bank_code": "COOPBANK",
+          "note": ""
+        },
+        {
+          "reference_code": "OCB",
+          "bin": "970448",
+          "name": "Ngân hàng TMCP Phương Đông",
+          "short_name": "OCB",
+          "platform_bank_code": "OCB",
+          "note": ""
+        },
+        {
+          "reference_code": "LPB",
+          "bin": "970449",
+          "name": "Ngân hàng TMCP Lộc Phát Việt Nam",
+          "short_name": "LPBank",
+          "platform_bank_code": "LPB",
+          "note": ""
+        },
+        {
+          "reference_code": "KLB",
+          "bin": "970452",
+          "name": "Ngân hàng TMCP Kiên Long",
+          "short_name": "KienLongBank",
+          "platform_bank_code": "KIENLONG",
+          "note": ""
+        },
+        {
+          "reference_code": "VCCB",
+          "bin": "970454",
+          "name": "Ngân hàng TMCP Bản Việt",
+          "short_name": "VietCapitalBank",
+          "platform_bank_code": "VIETCAPITAL",
+          "note": ""
+        },
+        {
+          "reference_code": "IBK - HN",
+          "bin": "970455",
+          "name": "Ngân hàng Công nghiệp Hàn Quốc - Chi nhánh Hà Nội",
+          "short_name": "IBKHN",
+          "platform_bank_code": "IBKHN",
+          "note": ""
+        },
+        {
+          "reference_code": "IBK - HCM",
+          "bin": "970456",
+          "name": "Ngân hàng Công nghiệp Hàn Quốc - Chi nhánh TP. Hồ Chí Minh",
+          "short_name": "IBKHCM",
+          "platform_bank_code": "IBKHCM",
+          "note": ""
+        },
+        {
+          "reference_code": "WVN",
+          "bin": "970457",
+          "name": "Ngân hàng TNHH MTV Woori Việt Nam",
+          "short_name": "Woori",
+          "platform_bank_code": "WOORIVN",
+          "note": ""
+        },
+        {
+          "reference_code": "UOB",
+          "bin": "970458",
+          "name": "Ngân hàng United Overseas - Chi nhánh TP. Hồ Chí Minh",
+          "short_name": "UnitedOverseas",
+          "platform_bank_code": "UOBVN",
+          "note": ""
+        },
+        {
+          "reference_code": "KBHN",
+          "bin": "970462",
+          "name": "Ngân hàng Kookmin - Chi nhánh Hà Nội",
+          "short_name": "KookminHN",
+          "platform_bank_code": "KBHN",
+          "note": ""
+        },
+        {
+          "reference_code": "KBHCM",
+          "bin": "970463",
+          "name": "Ngân hàng Kookmin - Chi nhánh Thành phố Hồ Chí Minh",
+          "short_name": "KookminHCM",
+          "platform_bank_code": "KBHCM",
+          "note": ""
+        },
+        {
+          "reference_code": "BSP",
+          "bin": "970465",
+          "name": "Ngân hàng SinoPac - Chi nhánh Thành phố Hồ Chí Minh",
+          "short_name": "BSP",
+          "platform_bank_code": "SINOPACVN",
+          "note": ""
+        },
+        {
+          "reference_code": "KEBHANAHCM",
+          "bin": "970466",
+          "name": "Ngân hàng KEB Hana – Chi nhánh Thành phố Hồ Chí Minh",
+          "short_name": "KEBHanaHCM",
+          "platform_bank_code": "KEBHANAHCM",
+          "note": ""
+        },
+        {
+          "reference_code": "KEBHANAHN",
+          "bin": "970467",
+          "name": "Ngân hàng KEB Hana – Chi nhánh Hà Nội",
+          "short_name": "KEBHANAHN",
+          "platform_bank_code": "KEBHANAHN",
+          "note": ""
+        },
+        {
+          "reference_code": "VTLMONEY",
+          "bin": "971005",
+          "name": "Tổng Công ty Dịch vụ số Viettel - Chi nhánh tập đoàn công nghiệp viễn thông Quân Đội",
+          "short_name": "ViettelMoney",
+          "platform_bank_code": "VIETTELMONEY",
+          "note": ""
+        },
+        {
+          "reference_code": "VNPTMONEY",
+          "bin": "971011",
+          "name": "Trung tâm dịch vụ tài chính số VNPT- Chi nhánh Tổng công ty truyền thông (VNPT Fintech)",
+          "short_name": "VNPTMoney",
+          "platform_bank_code": "VNPTMONEY",
+          "note": ""
+        },
+        {
+          "reference_code": "momo",
+          "bin": "971025",
+          "name": "CTCP Dịch Vụ Di Động Trực Tuyến",
+          "short_name": "MoMo",
+          "platform_bank_code": "MOMO",
+          "note": ""
+        },
+        {
+          "reference_code": "MVAS",
+          "bin": "971032",
+          "name": "Trung tâm Dịch vụ số Mobifone – Chi nhánh Tổng Công ty viễn thông Mobifone",
+          "short_name": "MVAS",
+          "platform_bank_code": "MOBIFONEMONEY",
+          "note": ""
+        },
+        {
+          "reference_code": "ZALOPAY",
+          "bin": "971101",
+          "name": "Ví điện tử ZaloPay",
+          "short_name": "ZaloPay",
+          "platform_bank_code": "ZALOPAY",
+          "note": ""
+        },
+        {
+          "reference_code": "PVDB",
+          "bin": "971133",
+          "name": "Ngân hàng số PVcomBank",
+          "short_name": "PVcomBank Pay",
+          "platform_bank_code": "PVCOMBANKPAY",
+          "note": ""
+        },
+        {
+          "reference_code": "MAFC",
+          "bin": "977777",
+          "name": "Công ty Tài chính TNHH MTV Mirae Asset (Việt Nam) ",
+          "short_name": "MAFC",
+          "platform_bank_code": "MIRAEASSETVN",
+          "note": ""
+        },
+        {
+          "reference_code": "VBSP",
+          "bin": "999888",
+          "name": "Ngân hàng Chính sách Xã hội",
+          "short_name": "VBSP",
+          "platform_bank_code": "VBSP",
+          "note": ""
+        }
+      ]
+    }
+  ]
+}

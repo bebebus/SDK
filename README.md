@@ -21,7 +21,7 @@ SDK/
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
 ├── RELEASE_NOTES.md     # 各版本面向用户的变更摘要
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
-├── appendix/            # 附录配置与国家/币种数据下载索引
+├── appendix/            # 附录配置与国家/币种/银行代码参考表、JSON、CSV
 ├── _tooling/
 │   └── generate-vectors.mjs   # 向量生成器（经三处权威实现交叉校验后产出）
 ├── nodejs/   # Node.js (ESM)         —— node:https/http + node:crypto + node:test
@@ -96,7 +96,11 @@ console.log(data.order_no, data.pay_url);
 
 ## 附录数据（查看 / 下载）
 
-国家/币种字典与客户端配置模板以本仓库为唯一来源：
+国家、币种、银行代码的完整参考表见 [代码表](./appendix/REFERENCE-CODES.md)，支持 [JSON](./appendix/reference-codes.json) 与 CSV（[国家](./appendix/countries.csv) / [币种](./appendix/currencies.csv) / [银行](./appendix/banks.csv)）下载。代码表包含标准字典与区域扩展，不表示商户当前已开通；实际范围以商户查询接口为准。
+
+越南银行参考包含 [76 项公开目录](./appendix/bank-directories.csv)，现已全部关联统一的项目银行码；项目码册另保留 LIOBANK，共 77 项。发布方代码、BIN 与项目银行码分别列出，实际可用银行仍需查询接口确认。目录含银行、分支和其他机构，不应按条目数推断银行法人数量。
+
+五语言国家/币种字典由同一份参考数据生成，客户端配置模板也在本仓库维护：
 
 - Node.js 数据：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
 - PHP 数据：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php

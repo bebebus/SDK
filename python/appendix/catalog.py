@@ -1,5 +1,5 @@
-# 国家 ISO / 币种附录（平台标准项）。
-# 某组合当前是否可下单以 pay-methods/query 为准。
+# 由 _tooling/reference-codes.mjs 生成；数据源 appendix/reference-codes.json。
+# 标准字典与区域扩展，实际可用范围以商户查询接口为准。
 
 COUNTRIES = [
     {"code": "PH", "name_zh": "菲律宾", "name_en": "Philippines", "currencies": ["PHP"]},
@@ -13,6 +13,7 @@ COUNTRIES = [
     {"code": "BR", "name_zh": "巴西", "name_en": "Brazil", "currencies": ["BRL"]},
     {"code": "MX", "name_zh": "墨西哥", "name_en": "Mexico", "currencies": ["MXN"]},
     {"code": "CN", "name_zh": "中国", "name_en": "China", "currencies": ["CNY"]},
+    {"code": "HK", "name_zh": "中国香港", "name_en": "Hong Kong", "currencies": ["HKD"]},
 ]
 
 CURRENCIES = [
@@ -28,4 +29,5 @@ CURRENCIES = [
     {"code": "MXN", "name_zh": "墨西哥比索", "name_en": "Mexican peso", "kind": "fiat"},
     {"code": "CNY", "name_zh": "人民币", "name_en": "Chinese yuan", "kind": "fiat"},
     {"code": "USDT", "name_zh": "泰达币", "name_en": "Tether", "kind": "crypto"},
+    {"code": "HKD", "name_zh": "港币", "name_en": "Hong Kong dollar", "kind": "fiat"},
 ]

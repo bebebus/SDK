@@ -1,1 +1,4 @@
 .github/workflows/*.lock.yml linguist-generated=true merge=ours
+
+# CSV 保留 UTF-8 BOM 与 CRLF，避免检出时换行转换破坏生成一致性。
+appendix/*.csv -text whitespace=cr-at-eol
