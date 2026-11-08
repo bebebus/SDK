@@ -4,6 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/@bebebus/merchant-openapi-sdk?label=npm)](https://www.npmjs.com/package/@bebebus/merchant-openapi-sdk) [![PyPI](https://img.shields.io/pypi/v/bebebus-merchant-openapi-sdk?label=PyPI)](https://pypi.org/project/bebebus-merchant-openapi-sdk/) [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/bebebus/SDK/badge)](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13569/badge)](https://www.bestpractices.dev/projects/13569)
 
 Provides five SDKs in **PHP / Python / Java / Go / Node.js** for the merchant payment open API (collection / payout / callback).
 
