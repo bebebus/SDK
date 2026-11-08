@@ -28,6 +28,7 @@ type Response struct {
 	Message string         // 服务端 message。
 	Data    map[string]any // 业务数据（可空）。
 	Raw     []byte         // 原始响应体。
+	Sign    string         // 本次请求实际发出的 sign。代付反查保存的就是代付下单的这一笔。
 }
 
 // Client 是商户 OpenAPI 客户端。零值不可用，请用 NewClient 构造。
@@ -193,7 +194,8 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 	}
 
 	data := decodeData(envelope.Data)
-	resp := &Response{Code: envelope.Code, Message: envelope.Message, Data: data, Raw: raw}
+	requestSign, _ := body["sign"].(string)
+	resp := &Response{Code: envelope.Code, Message: envelope.Message, Data: data, Raw: raw, Sign: requestSign}
 
 	if envelope.Code != 0 {
 		return resp, &APIError{Code: envelope.Code, Message: envelope.Message, Data: data, Raw: raw}

@@ -51,7 +51,7 @@ class _Capture:
 
     def __call__(self, path, body, secret):
         self.calls.append({"path": path, "body": dict(body), "secret": secret})
-        return self.envelope
+        return self.envelope, "request-sign"
 
 
 class TestEnvironmentAndConfig(unittest.TestCase):
@@ -257,6 +257,7 @@ class TestEnvelopeHandling(unittest.TestCase):
         try:
             data = client.pay_query(out_order_no="ORD1")
             self.assertEqual(data, {"status": "pending"})
+            self.assertEqual(data.sign, "request-sign")
         finally:
             Client._request = orig  # type: ignore[assignment]
 

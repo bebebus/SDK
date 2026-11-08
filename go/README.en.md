@@ -138,6 +138,10 @@ io.WriteString(w, "success") // correct acknowledgement: HTTP 200 + plain text s
 
 A complete runnable example is in `examples/callback_verify` (demonstrates collection + payout once each).
 
+## Payout precheck
+
+During review the platform POSTs JSON to the merchant's own HTTPS URL. Write `DecidePayoutPrecheck(body, saved)` as the entire HTTP 200 body. It is only `approve` or `reject`. Save `Response.Sign` from payout create as the create sign. `payout_no` must be present and is not compared with the create request. `body` and `saved` may be `map[string]string` or `map[string]any`.
+
 ## Signing (usable standalone)
 
 ```go

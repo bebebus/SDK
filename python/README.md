@@ -119,6 +119,16 @@ ok   = verify_callback(callback, secret)  # 时序安全（hmac.compare_digest�
 
 见 [`examples/callback_verify.py`](examples/callback_verify.py)：解析原始 body → `verify_callback`（时序安全）→ 按 `status` 幂等处理（success/failed）→ 应答 **HTTP 200 + 纯文本 `success`**。代收回调用 `api_secret_pay`、代付回调用 `api_secret_payout`，示例各演示一次。验签失败不回成功；同一订单可能再次收到回调。处理务必幂等（同一订单可能多次回调）。
 
+## 代付反查
+
+平台审核时向商户自己的 HTTPS 地址 POST JSON。`decide_payout_precheck(body, saved)` 的返回值原样作为 HTTP 200 正文，只能是 `approve` 或 `reject`。`saved["sign"]` 用代付下单返回数据上的 `.sign`。`payout_no` 必须出现，但不与下单请求比较。
+
+```python
+from openapi_sdk import decide_payout_precheck
+
+text = decide_payout_precheck(body, saved)
+```
+
 ## 示例
 
 ```bash

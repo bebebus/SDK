@@ -52,6 +52,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 **代收**：`payCreate`（下单，`pay_method` 必填）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`groupsQuery`（兼容别名）、`countriesQuery`（可用国家）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
 **代付**：`payoutCreate`（`pay_method` 必填，不收 `channel_code`）、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）
 **回调**：`verifyPayCallback` / `verifyPayoutCallback`（验签，时序安全比较）
+**代付反查**：`decidePayoutPrecheck`（商户自己的接口里比对账号、商户单号和下单 `sign`，响应正文精确为 `approve` 或 `reject`）
 
 各方法的请求/响应字段见 [`INTERFACES.md`](./INTERFACES.md)。方法名按各语言习惯（Java/JS/PHP 驼峰、Python 蛇形 `pay_create`、Go 导出驼峰），语义一一对应。
 

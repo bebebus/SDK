@@ -20,7 +20,7 @@
 src/main/java/cloud/cniia/openapi/sdk/*.java
 ```
 
-把这 7 个源文件（`Signer / Config / Environment / Client / Json / ApiException / TransportException`，外加 `ApiResponse`）加入你的编译源即可。
+把这 8 个源文件（`Signer / Config / Environment / Client / Json / ApiException / TransportException / PayoutPrecheck`，外加 `ApiResponse`）加入你的编译源即可。
 
 或者用 `javac` 编译成 classes / jar：
 
@@ -137,6 +137,10 @@ return "success"; // HTTP 200 + 纯文本 success
 ```
 
 代付回调同理，改用 `client.verifyPayoutCallback(payload)`。验签器**只依赖"除 sign 外所有字段参与"通用规则**，不硬编码字段表，回调字段新增或减少也兼容。完整可运行示例见 [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java)（代收 + 代付各演示一次，含篡改反例）。
+
+## 代付反查
+
+平台审核时向商户自己的 HTTPS 地址 POST JSON。`PayoutPrecheck.decide(body, saved)` 的返回值原样作为 HTTP 200 正文，只能是 `approve` 或 `reject`。`saved` 里的 `sign` 用代付下单 `ApiResponse.requestSign()`。`payout_no` 必须出现，但不与下单请求比较。
 
 ## examples/
 

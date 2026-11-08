@@ -240,7 +240,7 @@ test('payoutCreate：签名用 payout 密钥', async () => {
   });
   try {
     const client = makeClient(baseUrl);
-    await client.payoutCreate({
+    const created = await client.payoutCreate({
       out_payout_no: 'WD1',
       amount: 100000,
       currency: 'PHP',
@@ -253,6 +253,7 @@ test('payoutCreate：签名用 payout 密钥', async () => {
     });
     const { sign: gotSign, ...rest } = captured;
     assert.equal(gotSign, sign(rest, SECRET_PAYOUT));
+    assert.equal(created.sign, gotSign);
     // 用 pay 密钥应当对不上
     assert.notEqual(gotSign, sign(rest, SECRET_PAY));
   } finally {

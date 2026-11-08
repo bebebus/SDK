@@ -136,6 +136,16 @@ A complete example (demonstrating both collection and payout once each, includin
 node examples/callback_verify.js
 ```
 
+## Payout precheck
+
+During review the platform POSTs JSON to the merchant's own HTTPS URL. Write the return value of `decidePayoutPrecheck(body, saved)` as the entire HTTP 200 body. It is only `approve` or `reject`; do not add a newline. Use the `sign` from the payout create result as `saved.sign`. `payout_no` must be present and is not compared with the create request.
+
+```js
+import { decidePayoutPrecheck } from '@bebebus/merchant-openapi-sdk';
+
+const text = decidePayoutPrecheck(body, saved);
+```
+
 ## Running the examples
 
 ```bash

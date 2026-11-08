@@ -80,6 +80,8 @@ export interface ApiResult<T = Record<string, unknown>> {
   data: T | null;
   /** 原始统一信封，便于读取 message 等。 */
   raw: Envelope<T>;
+  /** 本次请求实际发出的 sign。代付反查保存的就是代付下单的这一笔。 */
+  sign: string;
 }
 
 /** 任意业务请求参数（键值表，值参与签名）。具体字段见 INTERFACES.md。 */
@@ -146,3 +148,17 @@ export function stableStringify(value: unknown): string;
 
 /** 回调验签（时序安全比较）。非法输入/空密钥一律返回 false，绝不抛异常。 */
 export function verifyCallback(payload: CallbackPayload, secret: string): boolean;
+
+/** 代付反查通过时的 HTTP 正文，精确为 ASCII approve。 */
+export const PAYOUT_PRECHECK_APPROVE: 'approve';
+/** 代付反查拒绝时的 HTTP 正文，精确为 ASCII reject。 */
+export const PAYOUT_PRECHECK_REJECT: 'reject';
+
+/**
+ * 商户代付反查判定。不发请求。
+ * body 必须恰好是 account_no、out_payout_no、original_sign、payout_no 四个非空字符串。
+ * saved 保存下单时的 account_no、out_payout_no 和请求 sign。
+ * original_sign 与 sign 按 UTF-8 字节等长比较。payout_no 不与下单请求比较。
+ * 非法输入返回 reject，不抛异常。响应体必须是返回值本身，不能另加换行或 JSON。
+ */
+export function decidePayoutPrecheck(body: unknown, saved: unknown): 'approve' | 'reject';

@@ -21,6 +21,7 @@ use Merchant\Openapi\Config;
 use Merchant\Openapi\Environment;
 use Merchant\Openapi\Exception\ApiException;
 use Merchant\Openapi\Exception\TransportException;
+use Merchant\Openapi\PayoutPrecheck;
 use Merchant\Openapi\Signer;
 
 /* ---------------------------- 轻量断言框架 ---------------------------- */
@@ -295,6 +296,7 @@ $pbody = $captured['body'];
 $psign = $pbody['sign'];
 unset($pbody['sign']);
 check('stub payoutCreate sign 用 payout 密钥', Signer::sign($pbody, $payoutSecret), $psign);
+check('payoutCreate lastRequestSign 等于请求 sign', $psign, $stubClient->lastRequestSign());
 
 // receipt inline 归一为整数 1/0
 $stubClient->payoutReceiptQuery(['out_payout_no' => 'WD1', 'inline' => true]);
@@ -482,6 +484,40 @@ foreach ($catalogAppendix['countries'] as $row) {
     }
 }
 checkTrue('[appendix] catalog 含 PH', is_array($ph) && in_array('PHP', $ph['currencies'] ?? [], true));
+
+/* ---------------------------- 代付反查 ---------------------------- */
+
+$precheckSaved = [
+    'out_payout_no' => 'merchant-order-no',
+    'account_no' => 'account',
+    'sign' => 'abc123',
+];
+$precheckBody = [
+    'out_payout_no' => 'merchant-order-no',
+    'payout_no' => 'W100',
+    'account_no' => 'account',
+    'original_sign' => 'abc123',
+];
+check('precheck 一致', PayoutPrecheck::APPROVE, PayoutPrecheck::decide($precheckBody, $precheckSaved));
+$precheckBody['payout_no'] = 'W-other';
+check('precheck 不比较 payout_no', PayoutPrecheck::APPROVE, PayoutPrecheck::decide($precheckBody, $precheckSaved));
+$utfSaved = $precheckSaved;
+$utfSaved['sign'] = '商户签';
+$utfBody = $precheckBody;
+$utfBody['original_sign'] = '商户签';
+$utfBody['payout_no'] = 'W100';
+check('precheck UTF-8 一致', PayoutPrecheck::APPROVE, PayoutPrecheck::decide($utfBody, $utfSaved));
+$utfBody['original_sign'] = '商户钱';
+check('precheck UTF-8 不一致', PayoutPrecheck::REJECT, PayoutPrecheck::decide($utfBody, $utfSaved));
+$badSign = $precheckBody;
+$badSign['original_sign'] = 'abc124';
+$badSign['payout_no'] = 'W100';
+check('precheck 错误签名', PayoutPrecheck::REJECT, PayoutPrecheck::decide($badSign, $precheckSaved));
+$extra = $precheckBody;
+$extra['extra'] = 'x';
+check('precheck 多字段', PayoutPrecheck::REJECT, PayoutPrecheck::decide($extra, $precheckSaved));
+check('precheck 非数组', PayoutPrecheck::REJECT, PayoutPrecheck::decide(null, $precheckSaved));
+check('precheck 列表', PayoutPrecheck::REJECT, PayoutPrecheck::decide(['a', 'b', 'c', 'd'], $precheckSaved));
 
 /* ---------------------------- 汇总 ---------------------------- */
 

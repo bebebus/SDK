@@ -31,6 +31,9 @@ final class Client
     /** @var array<string,mixed>|null 最近一次原始响应信封（保留拿原始响应的途径） */
     private ?array $lastRawResponse = null;
 
+    /** @var string|null 最近一次请求实际发出的 sign。PHP 请求是同步的，请在该次调用返回后立刻读取。 */
+    private ?string $lastRequestSign = null;
+
     /**
      * @param Config                                                 $config
      * @param (callable(string,string,int):array{status:int,body:string})|null $httpExecutor
@@ -246,6 +249,15 @@ final class Client
         return $this->lastRawResponse;
     }
 
+    /**
+     * 最近一次请求实际发出的 sign。代付反查保存的就是 payoutCreate 的这一笔。
+     * 请求是同步的，请在对应调用返回后、下一次 SDK 调用前读取。
+     */
+    public function lastRequestSign(): ?string
+    {
+        return $this->lastRequestSign;
+    }
+
     // ====================== 内部：请求构建与发送 ======================
 
     /**
@@ -282,6 +294,7 @@ final class Client
 
         $payload = $this->buildPayload($params);
         $payload['sign'] = Signer::sign($payload, $secret);
+        $this->lastRequestSign = $payload['sign'];
 
         $url = $base . $path;
         $json = $this->encodeBody($payload);

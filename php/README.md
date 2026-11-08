@@ -165,6 +165,16 @@ $client->verifyPayoutCallback($payload); // 代付回调，用 api_secret_payout
 - **数值必须整数**：参与签名的数值不允许 `float`（含 `NaN`/`Infinity`/`1.0`）——金额请用整数最小单位（`10000` = 1 元），传 float 会抛 `InvalidArgumentException`。
 - **传输 https**：`Config` 的 `baseUrl` 非 `localhost`/`127.0.0.1` 时强制 `https://`，否则拒绝构造；cURL 钉死证书校验（`SSL_VERIFYPEER`/`SSL_VERIFYHOST`）、限协议为 https|http、关闭重定向跟随。
 
+## 代付反查
+
+平台审核时向商户自己的 HTTPS 地址 POST JSON。`PayoutPrecheck::decide($body, $saved)` 的返回值原样输出为 HTTP 200 正文，只能是 `approve` 或 `reject`，不要另加换行。`$saved['sign']` 用 `payoutCreate` 返回后立刻读取的 `lastRequestSign()`。`payout_no` 必须出现，但不与下单请求比较。
+
+```php
+use Merchant\Openapi\PayoutPrecheck;
+
+$text = PayoutPrecheck::decide($body, $saved);
+```
+
 ## 示例
 
 - `examples/pay_create.php` — 代收下单 + 查单

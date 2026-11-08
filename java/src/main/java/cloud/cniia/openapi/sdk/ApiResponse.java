@@ -14,12 +14,14 @@ public final class ApiResponse {
     private final String message;
     private final Object data;
     private final String rawBody;
+    private final String requestSign;
 
-    ApiResponse(long code, String message, Object data, String rawBody) {
+    ApiResponse(long code, String message, Object data, String rawBody, String requestSign) {
         this.code = code;
         this.message = message;
         this.data = data;
         this.rawBody = rawBody;
+        this.requestSign = requestSign;
     }
 
     /** 业务码（0=成功）。 */
@@ -45,6 +47,11 @@ public final class ApiResponse {
     /** 原始响应体文本。 */
     public String rawBody() {
         return rawBody;
+    }
+
+    /** 本次请求实际发出的 sign。代付反查保存的就是代付下单的这一笔。 */
+    public String requestSign() {
+        return requestSign;
     }
 
     public boolean isSuccess() {

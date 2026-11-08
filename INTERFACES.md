@@ -123,6 +123,23 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 ### POST `/merchant/payout/test/complete` — 代付测试单完成（密钥：payout，**仅测试密钥**）
 请求：`payout_no` 或 `out_payout_no`（二选一）+ `result`(`success`|`failed`, 必填)。响应：`{payout_no, out_payout_no, amount, status}`。
 
+### 代付订单反查（商户自己的接口）
+
+平台在审核阶段向商户配置的公网 HTTPS 地址 POST JSON。这不是平台端点，也不是终态回调，SDK 不代替商户发这个请求。商户在自己的接口里调用判定助手，把返回值原样作为 HTTP 200 的响应体。
+
+请求体必须恰好是这四个非空字符串：
+
+| 字段 | 说明 |
+|------|------|
+| `out_payout_no` | 必须与下单时保存的商户代付单号一致 |
+| `payout_no` | 平台代付单号。必须出现且非空，不与下单请求比较 |
+| `account_no` | 必须与下单时保存的收款账号一致 |
+| `original_sign` | 与下单请求实际发出的 `sign` 按 UTF-8 字节等长、时序安全比较 |
+
+下单成功后保存 `out_payout_no`、`account_no` 和这次请求的 `sign`。`sign` 由 SDK 生成：Node.js 在返回值 `sign`，Python 在返回数据的 `.sign`，PHP 用 `lastRequestSign()`（该次调用返回后立刻读），Go 在 `Response.Sign`，Java 在 `ApiResponse.requestSign()`。
+
+助手名称：Node.js `decidePayoutPrecheck`，Python `decide_payout_precheck`，PHP `PayoutPrecheck::decide`，Go `DecidePayoutPrecheck`，Java `PayoutPrecheck.decide`。返回值只有精确的 `approve` 或 `reject`。非法输入返回 `reject`，不抛异常。响应体必须是这个字符串本身，不能附加空格、换行、BOM 或 JSON。`approve` 只表示通过这次确认，不跳过原有审核。
+
 ## 五、回调（Notify）
 
 订单进入终态后，服务会向 `notify_url` 发送 JSON 回调，体内含 `sign`。验签与应答见 SIGNING.md §六（**验签按"除 sign 外全部字段"通用计算，不要硬编码字段表**）。

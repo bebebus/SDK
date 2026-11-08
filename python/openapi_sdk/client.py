@@ -20,13 +20,25 @@ import urllib.error
 import urllib.request
 import uuid
 from contextlib import suppress
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Tuple
 
 from . import signer
 from .config import Config, Environment
 from .exceptions import ApiError, TransportError
 
-__all__ = ["Client"]
+__all__ = ["Client", "SignedData"]
+
+
+class SignedData(dict):
+    """成功响应的 data。``.sign`` 是本次请求发出的 sign，不是服务端字段。
+
+    与普通 dict 的相等比较只看键值，不看 ``.sign``。请从客户端返回的对象上读取，
+    再复制成普通 dict 之前把它存下来。代付反查要比对的就是代付下单的这一笔。
+    """
+
+    def __init__(self, data: Mapping[str, Any], sign: str) -> None:
+        super().__init__(data)
+        self.sign = sign
 
 
 # [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
@@ -352,11 +364,11 @@ class Client:
         仍会对 HTTP / 网络 / JSON 解析失败抛 TransportError。
         供调用方需要自行处理 code 时使用。
         """
-        envelope = self._request(path, body, secret)
+        envelope, _request_sign = self._request(path, body, secret)
         return envelope
 
     def _call(self, path: str, body: Mapping[str, Any], secret: str) -> Dict[str, Any]:
-        envelope = self._request(path, body, secret)
+        envelope, request_sign = self._request(path, body, secret)
         code = envelope.get("code")
         if code != 0:
             raise ApiError(
@@ -365,7 +377,8 @@ class Client:
                 data=envelope.get("data"),
             )
         data = envelope.get("data")
-        return data if isinstance(data, dict) else {}
+        payload = data if isinstance(data, dict) else {}
+        return SignedData(payload, request_sign)
 
     def _build_payload(
         self, body: Mapping[str, Any], secret: str
@@ -390,9 +403,10 @@ class Client:
 
     def _request(
         self, path: str, body: Mapping[str, Any], secret: str
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], str]:
         base = self._config.base_url
         payload = self._build_payload(body, secret)
+        request_sign = str(payload["sign"])
         url = base + path
         # allow_nan=False：NaN/Infinity 非法且与签名 base 分叉，序列化阶段即拒绝。
         data = json.dumps(
@@ -439,4 +453,4 @@ class Client:
                 status_code=status,
                 body=raw,
             )
-        return envelope
+        return envelope, request_sign

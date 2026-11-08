@@ -50,6 +50,7 @@ npm / PyPI / Packagist / Go are published to their respective package indexes (s
 **Collection**: `payCreate` (create order, `pay_method` required), `payQuery` (query order), `payMethodsQuery` (available pay methods), `groupsQuery` (compatibility alias), `countriesQuery` (available countries), `balanceQuery` (balance), `payTestComplete` (complete test order, test key only)
 **Payout**: `payoutCreate` (`pay_method` required, `channel_code` not accepted), `payoutQuery`, `payoutBanksQuery` (available banks), `payoutProofQuery` (proof), `payoutReceiptQuery` (receipt), `payoutTestComplete` (complete test order, test key only)
 **Callback**: `verifyPayCallback` / `verifyPayoutCallback` (callback signature verification, constant-time comparison)
+**Payout precheck**: `decidePayoutPrecheck` (inside the merchant's own endpoint, compare the account, merchant payout number, and create `sign`; the response body is exactly `approve` or `reject`)
 
 The request/response fields for each method are in [`INTERFACES.md`](./INTERFACES.en.md). Method names follow each language's conventions (Java/JS/PHP camelCase, Python snake_case `pay_create`, Go exported camelCase), with a one-to-one semantic correspondence.
 
