@@ -20,7 +20,7 @@ This SDK has no external dependencies. The simplest approach is to bring the sou
 src/main/java/cloud/cniia/openapi/sdk/*.java
 ```
 
-Just add these 7 source files (`Signer / Config / Environment / Client / Json / ApiException / TransportException`, plus `ApiResponse`) to your compilation sources.
+Just add these 8 source files (`Signer / Config / Environment / Client / Json / ApiException / TransportException / PayoutPrecheck`, plus `ApiResponse`) to your compilation sources.
 
 Or compile into classes / jar with `javac`:
 
@@ -137,6 +137,10 @@ return "success"; // HTTP 200 + plain text success
 ```
 
 Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` instead. The verifier **relies only on the general rule that "all fields except sign participate"**, does not hardcode a field table, and remains compatible when callback fields are added or removed. For a complete runnable example, see [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java) (demonstrates collection + payout once each, including a tampering counter-example).
+
+## Payout precheck
+
+During review the platform POSTs JSON to the merchant's own HTTPS URL. Write `PayoutPrecheck.decide(body, saved)` as the entire HTTP 200 body. It is only `approve` or `reject`. Save `ApiResponse.requestSign()` from payout create. `payout_no` must be present and is not compared with the create request.
 
 ## examples/
 

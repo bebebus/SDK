@@ -33,4 +33,7 @@ echo "==> 运行测试 (VectorTest)"
 # -Dfile.encoding=UTF-8 保证非 ASCII 向量正确读取与比较
 java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" VectorTest
 
+echo "==> 运行测试 (PayoutPrecheckTest)"
+java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" PayoutPrecheckTest
+
 echo "==> 测试通过"

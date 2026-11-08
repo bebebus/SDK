@@ -158,7 +158,8 @@ func TestGroupsQueryPathAndPaySecret(t *testing.T) {
 	defer srv.Close()
 
 	c := NewClient(Config{BaseURL: srv.URL, SecretPay: "sk_pay"})
-	if _, err := c.GroupsQuery(context.Background(), map[string]any{"biz_type": "pay"}); err != nil {
+	resp, err := c.GroupsQuery(context.Background(), map[string]any{"biz_type": "pay"})
+	if err != nil {
 		t.Fatalf("GroupsQuery 失败: %v", err)
 	}
 	if gotPath != "/merchant/groups/query" {
@@ -172,6 +173,9 @@ func TestGroupsQueryPathAndPaySecret(t *testing.T) {
 	want := Sign(captured, "sk_pay")
 	if gotSign != want {
 		t.Errorf("groupsQuery 应用 pay 密钥签名, got=%s want=%s", gotSign, want)
+	}
+	if resp.Sign != gotSign {
+		t.Errorf("Response.Sign = %s, want %s", resp.Sign, gotSign)
 	}
 }
 

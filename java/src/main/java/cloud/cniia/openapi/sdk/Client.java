@@ -31,7 +31,7 @@ public final class Client {
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 pom.xml &lt;version&gt; 一致）。
      */
-    public static final String VERSION = "2.1.0";
+    public static final String VERSION = "2.2.0";
 
     private final Config config;
     private final HttpClient http;
@@ -240,7 +240,7 @@ public final class Client {
         }
 
         // 5) 解析统一信封
-        return parseEnvelope(raw);
+        return parseEnvelope(raw, sign);
     }
 
     /** 注入通用字段、过滤 null，返回 key 升序的有序 payload（不含 sign）。 */
@@ -265,7 +265,7 @@ public final class Client {
         return merged;
     }
 
-    private ApiResponse parseEnvelope(String raw) {
+    private ApiResponse parseEnvelope(String raw, String requestSign) {
         Object parsed;
         try {
             parsed = Json.parse(raw);
@@ -312,7 +312,7 @@ public final class Client {
         Object msgObj = env.get("message");
         String message = msgObj == null ? null : msgObj.toString();
         Object data = env.get("data");
-        return new ApiResponse(code, message, data, raw);
+        return new ApiResponse(code, message, data, raw, requestSign);
     }
 
     // ============================================================

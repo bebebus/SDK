@@ -2,6 +2,18 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
+## v2.2.0 (2026-11-09) — payout precheck
+
+Merchant payout precheck helper in all five languages. During review the platform POSTs JSON to a merchant-owned public HTTPS URL. This is not a platform endpoint and not the final callback. The helper does not send HTTP. It compares the body with the account number, merchant payout number, and create-request `sign` saved from `payout/create`, and returns the exact ASCII text `approve` or `reject`.
+
+The posted object must contain exactly four non-empty strings: `out_payout_no`, `payout_no`, `account_no`, and `original_sign`. `payout_no` must be present and non-empty and is not compared with the create request. `original_sign` is compared with the saved create `sign` as equal-length UTF-8 bytes, using a constant-time compare. Any other input returns `reject` and does not throw. The merchant writes that string as the entire HTTP 200 body, with no space, newline, BOM, or JSON. `approve` only passes this check and does not skip the existing review.
+
+The create request `sign` is now available on the call result, because the SDK generates it: Node.js `result.sign`, Python `result.sign`, PHP `lastRequestSign()` (read immediately after the synchronous call), Go `Response.Sign`, and Java `ApiResponse.requestSign()`.
+
+Names: `decidePayoutPrecheck` (Node.js), `decide_payout_precheck` (Python), `PayoutPrecheck::decide` (PHP), `DecidePayoutPrecheck` (Go), `PayoutPrecheck.decide` (Java).
+
+Non-breaking for existing callers: no signature-algorithm change (`test-vectors.json` untouched) and no existing method signature changed. Python successful `data` is still dict-equal to the server object; `.sign` is an attribute. Same-account payout review is a platform rule and adds no SDK method.
+
 ## v2.1.0 (2026-09-29) — countries/query
 
 New endpoint (all five languages): `POST /merchant/countries/query` — available countries/currencies, signed with `api_secret_pay`, request carries common fields only, response is `data.countries[]` of `{country, name, name_i18n{zh-CN,en-US}, currencies[]}`. Exposed as `countriesQuery` (Node.js/PHP/Java), `countries_query()` (Python) and `CountriesQuery` (Go), mirroring `payMethodsQuery`.

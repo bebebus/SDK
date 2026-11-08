@@ -119,6 +119,16 @@ ok   = verify_callback(callback, secret)  # timing-safe (hmac.compare_digest), f
 
 See [`examples/callback_verify.py`](examples/callback_verify.py): parse the raw body → `verify_callback` (timing-safe) → process idempotently by `status` (success/failed) → acknowledge with **HTTP 200 + plain text `success`**. Collection callbacks use `api_secret_pay` and payout callbacks use `api_secret_payout`; the example demonstrates each once. On signature verification failure, do not return success; the same order may be sent again. The processing must be idempotent (the same order may be called back multiple times).
 
+## Payout precheck
+
+During review the platform POSTs JSON to the merchant's own HTTPS URL. Use the return value of `decide_payout_precheck(body, saved)` as the entire HTTP 200 body. It is only `approve` or `reject`. Use `.sign` on the payout create result as `saved["sign"]`. `payout_no` must be present and is not compared with the create request.
+
+```python
+from openapi_sdk import decide_payout_precheck
+
+text = decide_payout_precheck(body, saved)
+```
+
 ## Examples
 
 ```bash

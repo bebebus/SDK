@@ -136,6 +136,16 @@ try {
 node examples/callback_verify.js
 ```
 
+## 代付反查
+
+平台审核时会向商户自己的 HTTPS 地址 POST JSON。把 `decidePayoutPrecheck(body, saved)` 的返回值原样写成 HTTP 200 正文，只能是 `approve` 或 `reject`，不要加换行。`saved.sign` 用代付下单返回值里的 `sign`。`payout_no` 必须出现，但不与下单请求比较。
+
+```js
+import { decidePayoutPrecheck } from '@bebebus/merchant-openapi-sdk';
+
+const text = decidePayoutPrecheck(body, saved);
+```
+
 ## 运行示例
 
 ```bash

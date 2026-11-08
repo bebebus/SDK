@@ -166,6 +166,16 @@ process **idempotently** by `status` (success/failed) → reply with **HTTP 200 
 - **Numbers must be integers**: numeric values participating in signing may not be `float` (including `NaN`/`Infinity`/`1.0`) — pass amounts as integers in the smallest unit (`10000` = 1.00); passing a float throws `InvalidArgumentException`.
 - **Transport https**: when `Config`'s `baseUrl` is not `localhost`/`127.0.0.1`, `https://` is enforced or construction is rejected; cURL pins certificate verification (`SSL_VERIFYPEER`/`SSL_VERIFYHOST`), restricts protocols to https|http, and disables redirect following.
 
+## Payout precheck
+
+During review the platform POSTs JSON to the merchant's own HTTPS URL. Echo `PayoutPrecheck::decide($body, $saved)` as the entire HTTP 200 body. It is only `approve` or `reject`; do not add a newline. Read `lastRequestSign()` immediately after `payoutCreate` returns and save it as the create `sign`. `payout_no` must be present and is not compared with the create request.
+
+```php
+use Merchant\Openapi\PayoutPrecheck;
+
+$text = PayoutPrecheck::decide($body, $saved);
+```
+
 ## Examples
 
 - `examples/pay_create.php` — collection order creation + query

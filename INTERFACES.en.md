@@ -123,6 +123,23 @@ Response: `inline=0` → `{payout_no, out_payout_no, receipt_url, expires_in}`; 
 ### POST `/merchant/payout/test/complete` — complete a payout test order (key: payout, **test key only**)
 Request: `payout_no` or `out_payout_no` (either one) + `result`(`success`|`failed`, required). Response: `{payout_no, out_payout_no, amount, status}`.
 
+### Payout precheck (the merchant's own endpoint)
+
+During review the platform POSTs JSON to the merchant's public HTTPS URL. This is not a platform endpoint and not the final callback. The SDK does not send this request. Call the helper inside the merchant endpoint and write its return value as the entire HTTP 200 body.
+
+The body must be exactly these four non-empty strings:
+
+| Field | Meaning |
+|------|------|
+| `out_payout_no` | Must equal the merchant payout number saved at create time |
+| `payout_no` | Platform payout number. Required and non-empty. Not compared with the create request |
+| `account_no` | Must equal the account number saved at create time |
+| `original_sign` | Compared with the create request `sign` as equal-length UTF-8 bytes, in constant time |
+
+After a successful create, save `out_payout_no`, `account_no`, and the `sign` that was actually sent. The SDK exposes that sign as: Node.js return value `sign`, Python `.sign` on the returned data, PHP `lastRequestSign()` read immediately after the call returns, Go `Response.Sign`, Java `ApiResponse.requestSign()`.
+
+Helper names: Node.js `decidePayoutPrecheck`, Python `decide_payout_precheck`, PHP `PayoutPrecheck::decide`, Go `DecidePayoutPrecheck`, Java `PayoutPrecheck.decide`. The only return values are the exact strings `approve` and `reject`. Invalid input returns `reject` and does not throw. The HTTP body must be that string alone, with no added space, newline, BOM, or JSON. `approve` only passes this check and does not skip the existing review.
+
 ## 5. Callback (Notify)
 
 When an order reaches a terminal state, the service sends a JSON callback to `notify_url`, with `sign` in the body. For signature verification and the response, see SIGNING.md §6 (**verify generically over "all fields except sign", do not hard-code the field table**).

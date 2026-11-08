@@ -5,24 +5,35 @@
     from openapi_sdk import (
         Client, Config, Environment,
         sign, build_sign_base, verify_callback,
+        decide_payout_precheck, PAYOUT_PRECHECK_APPROVE, PAYOUT_PRECHECK_REJECT,
+        SignedData,
         ApiError, TransportError, OpenApiError,
     )
 """
 
 from __future__ import annotations
 
-from .client import Client
+from .client import Client, SignedData
 from .config import Config, Environment
 from .exceptions import ApiError, OpenApiError, TransportError
+from .payout_precheck import (
+    PAYOUT_PRECHECK_APPROVE,
+    PAYOUT_PRECHECK_REJECT,
+    decide_payout_precheck,
+)
 from .signer import build_sign_base, sign, verify_callback
 
 __all__ = [
     "Client",
     "Config",
     "Environment",
+    "SignedData",
     "sign",
     "build_sign_base",
     "verify_callback",
+    "decide_payout_precheck",
+    "PAYOUT_PRECHECK_APPROVE",
+    "PAYOUT_PRECHECK_REJECT",
     "ApiError",
     "TransportError",
     "OpenApiError",
@@ -37,6 +48,6 @@ try:
     try:
         __version__ = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        __version__ = "2.1.0"
+        __version__ = "2.2.0"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    __version__ = "2.1.0"
+    __version__ = "2.2.0"
