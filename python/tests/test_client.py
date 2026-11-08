@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """客户端请求构建单元测试（标准库 unittest，不发真实网络请求）。
 
 校验：通用字段注入、None 过滤、签名密钥选择（pay vs payout）、

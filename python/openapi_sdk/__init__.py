@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """商户支付 OpenAPI Python SDK（零第三方依赖）。
 
 公开 API::

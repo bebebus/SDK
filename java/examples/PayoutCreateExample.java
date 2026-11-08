@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import cloud.cniia.openapi.sdk.ApiException;
 import cloud.cniia.openapi.sdk.ApiResponse;
 import cloud.cniia.openapi.sdk.Client;

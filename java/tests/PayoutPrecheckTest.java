@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import cloud.cniia.openapi.sdk.PayoutPrecheck;
 
 import java.util.LinkedHashMap;

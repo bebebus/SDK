@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // gh-aw v0.84.3 不支持锁定引擎安装哈希；重新编译后运行本脚本。
 const fs = require('node:fs');
 const path = require('node:path');

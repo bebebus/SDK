@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { checkFiles, csv, reference, validateReference } from '../../_tooling/reference-codes.mjs';

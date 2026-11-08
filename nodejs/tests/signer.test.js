@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 单测：对 ../../test-vectors.json 的每个向量复现 base 与 sign。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

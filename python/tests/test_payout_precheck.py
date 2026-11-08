@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """代付反查判定。"""
 
 from __future__ import annotations

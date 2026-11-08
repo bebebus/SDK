@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 #
 # 一键发版：bump 版本 → 跑五套测试 → 发布到 npm / PyPI / Go / Packagist。
 #

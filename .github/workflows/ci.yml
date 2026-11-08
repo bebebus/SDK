@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: '24'
       - run: node .github/scripts/test-gh-aw-codex.cjs
+      - name: 检查程序源码许可证标识
+        run: python3 _tooling/check-spdx.py
 
   # Node.js —— node --test（与 release.sh 的 "Node" 步骤一致）
   nodejs:

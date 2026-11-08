@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // SDK 异常类型。
 //  - ApiError：服务端返回 code !== 0 的业务错误，携带 code/message/data 及原始响应。
 //  - TransportError：HTTP/网络层错误（连接失败、超时、非 2xx、响应非合法 JSON 等）。

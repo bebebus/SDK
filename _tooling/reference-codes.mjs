@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -204,6 +206,7 @@ ${bankSections.join('\n\n')}
 维护步骤见 [贡献指南](../CONTRIBUTING.md#参考代码表维护)。只编辑 \`appendix/reference-codes.json\`，运行 \`node _tooling/reference-codes.mjs\` 同步 Markdown、CSV 和五种语言的国家/币种附录；运行 \`node _tooling/reference-codes.mjs --check\` 校验生成结果。公开目录的响应指纹与源项目文件指纹分开维护。
 `;
   const php = `<?php
+// SPDX-License-Identifier: MIT
 
 declare(strict_types=1);
 
@@ -230,7 +233,8 @@ ${currencies.map((c) => `        ['code' => ${phpQuote(c.code)}, 'name_zh' => ${
             .join(', ')}},`,
       )
       .join('\n');
-  const python = `# 由 _tooling/reference-codes.mjs 生成；数据源 appendix/reference-codes.json。
+  const python = `# SPDX-License-Identifier: MIT
+# 由 _tooling/reference-codes.mjs 生成；数据源 appendix/reference-codes.json。
 # 标准字典与区域扩展，实际可用范围以商户查询接口为准。
 
 COUNTRIES = [
@@ -241,7 +245,9 @@ CURRENCIES = [
 ${pythonRows(currencies)}
 ]
 `;
-  const go = `package appendix
+  const go = `// SPDX-License-Identifier: MIT
+
+package appendix
 
 // 由 _tooling/reference-codes.mjs 生成；数据源 appendix/reference-codes.json。
 

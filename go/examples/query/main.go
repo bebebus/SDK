@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 示例：查询类端点（pay/query、pay-methods/query、countries/query、balance/query、payout/query、payout/receipt/query）。
 //
 // 运行：go run ./examples/query

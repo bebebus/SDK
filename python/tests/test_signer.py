@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """签名器单元测试（标准库 unittest）。
 
 (a) 读取 ../../test-vectors.json，对每个向量断言 build_sign_base == base 且 sign == sign。

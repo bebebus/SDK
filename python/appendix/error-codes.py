@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # 错误码总表（平台标准项）。业务错误一律 HTTP 200 + 信封 {code, message, data}。
 
 ERROR_CODES = [

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 商户代付反查判定。平台 POST 到商户自己的 HTTPS 接口，本模块不发请求。
 // 请求体必须恰好是四个非空字符串：account_no、out_payout_no、original_sign、payout_no。
 // original_sign 与下单时保存的 sign 按 UTF-8 字节等长比较。payout_no 必须出现，但不与下单请求比较。

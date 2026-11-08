@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 单测：客户端请求构建与信封解析（用本地 node:http 桩服务器，不依赖外网）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

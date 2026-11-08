@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """真实请求构建和传输错误分类，不连接外部服务。"""
 
 import io

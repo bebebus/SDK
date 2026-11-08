@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Python SDK × dev 环境联调。凭据从环境变量读取（PP_MNO/PP_KEY/PP_PAY/PP_POUT/PP_BASE）。
 序列与 dev_smoke.mjs / dev_smoke.php 完全一致，便于跨语言对比。"""
 import os

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 商户支付 OpenAPI Node.js SDK —— TypeScript 类型声明（手写，覆盖全部公开 API）。
 // [L24] 公开 SDK 自带类型；仅声明类型，不改变任何运行时 .js 行为。
 // 字段契约见仓库根 INTERFACES.md，签名算法见 SIGNING.md。
