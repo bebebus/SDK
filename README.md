@@ -21,6 +21,8 @@ SDK/
 ├── INTERFACES.md        # 13 个签名业务端点字段级请求/响应、回调字段、错误码
 ├── ARCHITECTURE.md      # 组件、信任边界、威胁及验证限制
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
+├── GOVERNANCE.md        # 项目治理和维护职责
+├── CODE_OF_CONDUCT.md   # 社区行为守则
 ├── RELEASE_NOTES.md     # 各版本面向用户的变更摘要
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
 ├── appendix/            # 附录配置与国家/币种/银行代码参考表、JSON、CSV
