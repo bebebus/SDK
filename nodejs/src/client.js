@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 商户支付 OpenAPI 客户端：实现全部签名业务端点。
 // HTTP 仅用 node:http / node:https；签名用 node:crypto（经 signer.js）。
 import http from 'node:http';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 package cloud.cniia.openapi.sdk;
 
 import java.io.IOException;

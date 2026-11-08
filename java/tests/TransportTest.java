@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import cloud.cniia.openapi.sdk.*;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;

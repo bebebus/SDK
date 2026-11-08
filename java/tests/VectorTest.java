@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import cloud.cniia.openapi.sdk.Json;
 import cloud.cniia.openapi.sdk.Signer;
 import cloud.cniia.openapi.sdk.Config;

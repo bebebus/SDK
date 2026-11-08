@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """签名器：HMAC-SHA256 -> 十六进制小写。
 
 与服务端签名实现逐字节一致。

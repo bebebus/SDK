@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // Go SDK × dev 环境联调。凭据从环境变量读取（PP_MNO/PP_KEY/PP_PAY/PP_POUT/PP_BASE）。
 // 序列与其余语言 dev_smoke 一致。运行：cd go && go run ./examples/dev_smoke
 package main

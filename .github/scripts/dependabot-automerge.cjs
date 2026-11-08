@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 'use strict';
 
 const REQUIRED_WORKFLOWS = ['ci', 'CodeQL'];

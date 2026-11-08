@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // Package openapi 是商户支付 OpenAPI 的零依赖 Go SDK。
 //
 // signer.go 实现签名算法（HMAC-SHA256 → hex 小写），与服务端签名实现逐字节一致。

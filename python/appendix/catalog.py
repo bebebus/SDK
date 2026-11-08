@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # 由 _tooling/reference-codes.mjs 生成；数据源 appendix/reference-codes.json。
 # 标准字典与区域扩展，实际可用范围以商户查询接口为准。
 

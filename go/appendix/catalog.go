@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 package appendix
 
 // 由 _tooling/reference-codes.mjs 生成；数据源 appendix/reference-codes.json。

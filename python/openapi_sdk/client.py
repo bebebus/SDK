@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """商户支付 OpenAPI 客户端：覆盖全部 13 个签名业务端点。
 
 仅用标准库：urllib.request（HTTP）、json、uuid、time、secrets。

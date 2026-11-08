@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """环境与客户端配置。
 
 - ``Environment``：预设环境枚举（PRODUCTION / SANDBOX）。

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 #
 # 编译并运行 Java SDK 单元测试（无 Maven/JUnit，纯 JDK）。
 #

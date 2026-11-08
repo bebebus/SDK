@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 单测：安全守卫（空密钥 fail-closed / 验签异常归 false / 数值规范 / 传输 https）。
 // 这些守卫只拦非法或攻击者可控的异常输入，对全部标准向量（合法载荷+非空密钥）逐字节无影响。
 import { test } from 'node:test';

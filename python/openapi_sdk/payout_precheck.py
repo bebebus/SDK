@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """商户代付反查判定。平台 POST 到商户自己的 HTTPS 接口，本模块不发请求。"""
 
 from __future__ import annotations
