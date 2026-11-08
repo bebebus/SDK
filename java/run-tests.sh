@@ -36,4 +36,7 @@ java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" VectorTest
 echo "==> 运行测试 (PayoutPrecheckTest)"
 java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" PayoutPrecheckTest
 
+echo "==> 运行测试 (TransportTest)"
+java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" TransportTest
+
 echo "==> 测试通过"
