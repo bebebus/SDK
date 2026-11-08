@@ -38,9 +38,9 @@ jobs:
       - name: eslint
         working-directory: nodejs
         run: npm run lint
-      - name: node --test
+      - name: node --test with source coverage
         working-directory: nodejs
-        run: node --test
+        run: node --test --experimental-test-coverage --test-coverage-include='src/**' --test-coverage-lines=90 --test-coverage-branches=80
 
   # Python —— unittest discover（与 release.sh 的 "Python" 步骤一致）
   python:
@@ -109,4 +109,4 @@ jobs:
           working-directory: go
       - name: go test
         working-directory: go
-        run: go test -count=1 ./...
+        run: go test -count=1 -cover ./...

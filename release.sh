@@ -66,6 +66,7 @@ run "Python" "cd '$ROOT/python' && python3 -m unittest discover -s tests"
 run "PHP"    "cd '$ROOT/php' && php tests/run.php"
 run "Java"   "cd '$ROOT/java' && bash run-tests.sh"
 run "Go"     "cd '$ROOT/go' && go test -count=1 ./..."
+run "Go fuzz" "cd '$ROOT/go' && go test -run='^$' -fuzz=FuzzVerifyCallbackNeverPanics -fuzztime=10s -parallel=2 ."
 [ "$test_fail" -ne 0 ] && { echo ""; echo "⛔ 有测试失败，发布中止。"; exit 1; }
 echo "全部测试通过。"; echo ""
 

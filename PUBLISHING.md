@@ -22,6 +22,17 @@
 
 默认只构建和创建 GitHub Release；只有在手动输入 `publish_registries=true` 且已配置 `release` 环境和 `PHP_MIRROR_TOKEN` 时，才会发布 npm、PyPI，并同步 PHP 镜像仓。npm/PyPI 使用 Trusted Publishing/OIDC，不在仓库中保存长期令牌。Java 仍然只发布源码归档，不发布 Maven 包。
 
+## 验证 GitHub Release 构建证明
+
+从 [GitHub Release](https://github.com/bebebus/SDK/releases) 下载目标文件后，可用已登录的 GitHub CLI 验证该文件的构建证明及仓库来源。例如验证 `v2.2.0` 的 Go 归档：
+
+```bash
+gh release download v2.2.0 -R bebebus/SDK -p go-2.2.0.tar.gz
+gh attestation verify go-2.2.0.tar.gz -R bebebus/SDK
+```
+
+成功只证明指定文件的摘要与通过验证的构建证明匹配；应对每个准备使用的文件分别验证。工作流也将 Sigstore bundle 和 provenance 随 GitHub Release 提供；其他包索引或历史版本是否具备相同证明应分别核验，不应由此推断。GitHub 的 [验证构建证明指南](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations)解释证书和信任根的验证方式。
+
 ## 一键发版（推荐）：`release.sh`
 
 `./release.sh <version>` 一条命令完成：bump 版本 → 跑五套测试（不过即中止）→ 发布 npm + PyPI + Go tag + Packagist 镜像仓。令牌经环境变量注入、用完不留盘；各索引独立成败互不阻塞。
