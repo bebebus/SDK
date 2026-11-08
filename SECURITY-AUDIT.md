@@ -38,4 +38,4 @@ SDK 运行时不声明第三方依赖；该来源主要用于复核发布包元�
 | 依赖供应链复核 | 可通过 deps.dev 公开复核 |
 | 独立人工代码审计 / 渗透测试 | 尚未委托，不宣称已完成 |
 
-安全问题请通过 [GitHub Security Advisories](https://github.com/bebebus/SDK/security/advisories) 报告，不要在公开 Issue 中披露可利用细节。
+安全问题请按照 [SECURITY.md](./SECURITY.md) 的当前报告流程联系维护者，不要在公开 Issue 中披露可利用细节。
