@@ -445,7 +445,16 @@ final class Client
             throw new TransportException('响应信封缺少 code 字段', $status, $body);
         }
 
-        $code = (int) $decoded['code'];
+        $rawCode = $decoded['code'];
+        if (is_int($rawCode)) {
+            $code = $rawCode;
+        } elseif (is_string($rawCode)
+            && preg_match('/\A[+-]?(?:0|[1-9][0-9]*)\z/', trim($rawCode)) === 1
+            && filter_var(trim($rawCode), FILTER_VALIDATE_INT) !== false) {
+            $code = (int) trim($rawCode);
+        } else {
+            throw new TransportException('响应 code 必须是范围内的整数', $status, $body);
+        }
         if ($code !== 0) {
             $message = isset($decoded['message']) ? (string) $decoded['message'] : '';
             $data = (isset($decoded['data']) && is_array($decoded['data'])) ? $decoded['data'] : null;

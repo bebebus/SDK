@@ -28,7 +28,8 @@ public final class JsonEdgeTest {
             @Override public String toString() { return "fallback"; }
         })), "其他对象序列化");
         for (String invalid : new String[] {"", "[", "{", "{1:2}", "[1 2]", "{\"a\":1 2}",
-                "\"unfinished", "\"\\x\"", "\"\\u12\"", "-", "1e", "truth", "nul", "true x"}) {
+                "\"unfinished", "\"\\x\"", "\"\\u12\"", "\"\\uZZZZ\"", "\"raw\nnewline\"",
+                "-", "1e", "01", "-01", "1.", "1e+", "1-2", "truth", "nul", "true x"}) {
             try {
                 Json.parse(invalid);
                 throw new AssertionError("应拒绝非法 JSON: " + invalid);

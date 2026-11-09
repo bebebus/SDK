@@ -104,9 +104,8 @@ jobs:
           # 根 dist/ 混有 php/java/go tarball），再拷回根 dist/ 保持 GitHub Release 资产不变。
           python -m build --outdir python/dist python
           cp python/dist/* dist/
-          tar --exclude='out' --exclude='.DS_Store' -czf "dist/php-${version}.tar.gz" -C php .
-          tar --exclude='out' --exclude='.DS_Store' -czf "dist/java-${version}.tar.gz" -C java .
-          tar --exclude='out' --exclude='.DS_Store' -czf "dist/go-${version}.tar.gz" -C go .
+          # 仅打包签出版本的 Git 跟踪文件，固定顺序和归档元数据。
+          python _tooling/reproducible-source-archives.py --ref HEAD --version "$version" --output dist
           find dist -maxdepth 1 -type f -print | sort
 
       - name: Generate build provenance

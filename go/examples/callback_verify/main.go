@@ -130,6 +130,13 @@ func parseJSONObject(raw []byte) (map[string]any, error) {
 	if err := dec.Decode(&m); err != nil {
 		return nil, err
 	}
+	if m == nil {
+		return nil, fmt.Errorf("回调体必须是 JSON 对象")
+	}
+	var extra any
+	if err := dec.Decode(&extra); err != io.EOF {
+		return nil, fmt.Errorf("回调体包含多余内容")
+	}
 	return m, nil
 }
 
