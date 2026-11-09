@@ -54,12 +54,18 @@ jobs:
           python-version: '3.12'
       - name: install Ruff
         run: python -m pip install --disable-pip-version-check --require-hashes -r python/requirements-ci.txt
+      - name: install coverage.py
+        run: python -m pip install --disable-pip-version-check --require-hashes -r python/requirements-coverage.txt
       - name: ruff check
         working-directory: python
         run: ruff check .
-      - name: python -m unittest
+      - name: Python 测试与源码覆盖率
         working-directory: python
-        run: python3 -m unittest discover -s tests
+        run: |
+          python -m coverage run --timid --branch --source=openapi_sdk -m unittest discover -s tests
+          python -m coverage report -m
+          python -m coverage json -o coverage.json
+          python ../_tooling/check-python-coverage.py coverage.json
 
   # PHP —— 自写零依赖 runner（与 release.sh 的 "PHP" 步骤一致）
   php:
@@ -111,4 +117,7 @@ jobs:
           working-directory: go
       - name: go test
         working-directory: go
-        run: go test -count=1 -cover ./...
+        run: |
+          go test -count=1 ./...
+          go test -count=1 -coverprofile=coverage.out .
+          awk 'NR > 1 { total += $2; if ($3 > 0) covered += $2 } END { printf "Go 语句覆盖率: %d/%d\n", covered, total; if (total == 0 || covered * 100 < total * 90) exit 1 }' coverage.out

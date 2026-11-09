@@ -1,0 +1,3 @@
+# PyPI 官方 7.10.7 纯 Python wheel；CI 使用哈希验证。
+coverage @ https://files.pythonhosted.org/packages/ec/16/114df1c291c22cac3b0c127a73e0af5c12ed7bbb6558d310429a0ae24023/coverage-7.10.7-py3-none-any.whl \
+  --hash=sha256:f7941f6f2fe6dd6807a1208737b8a0cbcf1cc6d7b07d24998ad2d63590868260

@@ -4,8 +4,10 @@
 
 import io
 import json
+import threading
 import unittest
 import urllib.error
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import patch
 
 from openapi_sdk import ApiError, Client, Config, Environment, TransportError, signer
@@ -39,7 +41,7 @@ class TestTransport(unittest.TestCase):
 
     def test_request_is_signed_and_response_retains_original_sign(self):
         response = _Response(b'{"code":0,"data":{"order_no":"P1"}}')
-        with patch("urllib.request.urlopen", return_value=response) as send:
+        with patch.object(self.client._opener, "open", return_value=response) as send:
             result = self.client.pay_query(out_order_no="merchant-order")
         request = send.call_args.args[0]
         payload = json.loads(request.data)
@@ -54,7 +56,7 @@ class TestTransport(unittest.TestCase):
 
     def test_http_error_preserves_status_and_body(self):
         error = urllib.error.HTTPError("https://example.test", 503, "unavailable", {}, io.BytesIO(b"retry"))
-        with patch("urllib.request.urlopen", side_effect=error), self.assertRaises(TransportError) as raised:
+        with patch.object(self.client._opener, "open", side_effect=error), self.assertRaises(TransportError) as raised:
             self.client.pay_query(out_order_no="x")
         self.assertEqual(raised.exception.status_code, 503)
         self.assertEqual(raised.exception.body, "retry")
@@ -62,13 +64,13 @@ class TestTransport(unittest.TestCase):
 
     def test_network_error_preserves_cause(self):
         error = urllib.error.URLError("connection refused")
-        with patch("urllib.request.urlopen", side_effect=error), self.assertRaises(TransportError) as raised:
+        with patch.object(self.client._opener, "open", side_effect=error), self.assertRaises(TransportError) as raised:
             self.client.pay_query(out_order_no="x")
         self.assertIs(raised.exception.cause, error)
 
     def test_invalid_json_or_missing_envelope_is_transport_error(self):
         for body in (b"not-json", b'{}', b'[]'):
-            with self.subTest(body=body), patch("urllib.request.urlopen", return_value=_Response(body)):
+            with self.subTest(body=body), patch.object(self.client._opener, "open", return_value=_Response(body)):
                 with self.assertRaises(TransportError) as raised:
                     self.client.pay_query(out_order_no="x")
                 self.assertEqual(raised.exception.body, body.decode())
@@ -76,13 +78,54 @@ class TestTransport(unittest.TestCase):
 
     def test_business_error_and_raw_envelope(self):
         body = b'{"code":123,"message":"declined","data":{"reason":"x"}}'
-        with patch("urllib.request.urlopen", side_effect=lambda *_args, **_kwargs: _Response(body)):
+        with patch.object(self.client._opener, "open", side_effect=lambda *_args, **_kwargs: _Response(body)):
             with self.assertRaises(ApiError) as raised:
                 self.client.pay_query(out_order_no="x")
             raw = self.client.call_raw("/merchant/pay/query", {}, "pay-secret")
         self.assertEqual(raised.exception.code, 123)
         self.assertEqual(raised.exception.data, {"reason": "x"})
         self.assertEqual(raw["code"], 123)
+
+    def test_redirects_never_reach_target(self):
+        hits = []
+
+        class Handler(BaseHTTPRequestHandler):
+            status = 302
+
+            def do_POST(self):
+                if self.path == "/target":
+                    hits.append(self.path)
+                    self.send_response(200)
+                    self.end_headers()
+                    return
+                self.send_response(self.status)
+                self.send_header("Location", f"http://127.0.0.1:{self.server.server_port}/target")
+                self.end_headers()
+
+            def do_GET(self):
+                hits.append(self.path)
+                self.send_response(200)
+                self.end_headers()
+
+            def log_message(self, *_args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        self.addCleanup(thread.join, 2)
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        self.client = Client(Config(
+            merchant_no="M1", api_key="key", api_secret_pay="secret",
+            base_url=f"http://127.0.0.1:{server.server_port}", timeout=2,
+        ))
+        for status in (301, 302, 303, 307, 308):
+            Handler.status = status
+            with self.subTest(status=status), self.assertRaises(TransportError) as raised:
+                self.client.pay_query(out_order_no="x")
+            self.assertEqual(raised.exception.status_code, status)
+        self.assertEqual(hits, [])
 
 
 if __name__ == "__main__":

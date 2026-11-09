@@ -65,6 +65,13 @@ _JSON_HEADERS = {
 }
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """拒绝自动跳转，避免凭证或签名请求转发至非预期地址。"""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 class Client:
     """商户支付 OpenAPI 客户端。
 
@@ -84,6 +91,7 @@ class Client:
 
     def __init__(self, config: Config) -> None:
         self._config = config
+        self._opener = urllib.request.build_opener(_NoRedirect())
 
     # ---- 便捷构造 -----------------------------------------------------------
 
@@ -419,7 +427,7 @@ class Client:
         )
 
         try:
-            with urllib.request.urlopen(request, timeout=self._config.timeout) as resp:
+            with self._opener.open(request, timeout=self._config.timeout) as resp:
                 status = resp.getcode()
                 raw = resp.read().decode("utf-8")
         except urllib.error.HTTPError as exc:  # 非 2xx
