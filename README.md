@@ -20,9 +20,13 @@ SDK/
 ├── SIGNING.md           # 签名算法权威说明 + 逐语言序列化坑（实现/排错必读）
 ├── INTERFACES.md        # 13 个签名业务端点字段级请求/响应、回调字段、错误码
 ├── ARCHITECTURE.md      # 组件、信任边界、威胁及验证限制
+├── ASSURANCE.md         # 安全目标、威胁、证据和剩余风险
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
 ├── GOVERNANCE.md        # 项目治理和维护职责
 ├── CODE_OF_CONDUCT.md   # 社区行为守则
+├── COVERAGE.md          # 覆盖率测量范围、命令和限制
+├── ROADMAP.md           # 未来一年的维护方向
+├── UPGRADING.md         # 安装版本、升级与 1.x 迁移
 ├── RELEASE_NOTES.md     # 各版本面向用户的变更摘要
 ├── test-vectors.json    # 跨语言签名「标准答案」向量（11 条；五套单测都断言它）
 ├── appendix/            # 附录配置与国家/币种/银行代码参考表、JSON、CSV

@@ -57,6 +57,22 @@ class _Capture:
 
 
 class TestEnvironmentAndConfig(unittest.TestCase):
+    def test_rejects_missing_identifiers_and_insecure_urls(self):
+        base = {"merchant_no": "M1", "api_key": "key", "base_url": "https://api.example.com"}
+        for field in ("merchant_no", "api_key"):
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                Config(**{**base, field: ""})
+        for url in ("file:///etc/passwd", "http://api.example.com/v1"):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                Config(**{**base, "base_url": url})
+
+    def test_missing_business_secrets_fail_closed(self):
+        config = Config(merchant_no="M1", api_key="key", environment=Environment.SANDBOX)
+        with self.assertRaises(ValueError):
+            config.require_secret_pay()
+        with self.assertRaises(ValueError):
+            config.require_secret_payout()
+
     def test_presets(self):
         # PRODUCTION 无内置基址（按上级代理域名派生，需显式传 base_url）。
         self.assertEqual(Environment.PRODUCTION.base_url, "")

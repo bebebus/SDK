@@ -25,7 +25,15 @@
 
 ## 本地验证
 
-SDK 不需要安装运行时第三方依赖。提交 Pull Request 前至少运行：
+SDK 不需要安装运行时第三方依赖。完整开发环境需要 Git、Node.js 22/npm、Python 3.12/pip、PHP 8.2（含 cURL 和 JSON）/Composer、JDK 17/Maven 以及 Go 1.21 和 golangci-lint；CI 使用的工具版本和安装方式见 [CI 工作流](./.github/workflows/ci.yml)。在仓库根目录克隆后，依次安装检查工具：
+
+```bash
+cd nodejs && npm ci && cd ..
+python3 -m pip install --require-hashes -r python/requirements-ci.txt
+cd php && composer install && cd ..
+```
+
+Java、Go 和基础测试不需额外运行时库；Maven 与 golangci-lint 可能在首次执行时下载构建或检查依赖。提交 Pull Request 前至少运行：
 
 ```bash
 cd nodejs && node --test && cd ..
@@ -53,6 +61,20 @@ go test -fuzz=FuzzVerifyCallbackNeverPanics -fuzztime=30s .
 ```
 
 工作流 Action 必须固定到完整提交 SHA；修改 `.github/workflows/` 后建议使用 `actionlint` 检查语法和表达式。
+
+覆盖率测量范围、CI 阈值和不同工具的口径见 [COVERAGE.md](./COVERAGE.md)。新增程序源码应包含 `SPDX-License-Identifier: MIT`；修改参考表生成器时也要保留生成文件的标识。
+
+项目获得新的公开成就时，维护者应在 48 小时内将名称及链接加入仓库首页；现有徽章见 [README](./README.md)。
+
+## 适合新贡献者的小任务
+
+先在 [Issues](https://github.com/bebebus/SDK/issues) 搜索或提出计划，避免重复工作；以下任务适合按单一语言或单一文档分拆，不要求一次完成整个项目：
+
+- 对照一种语言的 README 示例与当前公开方法，修复可复现的示例错误并运行该语言测试。
+- 为某个尚未覆盖的签名边界或网络错误补充回归测试；先确认行为符合 [签名规范](./SIGNING.md)。
+- 改进一种语言的安装、卸载或升级说明，并在干净环境验证相关命令。
+
+需要接口变更或安全漏洞细节的工作先联系维护者；私密内容遵循 [安全策略](./SECURITY.md)。
 
 ## 参考代码表维护
 

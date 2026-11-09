@@ -275,6 +275,24 @@ $ctKeys = array_keys($captured['body']);
 sort($ctKeys);
 check('countriesQuery 仅公共字段', ['api_key', 'merchant_no', 'nonce', 'sign', 'timestamp'], $ctKeys);
 
+// 其余接口逐一验证目标路径及密钥类型，避免跨语言端点映射或密钥选择回归。
+foreach ([
+    ['payMethodsQuery', '/merchant/pay-methods/query', $paySecret],
+    ['balanceQuery', '/merchant/balance/query', $paySecret],
+    ['payTestComplete', '/merchant/pay/test/complete', $paySecret],
+    ['payoutQuery', '/merchant/payout/query', $payoutSecret],
+    ['payoutBanksQuery', '/merchant/payout/banks/query', $payoutSecret],
+    ['payoutProofQuery', '/merchant/payout/proof/query', $payoutSecret],
+    ['payoutTestComplete', '/merchant/payout/test/complete', $payoutSecret],
+] as [$method, $path, $secret]) {
+    $stubClient->$method(['sample' => 'value']);
+    check("$method 路径", 'http://127.0.0.1:3090/api/open/v1' . $path, $captured['url']);
+    $payload = $captured['body'];
+    $signature = $payload['sign'];
+    unset($payload['sign']);
+    check("$method 签名密钥", Signer::sign($payload, $secret), $signature);
+}
+
 // nonce 每请求唯一
 $firstNonce = $captured['body']['nonce'];
 $stubClient->payQuery(['out_order_no' => '202501010001']);
@@ -369,8 +387,73 @@ try {
 }
 checkTrue('非法 JSON 抛 TransportException', $caughtJ instanceof TransportException);
 
+foreach (['{}', '[]', '{"message":"missing code"}'] as $invalidEnvelope) {
+    $invalidClient = new Client(
+        new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+        fn (string $u, string $j, int $t): array => ['status' => 200, 'body' => $invalidEnvelope]
+    );
+    $rejected = false;
+    try {
+        $invalidClient->payQuery(['out_order_no' => 'x']);
+    } catch (TransportException $e) {
+        $rejected = true;
+        check('无效信封状态码', 200, $e->httpStatus);
+    }
+    checkTrue('无效信封必须拒绝', $rejected);
+}
+
 // 原始响应保留途径
 checkTrue('lastRawResponse 可取', is_array($stubClient->lastRawResponse()));
+
+// 在本机回环启动短生命周期 HTTP 服务，验证默认 cURL 传输与重定向策略。
+$listener = stream_socket_server('tcp://127.0.0.1:0', $socketError, $socketMessage);
+if ($listener === false) {
+    throw new RuntimeException("测试监听端口分配失败: $socketMessage");
+}
+$address = stream_socket_get_name($listener, false);
+$port = (int) substr(strrchr($address, ':'), 1);
+fclose($listener);
+$nullDevice = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
+$process = proc_open(
+    [PHP_BINARY, '-S', "127.0.0.1:$port", __DIR__ . '/http-fixture.php'],
+    [0 => ['pipe', 'r'], 1 => ['file', $nullDevice, 'w'], 2 => ['file', $nullDevice, 'w']],
+    $pipes
+);
+if (!is_resource($process)) {
+    throw new RuntimeException('无法启动本地 HTTP 测试服务');
+}
+try {
+    $ready = false;
+    for ($attempt = 0; $attempt < 50; $attempt++) {
+        $probe = @stream_socket_client("tcp://127.0.0.1:$port", $socketError, $socketMessage, 0.1);
+        if ($probe !== false) {
+            fclose($probe);
+            $ready = true;
+            break;
+        }
+        usleep(20000);
+    }
+    if (!$ready) {
+        throw new RuntimeException('本地 HTTP 测试服务未能启动');
+    }
+    $networkClient = new Client(new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX, "http://127.0.0.1:$port"));
+    $networkData = $networkClient->payQuery(['out_order_no' => 'test-order']);
+    check('真实传输路径', '/merchant/pay/query', $networkData['path']);
+    check('真实传输业务字段', 'test-order', $networkData['request']['out_order_no']);
+    check('真实传输签名', Signer::sign($networkData['request'], $paySecret), $networkData['request']['sign']);
+    $redirectClient = new Client(new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX, "http://127.0.0.1:$port/redirect"));
+    $redirectStatus = null;
+    try {
+        $redirectClient->payQuery(['out_order_no' => 'test-order']);
+    } catch (TransportException $e) {
+        $redirectStatus = $e->httpStatus;
+    }
+    check('真实传输不跟随重定向', 302, $redirectStatus);
+} finally {
+    fclose($pipes[0]);
+    proc_terminate($process);
+    proc_close($process);
+}
 
 /* ---------------------------- (d) fail-closed 守卫 ---------------------------- */
 

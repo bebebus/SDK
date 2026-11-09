@@ -39,6 +39,8 @@ SDK 提供请求签名和回调验签，不替商户保管密钥、确认业务�
 
 SDK 不提供回调重放防护、服务端权限隔离、资金一致性或主机安全保障。信任边界、威胁与已知限制见 [`ARCHITECTURE.md`](./ARCHITECTURE.md)；签名契约见 [`SIGNING.md`](./SIGNING.md)。
 
+安全目标、控制、验证证据和剩余风险的对应关系见 [`ASSURANCE.md`](./ASSURANCE.md)。
+
 ## 第三方验证边界
 
 仓库接入的 [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK) 是持续运行的自动化开源供应链安全评估，不等同于独立安全公司的人工代码审计、渗透测试或合规认证。详细结果和修复记录见 [`SECURITY-AUDIT.md`](./SECURITY-AUDIT.md) 与 [`SECURITY-REMEDIATION-PLAN.md`](./SECURITY-REMEDIATION-PLAN.md)。
