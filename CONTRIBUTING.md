@@ -74,6 +74,8 @@ go test -fuzz=FuzzVerifyCallbackNeverPanics -fuzztime=30s .
 - 为某个尚未覆盖的签名边界或网络错误补充回归测试；先确认行为符合 [签名规范](./SIGNING.md)。
 - 改进一种语言的安装、卸载或升级说明，并在干净环境验证相关命令。
 
+目前可独立领取的具体小任务：为 [`go/examples/query/main.go`](./go/examples/query/main.go) 的 `printResult` 添加表驱动测试，覆盖成功响应、业务错误和传输错误；测试只构造本地响应对象，不连接支付接口。提交前运行 `cd go && go test ./examples/query`。如果已有 PR 正在处理，请先选择其他任务。
+
 需要接口变更或安全漏洞细节的工作先联系维护者；私密内容遵循 [安全策略](./SECURITY.md)。
 
 ## 参考代码表维护

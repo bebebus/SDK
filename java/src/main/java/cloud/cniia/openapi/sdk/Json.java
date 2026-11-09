@@ -349,12 +349,22 @@ public final class Json {
                             }
                             String hex = s.substring(pos, pos + 4);
                             pos += 4;
-                            sb.append((char) Integer.parseInt(hex, 16));
+                            try {
+                                if (!hex.matches("[0-9a-fA-F]{4}")) {
+                                    throw new NumberFormatException("非法十六进制");
+                                }
+                                sb.append((char) Integer.parseInt(hex, 16));
+                            } catch (NumberFormatException ex) {
+                                throw new JsonException("非法 Unicode 转义");
+                            }
                             break;
                         default:
                             throw new JsonException("非法转义 \\" + e);
                     }
                 } else {
+                    if (c < 0x20) {
+                        throw new JsonException("字符串含未转义的控制字符");
+                    }
                     sb.append(c);
                 }
             }
@@ -379,6 +389,9 @@ public final class Json {
                 }
             }
             String num = s.substring(start, pos);
+            if (!num.matches("-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?")) {
+                throw new JsonException("非法数字字面量 '" + num + "'，位置 " + start);
+            }
             // 畸形数字（如 "-"、"1.2.3"、"1e"、空段）统一收敛为 JsonException（fail-closed），
             // 不让 BigDecimal/Long/BigInteger 的原生异常冒泡出解析层。
             if (isFloat) {

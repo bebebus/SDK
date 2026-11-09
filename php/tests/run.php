@@ -387,7 +387,8 @@ try {
 }
 checkTrue('非法 JSON 抛 TransportException', $caughtJ instanceof TransportException);
 
-foreach (['{}', '[]', '{"message":"missing code"}'] as $invalidEnvelope) {
+foreach (['{}', '[]', '{"message":"missing code"}', '{"code":"invalid"}', '{"code":0.5}',
+          '{"code":true}', '{"code":null}', '{"code":[]}', '{"code":"999999999999999999999999"}'] as $invalidEnvelope) {
     $invalidClient = new Client(
         new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
         fn (string $u, string $j, int $t): array => ['status' => 200, 'body' => $invalidEnvelope]
@@ -401,6 +402,12 @@ foreach (['{}', '[]', '{"message":"missing code"}'] as $invalidEnvelope) {
     }
     checkTrue('无效信封必须拒绝', $rejected);
 }
+
+$stringCodeClient = new Client(
+    new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+    fn (string $u, string $j, int $t): array => ['status' => 200, 'body' => '{"code":"0","data":{"ok":true}}']
+);
+check('字符串整数业务码可用', ['ok' => true], $stringCodeClient->payQuery(['out_order_no' => 'x']));
 
 // 原始响应保留途径
 checkTrue('lastRawResponse 可取', is_array($stubClient->lastRawResponse()));
@@ -602,6 +609,27 @@ $extra['extra'] = 'x';
 check('precheck 多字段', PayoutPrecheck::REJECT, PayoutPrecheck::decide($extra, $precheckSaved));
 check('precheck 非数组', PayoutPrecheck::REJECT, PayoutPrecheck::decide(null, $precheckSaved));
 check('precheck 列表', PayoutPrecheck::REJECT, PayoutPrecheck::decide(['a', 'b', 'c', 'd'], $precheckSaved));
+check('precheck 保存信息非数组', PayoutPrecheck::REJECT, PayoutPrecheck::decide($precheckBody, null));
+foreach (['account_no', 'out_payout_no', 'original_sign', 'payout_no'] as $key) {
+    $missing = $precheckBody;
+    unset($missing[$key]);
+    check("precheck 缺少 $key", PayoutPrecheck::REJECT, PayoutPrecheck::decide($missing, $precheckSaved));
+    foreach (['', 123, null] as $invalid) {
+        $bad = $precheckBody;
+        $bad[$key] = $invalid;
+        check("precheck 非法 $key", PayoutPrecheck::REJECT, PayoutPrecheck::decide($bad, $precheckSaved));
+    }
+}
+foreach (['account_no', 'out_payout_no', 'sign'] as $key) {
+    $badSaved = $precheckSaved;
+    $badSaved[$key] = '';
+    check("precheck 保存的 $key 为空", PayoutPrecheck::REJECT, PayoutPrecheck::decide($precheckBody, $badSaved));
+}
+foreach (['account_no', 'out_payout_no', 'original_sign'] as $key) {
+    $different = $precheckBody;
+    $different[$key] .= '-different';
+    check("precheck 不匹配 $key", PayoutPrecheck::REJECT, PayoutPrecheck::decide($different, $precheckSaved));
+}
 
 /* ---------------------------- 汇总 ---------------------------- */
 

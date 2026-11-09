@@ -22,6 +22,14 @@
 
 默认只构建和创建 GitHub Release；只有在手动输入 `publish_registries=true` 且已配置 `release` 环境和 `PHP_MIRROR_TOKEN` 时，才会发布 npm、PyPI，并同步 PHP 镜像仓。npm/PyPI 使用 Trusted Publishing/OIDC，不在仓库中保存长期令牌。Java 仍然只发布源码归档，不发布 Maven 包。
 
+PHP、Java 和 Go 的 GitHub Release 源码归档由 [`_tooling/reproducible-source-archives.py`](./_tooling/reproducible-source-archives.py) 从签出提交的已跟踪文件生成，固定顺序、所有者、时间戳和 gzip 元数据。CI 在当前运行环境中两次构建并逐文件核对 Git 内容；构建命令示例：
+
+```bash
+python3 _tooling/reproducible-source-archives.py --ref v2.2.0 --version 2.2.0 --output /tmp/sdk-archives
+```
+
+此检查不证明不同 Python/zlib 版本下的字节一致，也不涵盖 npm、PyPI 包、GitHub 自动生成的源码包或 PHP 镜像；项目整体可复现构建仍需分别验证。
+
 ## 验证 GitHub Release 构建证明
 
 从 [GitHub Release](https://github.com/bebebus/SDK/releases) 下载目标文件后，可用已登录的 GitHub CLI 验证该文件的构建证明及仓库来源。例如验证 `v2.2.0` 的 Go 归档：
