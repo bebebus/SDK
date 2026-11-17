@@ -136,7 +136,7 @@ if ("success".equals(status)) {
 return "success"; // HTTP 200 + plain text success
 ```
 
-Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` instead. The verifier **relies only on the general rule that "all fields except sign participate"**, does not hardcode a field table, and remains compatible when callback fields are added or removed. For a complete runnable example, see [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java) (demonstrates collection + payout once each, including a tampering counter-example).
+Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` instead. Ticket-reply callbacks use `client.verifyIssueTicketCallback(payload)` with `api_secret_pay`, the same secret as collection. The verifier **relies only on the general rule that "all fields except sign participate"**, does not hardcode a field table, and remains compatible when callback fields are added or removed. For a complete runnable example, see [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java) (demonstrates collection + payout once each, including a tampering counter-example).
 
 ## examples/
 

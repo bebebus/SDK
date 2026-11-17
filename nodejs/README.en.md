@@ -126,7 +126,7 @@ try {
 
 ## Callback signature verification (timing-safe)
 
-`verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` compute generically over "all fields except `sign`" (without hardcoding a field table) and use `crypto.timingSafeEqual` for a timing-safe comparison.
+`verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` / `client.verifyIssueTicketCallback` compute generically over "all fields except `sign`" (without hardcoding a field table) and use `crypto.timingSafeEqual` for a timing-safe comparison. Ticket-reply callbacks use `api_secret_pay`, the same secret as collection.
 
 Collection/refund callbacks use `apiSecretPay`, payout callbacks use `apiSecretPayout`. On signature verification failure, **do not return a success acknowledgement**; the same order may be sent again. After successful processing, return **HTTP 200 + plain text `success`**, and the processing must be **idempotent**.
 

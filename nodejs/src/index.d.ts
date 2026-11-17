@@ -125,12 +125,21 @@ export class Client {
   /** 代付测试单完成 POST /merchant/payout/test/complete（仅测试密钥）。 */
   payoutTestComplete(params: Params): Promise<ApiResult>;
 
+  // ---- 工单（密钥 api_secret_pay）----
+
+  /** 创建工单 POST /merchant/issue-ticket/create。order_no 必填，notify_url 可选。 */
+  issueTicketCreate(params: Params): Promise<ApiResult>;
+  /** 查询工单 POST /merchant/issue-ticket/query（ticket_no 或 order_no 至少填一个）。 */
+  issueTicketQuery(params: Params): Promise<ApiResult>;
+
   // ---- 回调验签 ----
 
   /** 代收/退款回调验签（api_secret_pay，时序安全比较）。 */
   verifyPayCallback(payload: CallbackPayload): boolean;
   /** 代付回调验签（api_secret_payout，时序安全比较）。 */
   verifyPayoutCallback(payload: CallbackPayload): boolean;
+  /** 工单回复回调验签（api_secret_pay，时序安全比较）。 */
+  verifyIssueTicketCallback(payload: CallbackPayload): boolean;
 }
 
 // ---- 签名器（底层，按需直接使用）----

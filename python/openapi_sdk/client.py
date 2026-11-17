@@ -1,4 +1,4 @@
-"""商户支付 OpenAPI 客户端：覆盖全部 13 个签名业务端点。
+"""商户支付 OpenAPI 客户端：覆盖代收、代付与工单签名端点。
 
 仅用标准库：urllib.request（HTTP）、json、uuid、time、secrets。
 
@@ -331,6 +331,45 @@ class Client:
                 "result": result,
             },
         )
+
+    # =====================================================================
+    # 工单（密钥：api_secret_pay）
+    # =====================================================================
+
+    def issue_ticket_create(
+        self,
+        order_no: str,
+        content: Optional[str] = None,
+        image_base64: Optional[str] = None,
+        image_mime: Optional[str] = None,
+        notify_url: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """POST /merchant/issue-ticket/create — 创建工单。notify_url 为空则不推送回复。"""
+        return self._call_pay(
+            "/merchant/issue-ticket/create",
+            {
+                "order_no": order_no,
+                "content": content,
+                "image_base64": image_base64,
+                "image_mime": image_mime,
+                "notify_url": notify_url,
+            },
+        )
+
+    def issue_ticket_query(
+        self,
+        ticket_no: Optional[str] = None,
+        order_no: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """POST /merchant/issue-ticket/query — 查询工单。ticket_no 与 order_no 至少填一个。"""
+        return self._call_pay(
+            "/merchant/issue-ticket/query",
+            {"ticket_no": ticket_no, "order_no": order_no},
+        )
+
+    def verify_issue_ticket_callback(self, payload: Mapping[str, Any]) -> bool:
+        """工单回复回调验签（api_secret_pay）。"""
+        return signer.verify_callback(payload, self._config.require_secret_pay())
 
     # =====================================================================
     # 内部：请求构建 / 发送 / 解析

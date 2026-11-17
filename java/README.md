@@ -136,7 +136,7 @@ if ("success".equals(status)) {
 return "success"; // HTTP 200 + 纯文本 success
 ```
 
-代付回调同理，改用 `client.verifyPayoutCallback(payload)`。验签器**只依赖"除 sign 外所有字段参与"通用规则**，不硬编码字段表，回调字段新增或减少也兼容。完整可运行示例见 [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java)（代收 + 代付各演示一次，含篡改反例）。
+代付回调同理，改用 `client.verifyPayoutCallback(payload)`。工单回复回调用 `client.verifyIssueTicketCallback(payload)`，密钥与代收相同，为 `api_secret_pay`。验签器**只依赖"除 sign 外所有字段参与"通用规则**，不硬编码字段表，回调字段新增或减少也兼容。完整可运行示例见 [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java)（代收 + 代付各演示一次，含篡改反例）。
 
 ## examples/
 

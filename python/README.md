@@ -117,7 +117,7 @@ ok   = verify_callback(callback, secret)  # 时序安全（hmac.compare_digest�
 
 ## 回调验签 + 处理
 
-见 [`examples/callback_verify.py`](examples/callback_verify.py)：解析原始 body → `verify_callback`（时序安全）→ 按 `status` 幂等处理（success/failed）→ 应答 **HTTP 200 + 纯文本 `success`**。代收回调用 `api_secret_pay`、代付回调用 `api_secret_payout`，示例各演示一次。验签失败不回成功；同一订单可能再次收到回调。处理务必幂等（同一订单可能多次回调）。
+见 [`examples/callback_verify.py`](examples/callback_verify.py)：解析原始 body → `verify_callback`（时序安全）→ 按 `status` 幂等处理（success/failed）→ 应答 **HTTP 200 + 纯文本 `success`**。代收回调用 `api_secret_pay`、代付回调用 `api_secret_payout`，示例各演示一次。工单回复回调同样用 `api_secret_pay`，客户端方法是 `verify_issue_ticket_callback`。验签失败不回成功；同一订单可能再次收到回调。处理务必幂等（同一订单可能多次回调）。
 
 ## 示例
 

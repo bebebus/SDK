@@ -161,6 +161,20 @@ public final class Client {
     }
 
     // ============================================================
+    // 工单（密钥：api_secret_pay）
+    // ============================================================
+
+    /** 创建工单 POST /merchant/issue-ticket/create。params: order_no 必填，notify_url 可选。 */
+    public ApiResponse issueTicketCreate(Map<String, Object> params) {
+        return call("/merchant/issue-ticket/create", params, Secret.PAY);
+    }
+
+    /** 查询工单 POST /merchant/issue-ticket/query。params: ticket_no 或 order_no 至少填一个。 */
+    public ApiResponse issueTicketQuery(Map<String, Object> params) {
+        return call("/merchant/issue-ticket/query", params, Secret.PAY);
+    }
+
+    // ============================================================
     // 回调验签（不发请求）
     // ============================================================
 
@@ -172,6 +186,11 @@ public final class Client {
     /** 验证代付回调（密钥：api_secret_payout）。 */
     public boolean verifyPayoutCallback(Map<String, Object> payload) {
         return Signer.verifyCallback(payload, config.requireSecretPayout());
+    }
+
+    /** 验证工单回复回调（密钥：api_secret_pay）。 */
+    public boolean verifyIssueTicketCallback(Map<String, Object> payload) {
+        return Signer.verifyCallback(payload, config.requireSecretPay());
     }
 
     // ============================================================

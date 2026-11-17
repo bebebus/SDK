@@ -110,7 +110,7 @@ openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open
 ## Callback Signature Verification and Acknowledgement
 
 Callbacks are computed generically as "every field except `sign` participates in signing" (field-agnostic, so callback fields may be added or removed); the comparison uses
-`hmac.Equal` and is timing-safe. Use `VerifyPayCallback` for collection/refund callbacks, and `VerifyPayoutCallback` for payout callbacks.
+`hmac.Equal` and is timing-safe. Use `VerifyPayCallback` for collection/refund callbacks, and `VerifyPayoutCallback` for payout callbacks. Ticket-reply callbacks use `VerifyIssueTicketCallback` with `api_secret_pay`, the same secret as collection.
 
 ```go
 raw, _ := io.ReadAll(r.Body)

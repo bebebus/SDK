@@ -144,6 +144,18 @@ func (c *Client) PayoutTestComplete(ctx context.Context, params map[string]any) 
 	return c.call(ctx, "/merchant/payout/test/complete", params, usePayout)
 }
 
+// ===================== 工单（密钥 api_secret_pay） =====================
+
+// IssueTicketCreate 创建工单。params 须含 order_no，可选 content、image_base64、image_mime、notify_url。
+func (c *Client) IssueTicketCreate(ctx context.Context, params map[string]any) (*Response, error) {
+	return c.call(ctx, "/merchant/issue-ticket/create", params, usePay)
+}
+
+// IssueTicketQuery 查询工单。params 须含 ticket_no 或 order_no 至少一个。
+func (c *Client) IssueTicketQuery(ctx context.Context, params map[string]any) (*Response, error) {
+	return c.call(ctx, "/merchant/issue-ticket/query", params, usePay)
+}
+
 // ===================== 回调验签 =====================
 
 // VerifyPayCallback 校验代收/退款回调（密钥 api_secret_pay，时序安全）。
@@ -154,6 +166,11 @@ func (c *Client) VerifyPayCallback(payload map[string]any) bool {
 // VerifyPayoutCallback 校验代付回调（密钥 api_secret_payout，时序安全）。
 func (c *Client) VerifyPayoutCallback(payload map[string]any) bool {
 	return VerifyCallback(payload, c.cfg.SecretPayout)
+}
+
+// VerifyIssueTicketCallback 校验工单回复回调（密钥 api_secret_pay，时序安全）。
+func (c *Client) VerifyIssueTicketCallback(payload map[string]any) bool {
+	return VerifyCallback(payload, c.cfg.SecretPay)
 }
 
 // ===================== 内部：请求构建 / 发送 / 解析 =====================

@@ -152,6 +152,7 @@ $ok = Signer::verifyCallbackRaw($rawBody, $secret);
 // 便捷方法（密钥取自 Config）
 $client->verifyPayCallback($payload);    // 代收/退款回调，用 api_secret_pay
 $client->verifyPayoutCallback($payload); // 代付回调，用 api_secret_payout
+$client->verifyIssueTicketCallback($payload); // 工单回复回调，用 api_secret_pay
 ```
 
 回调处理范式（见 `examples/callback_verify.php`）：拿原始 body → 优先用 `verifyCallbackRaw($rawBody, $secret)`

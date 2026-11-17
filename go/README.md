@@ -110,7 +110,7 @@ openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open
 ## 回调验签与应答
 
 回调按「除 `sign` 外所有字段参与签名」通用计算（字段无关，回调字段可能新增或减少），比较使用
-`hmac.Equal` 时序安全。代收/退款回调用 `VerifyPayCallback`，代付回调用 `VerifyPayoutCallback`。
+`hmac.Equal` 时序安全。代收/退款回调用 `VerifyPayCallback`，代付回调用 `VerifyPayoutCallback`。工单回复回调用 `VerifyIssueTicketCallback`，密钥与代收相同，为 `api_secret_pay`。
 
 ```go
 raw, _ := io.ReadAll(r.Body)

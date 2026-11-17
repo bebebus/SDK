@@ -214,6 +214,30 @@ final class Client
         return $this->callPayout('/merchant/payout/test/complete', $params);
     }
 
+    /**
+     * 创建工单 POST /merchant/issue-ticket/create（密钥 api_secret_pay）。
+     * order_no 必填；content、image_base64、image_mime、notify_url 可选。
+     *
+     * @param array{order_no:string, content?:string|null, image_base64?:string|null, image_mime?:string|null, notify_url?:string|null} $params
+     * @return array<string,mixed> data
+     */
+    public function issueTicketCreate(array $params): array
+    {
+        return $this->callPay('/merchant/issue-ticket/create', $params);
+    }
+
+    /**
+     * 查询工单 POST /merchant/issue-ticket/query（密钥 api_secret_pay）。
+     * ticket_no 或 order_no 至少填一个。
+     *
+     * @param array{ticket_no?:string|null, order_no?:string|null} $params
+     * @return array<string,mixed> data
+     */
+    public function issueTicketQuery(array $params): array
+    {
+        return $this->callPay('/merchant/issue-ticket/query', $params);
+    }
+
     // ====================== 回调验签（便捷转发到 Signer）======================
 
     /**
@@ -234,6 +258,16 @@ final class Client
     public function verifyPayoutCallback(array $payload): bool
     {
         return Signer::verifyCallback($payload, $this->config->apiSecretPayout);
+    }
+
+    /**
+     * 工单回复回调验签（密钥 api_secret_pay，时序安全比较）。
+     *
+     * @param array<string,mixed> $payload 回调 JSON 解析后的键值表（含 sign）
+     */
+    public function verifyIssueTicketCallback(array $payload): bool
+    {
+        return Signer::verifyCallback($payload, $this->config->apiSecretPay);
     }
 
     /**

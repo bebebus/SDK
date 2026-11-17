@@ -222,6 +222,18 @@ export class Client {
     return this._post('/merchant/payout/test/complete', params, 'payout');
   }
 
+  // ---- 工单（密钥：api_secret_pay）----
+
+  // 创建工单。params: { order_no, content?, image_base64?, image_mime?, notify_url? }
+  issueTicketCreate(params) {
+    return this._post('/merchant/issue-ticket/create', params, 'pay');
+  }
+
+  // 查询工单。params: { ticket_no? | order_no? }，至少填一个。
+  issueTicketQuery(params) {
+    return this._post('/merchant/issue-ticket/query', params, 'pay');
+  }
+
   // ---- 回调验签 ----
 
   // 代收/退款回调验签（api_secret_pay）。payload：解析后的回调键值表（含 sign）。
@@ -234,5 +246,11 @@ export class Client {
   verifyPayoutCallback(payload) {
     if (!this.config.apiSecretPayout) throw new TypeError('Client: missing apiSecretPayout');
     return verifyCallbackSig(payload, this.config.apiSecretPayout);
+  }
+
+  // 工单回复回调验签（api_secret_pay）。payload：解析后的回调键值表（含 sign）。
+  verifyIssueTicketCallback(payload) {
+    if (!this.config.apiSecretPay) throw new TypeError('Client: missing apiSecretPay');
+    return verifyCallbackSig(payload, this.config.apiSecretPay);
   }
 }

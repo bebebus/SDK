@@ -354,6 +354,9 @@ test('全部签名业务端点方法均存在', () => {
     'payoutProofQuery',
     'payoutReceiptQuery',
     'payoutTestComplete',
+    'issueTicketCreate',
+    'issueTicketQuery',
+    'verifyIssueTicketCallback',
   ];
   for (const m of methods) {
     assert.equal(typeof client[m], 'function', `missing method ${m}`);

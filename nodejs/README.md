@@ -126,7 +126,7 @@ try {
 
 ## 回调验签（时序安全）
 
-`verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` 按「除 `sign` 外所有字段参与」通用计算（不硬编码字段表），并用 `crypto.timingSafeEqual` 做时序安全比较。
+`verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` / `client.verifyIssueTicketCallback` 按「除 `sign` 外所有字段参与」通用计算（不硬编码字段表），并用 `crypto.timingSafeEqual` 做时序安全比较。工单回复回调与代收共用 `api_secret_pay`。
 
 代收/退款回调用 `apiSecretPay`，代付回调用 `apiSecretPayout`。验签失败时**不要回成功应答**；同一订单可能再次收到回调。成功处理后回 **HTTP 200 + 纯文本 `success`**，处理务必**幂等**。
 

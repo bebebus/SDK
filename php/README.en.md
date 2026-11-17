@@ -153,6 +153,7 @@ $ok = Signer::verifyCallbackRaw($rawBody, $secret);
 // Convenience methods (secret taken from Config)
 $client->verifyPayCallback($payload);    // collection/refund callback, uses api_secret_pay
 $client->verifyPayoutCallback($payload); // payout callback, uses api_secret_payout
+$client->verifyIssueTicketCallback($payload); // ticket-reply callback, uses api_secret_pay
 ```
 
 Callback handling pattern (see `examples/callback_verify.php`): take the raw body → prefer `verifyCallbackRaw($rawBody, $secret)`
