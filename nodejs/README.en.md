@@ -13,6 +13,7 @@ Signing, HTTP, JSON, and the test framework all rely on official built-ins, so *
 - Appendix config (view / download): [`appendix/config.example.json`](./appendix/config.example.json) · [`appendix/catalog.json`](./appendix/catalog.json)
 
 Download:
+
 - Config template: https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/config.example.json ([docs site](https://openapi.overseas.cniia.cloud/sdk-config/config.example.json))
 - Country/currency appendix: https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json ([docs site](https://openapi.overseas.cniia.cloud/appendix/catalog.json))
 
