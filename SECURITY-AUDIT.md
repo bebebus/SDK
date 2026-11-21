@@ -6,7 +6,7 @@
 
 ## OpenSSF Scorecard
 
-SDK 已加入 OpenSSF Scorecard 工作流，扫描 `bebebus/SDK` 的仓库安全实践，并将结果发布到 Scorecard 公共结果服务和 GitHub Code Scanning。
+SDK 已加入 OpenSSF Scorecard 工作流，扫描 `bebebus/payment-openapi-sdk` 的仓库安全实践，并将结果发布到 Scorecard 公共结果服务和 GitHub Code Scanning。
 
 - 最新结果：[OpenSSF Scorecard report](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
 - 公共结果 API：[Scorecard API](https://api.scorecard.dev/projects/github.com/bebebus/SDK)
@@ -32,9 +32,9 @@ SDK 运行时不声明第三方依赖；该来源主要用于复核发布包元�
 | 项目 | 状态 |
 | --- | --- |
 | OpenSSF Scorecard 工作流 | 已配置；2026-08-22 基线为 8.7/10，扫描提交 `59c4135` |
-| CI / CodeQL | `59c4135` 对应的 [CI](https://github.com/bebebus/SDK/actions/runs/32558710542) 和 [CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548) 均成功 |
-| GitHub Code Scanning | 2026-08-25 [复核有 5 条 open 告警](https://github.com/bebebus/SDK/security/code-scanning?query=is%3Aopen)，均为工作流 npm 安装命令触发的 OpenSSF Pinned-Dependencies 中危告警 |
-| Dependabot 安全告警 | 2026-08-25 [复核为 0 条 open 告警](https://github.com/bebebus/SDK/security/dependabot?query=is%3Aopen) |
+| CI / CodeQL | `59c4135` 对应的 [CI](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710542) 和 [CodeQL](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710548) 均成功 |
+| GitHub Code Scanning | 2026-08-25 [复核有 5 条 open 告警](https://github.com/bebebus/payment-openapi-sdk/security/code-scanning?query=is%3Aopen)，均为工作流 npm 安装命令触发的 OpenSSF Pinned-Dependencies 中危告警 |
+| Dependabot 安全告警 | 2026-08-25 [复核为 0 条 open 告警](https://github.com/bebebus/payment-openapi-sdk/security/dependabot?query=is%3Aopen) |
 | 依赖供应链复核 | 可通过 deps.dev 公开复核 |
 | 独立人工代码审计 / 渗透测试 | 尚未委托，不宣称已完成 |
 

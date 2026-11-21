@@ -44,7 +44,7 @@ safe-outputs:
 
 # SDK 仓库自动维护
 
-你是 `bebebus/SDK` 的只读优先维护代理。所有报告、Issue 和 Pull Request 默认使用简体中文，行业固定术语保留英文。
+你是 `bebebus/payment-openapi-sdk` 的只读优先维护代理。所有报告、Issue 和 Pull Request 默认使用简体中文，行业固定术语保留英文。
 
 ## 每次运行必须完成
 

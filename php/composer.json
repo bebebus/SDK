@@ -3,11 +3,11 @@
     "description": "商户支付 OpenAPI 的 PHP 8 SDK（零第三方依赖，仅用标准库与 ext-curl）",
     "type": "library",
     "license": "MIT",
-    "homepage": "https://github.com/bebebus/SDK",
+    "homepage": "https://github.com/bebebus/payment-openapi-sdk",
     "keywords": ["payment", "openapi", "merchant", "sdk"],
     "support": {
-        "issues": "https://github.com/bebebus/SDK/issues",
-        "source": "https://github.com/bebebus/SDK"
+        "issues": "https://github.com/bebebus/payment-openapi-sdk/issues",
+        "source": "https://github.com/bebebus/payment-openapi-sdk"
     },
     "require": {
         "php": ">=8.1",

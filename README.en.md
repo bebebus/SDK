@@ -98,16 +98,16 @@ Runnable examples of `pay_create` / `payout_create` / `callback_verify` for each
 
 The country/currency catalog and client config templates live in this repository:
 
-- Node.js data: https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
-- PHP data: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
-- Python data: https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py
-- Go data: https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go
-- Java data: https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json
-- Node.js error codes: https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/error-codes.json
-- PHP error codes: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/error-codes.php
-- Python error codes: https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/error-codes.py
-- Go error codes: https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/error-codes.go
-- Java error codes: https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/error-codes.json
+- Node.js data: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/nodejs/appendix/catalog.json
+- PHP data: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/catalog.php
+- Python data: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/python/appendix/catalog.py
+- Go data: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/go/appendix/catalog.go
+- Java data: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/java/appendix/catalog.json
+- Node.js error codes: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/nodejs/appendix/error-codes.json
+- PHP error codes: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/error-codes.php
+- Python error codes: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/python/appendix/error-codes.py
+- Go error codes: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/go/appendix/error-codes.go
+- Java error codes: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/java/appendix/error-codes.json
 
 See [`appendix/README.md`](./appendix/README.md) for the full index.
 

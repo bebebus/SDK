@@ -111,16 +111,16 @@ console.log(data.order_no, data.pay_url);
 
 五语言国家/币种字典由同一份参考数据生成，客户端配置模板也在本仓库维护：
 
-- Node.js 数据：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json
-- PHP 数据：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
-- Python 数据：https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/catalog.py
-- Go 数据：https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/catalog.go
-- Java 数据：https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/catalog.json
-- Node.js 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/error-codes.json
-- PHP 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/error-codes.php
-- Python 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/python/appendix/error-codes.py
-- Go 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/go/appendix/error-codes.go
-- Java 错误码：https://raw.githubusercontent.com/bebebus/SDK/main/java/appendix/error-codes.json
+- Node.js 数据：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/nodejs/appendix/catalog.json
+- PHP 数据：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/catalog.php
+- Python 数据：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/python/appendix/catalog.py
+- Go 数据：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/go/appendix/catalog.go
+- Java 数据：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/java/appendix/catalog.json
+- Node.js 错误码：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/nodejs/appendix/error-codes.json
+- PHP 错误码：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/error-codes.php
+- Python 错误码：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/python/appendix/error-codes.py
+- Go 错误码：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/go/appendix/error-codes.go
+- Java 错误码：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/java/appendix/error-codes.json
 
 完整索引见 [`appendix/README.md`](./appendix/README.md)。
 

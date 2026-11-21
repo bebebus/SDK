@@ -21,9 +21,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/bebebus/SDK/tree/main/python"
-Repository = "https://github.com/bebebus/SDK"
-Issues = "https://github.com/bebebus/SDK/issues"
+Homepage = "https://github.com/bebebus/payment-openapi-sdk/tree/main/python"
+Repository = "https://github.com/bebebus/payment-openapi-sdk"
+Issues = "https://github.com/bebebus/payment-openapi-sdk/issues"
 
 [project.optional-dependencies]
 # 运行时仍为零第三方依赖；dev 额外提供静态检查工具。
