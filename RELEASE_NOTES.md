@@ -2,6 +2,30 @@
 
 This file summarizes user-visible changes for each SDK release. It is maintained alongside the GitHub Releases page and is not a raw Git history export.
 
+## v2.3.0 (2026-11-21) — issue tickets, non-2xx business errors & security/protocol hardening
+
+- **New issue-ticket endpoints & callback verifier (all five languages)**:
+  - `POST /merchant/issue-ticket/create` (`issueTicketCreate` / `issue_ticket_create` / `IssueTicketCreate`)
+  - `POST /merchant/issue-ticket/query` (`issueTicketQuery` / `issue_ticket_query` / `IssueTicketQuery`)
+  - Ticket-reply callback verification (`verifyIssueTicketCallback` / `verify_issue_ticket_callback` / `VerifyIssueTicketCallback`)
+  - All ticket operations and callbacks are signed with `api_secret_pay` (even when the referenced order is a payout order).
+- **Non-2xx business error envelopes parsed as business errors (all five languages)**:
+  - When the server returns a non-2xx HTTP status with a valid business JSON envelope and non-zero integer `code` (such as HTTP `503` + `300304` retryable create failure or HTTP `500` + `300302`), all five SDKs now raise/return `ApiError` / `ApiException` / `*APIError` with the HTTP status code preserved.
+  - Non-2xx responses with `code === 0` or invalid envelopes remain fail-closed as transport errors (`TransportError` / `TransportException`).
+- **Payout precheck timeout recovery (`requestSign` on transport errors, all five languages)**:
+  - Transport failures now attach the exact `sign` sent on the wire (`err.requestSign` in Node.js, `err.request_sign` in Python, `$e->requestSign` / `$client->lastRequestSign()` in PHP, `te.RequestSign` in Go, `e.requestSign()` in Java) so payout precheck can still verify orders that timed out after server acceptance.
+- **Security & cross-language parity fixes**:
+  - **Java**: removed the `SANDBOX` early-return bypass of HTTPS validation, switched host validation to `java.net.URI` (blocking `file://` and userinfo-spoofed URLs like `http://localhost:80@evil.example.com`), rejected blank secrets in `requireSecretPay/Payout`, converted overflowing response codes (e.g. `1e20`) into `TransportException` instead of leaking `ArithmeticException`, normalized integer `BigDecimal` values (`1.0` → `"1"`) while rejecting non-integer decimals during signing.
+  - **Go**: changed envelope `Code` decoding to `*int` (rejecting `{}` / `{"code":null}` instead of treating them as success `Code == 0`), returned errors instead of panicking in `Client.call()` for missing secrets or invalid signing values, enforced integer validation on nested `json.Number`.
+  - **Python**: added `Client.verify_pay_callback` and `Client.verify_payout_callback`, removed obsolete `biz_type`/`currency` parameters from `pay_methods_query`, rejected boolean `code` values (`False == 0`), recursively rejected nested floats in signing.
+  - **Node.js**: fixed `payoutReceiptQuery` `inline: '0'`/`'false'` normalization (no longer coerced to `1`), classified malformed envelopes (`{}`/`[]`/`code: null`) as `TransportError`, attached `res.on('error')` handling, rejected whitespace-only secrets.
+  - **PHP**: made `Config` secrets optional for single-side integrations while rejecting empty/blank `merchantNo`/`apiKey`, added `requireSecretPay()`/`requireSecretPayout()`, added `$httpStatus` to `ApiException` and `$requestSign` to `TransportException`.
+  - **Uniform callback `sign` pre-check**: all five SDKs now pre-validate callback `sign` as strictly 64 lowercase hexadecimal characters (`[0-9a-f]{64}`) before constant-time comparison.
+- **Appendices & documentation**:
+  - Synced all five `appendix/error-codes.*` files to the server's 30 error codes (adding `100108`, `300302`, `300308`, `300309`).
+  - Updated `INTERFACES.md`/`INTERFACES.en.md`, `SIGNING.md`/`SIGNING.en.md`, and all READMEs to 15 signed endpoints, per-currency amount limits, updated response/callback fields, and `bebebus/payment-openapi-sdk` repository links.
+- Version bumped to `2.3.0` across all five SDKs (`package.json`/`package-lock.json`, `pyproject.toml`, `Client::VERSION`/`Version`/`VERSION` constants, `java/pom.xml`, and source-run version fallbacks). Go: `go get github.com/bebebus/SDK/go/v2@v2.3.0` (tag `go/v2.3.0`).
+
 ## v2.2.0 (2026-11-09) — payout precheck
 
 Merchant payout precheck helper in all five languages. During review the platform POSTs JSON to a merchant-owned public HTTPS URL. This is not a platform endpoint and not the final callback. The helper does not send HTTP. It compares the body with the account number, merchant payout number, and create-request `sign` saved from `payout/create`, and returns the exact ASCII text `approve` or `reject`.
