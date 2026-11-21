@@ -73,6 +73,15 @@
       "note_en": "Triggered when the same merchant_no + source IP fails auth 60 times within 60s; wait ~60s and retry"
     },
     {
+      "code": "100108",
+      "http": 429,
+      "retryable": "yes",
+      "meaning_zh": "落地页读单过于频繁",
+      "meaning_en": "Too many landing-page reads",
+      "note_zh": "同一 IP 每 60 秒超过 6000 次调用落地页订单详情或状态接口。HTTP 429，响应头 Retry-After 为窗口秒数；降低轮询频率后重试",
+      "note_en": "The same IP called the landing-page order detail or status endpoint more than 6000 times within 60 seconds. HTTP 429, with Retry-After set to the window in seconds; slow down polling and retry"
+    },
+    {
       "code": "200002",
       "http": 200,
       "retryable": "no",
@@ -116,6 +125,33 @@
       "meaning_en": "Order not found",
       "note_zh": "核对订单号（order_no / out_order_no / payout_no / out_payout_no）",
       "note_en": "Check the order no. (order_no / out_order_no / payout_no / out_payout_no)"
+    },
+    {
+      "code": "300308",
+      "http": 200,
+      "retryable": "no",
+      "meaning_zh": "工单不存在",
+      "meaning_en": "Ticket not found",
+      "note_zh": "核对工单号或订单号",
+      "note_en": "Check the ticket number or the order number"
+    },
+    {
+      "code": "300309",
+      "http": 200,
+      "retryable": "no",
+      "meaning_zh": "当前订单状态不接受工单",
+      "meaning_en": "The current order status does not accept a ticket",
+      "note_zh": "具体原因在 message 里，不单靠这个码",
+      "note_en": "The specific reason is in message; do not rely on this code alone"
+    },
+    {
+      "code": "300302",
+      "http": 500,
+      "retryable": "yes",
+      "meaning_zh": "订单数据暂不可用",
+      "meaning_en": "Order data temporarily unavailable",
+      "note_zh": "仅落地页订单详情在本地订单数据暂时读不出时返回，HTTP 500。稍后重试；支付结果轮询改走状态接口",
+      "note_en": "Returned only by the landing-page order detail endpoint when the local order cannot be read, HTTP 500. Retry later; poll the status endpoint for the payment result"
     },
     {
       "code": "300304",
