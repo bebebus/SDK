@@ -4,7 +4,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A zero-dependency Go SDK covering all 13 signed endpoints of the Merchant OpenAPI (7 collection + 6 payout), including
+A zero-dependency Go SDK covering all 15 signed endpoints of the Merchant OpenAPI (7 collection + 6 payout + 2 ticket), including
 HMAC-SHA256 signing, dual-environment configuration, and timing-safe callback signature verification. It uses only the Go standard library (`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`), with **no `require` at all**.
 
@@ -67,7 +67,7 @@ func main() {
 }
 ```
 
-### The 13 Endpoint Methods
+### The 15 Endpoint Methods
 
 | Category | Method | Endpoint | Secret |
 |------|------|------|------|
@@ -84,6 +84,8 @@ func main() {
 | payout | `PayoutProofQuery` | `/merchant/payout/proof/query` | payout |
 | payout | `PayoutReceiptQuery` | `/merchant/payout/receipt/query` | payout |
 | payout | `PayoutTestComplete` | `/merchant/payout/test/complete` | payout |
+| ticket | `IssueTicketCreate` | `/merchant/issue-ticket/create` | pay |
+| ticket | `IssueTicketQuery` | `/merchant/issue-ticket/query` | pay |
 
 Each method automatically injects the common fields (`merchant_no` / `api_key` / `timestamp` / a unique `nonce`) and `sign`, and
 automatically picks the correct secret. **Fields whose value is `nil` neither enter the request body nor participate in signing**. The `inline` field of `PayoutReceiptQuery`
@@ -156,9 +158,9 @@ compact with no whitespace, not escaping `/`, non-ASCII, or `<>&`, escaping only
 
 ## Error Handling
 
-- Business failure (envelope `code != 0`) → `*openapi.APIError` (contains `Code`/`Message`/`Data`/`Raw`).
-- HTTP/network/non-2xx/parse failure → `*openapi.TransportError` (contains `StatusCode`/`Raw`/`Err`, supports `errors.Unwrap`).
-- Even when an error is returned, `*Response.Raw` still preserves the raw response body for troubleshooting.
+- Business failure (envelope `code != 0`, including non-2xx business envelopes like HTTP 503+`300304` / 500+`300302`) → `*openapi.APIError` (contains `Code`/`Message`/`Data`/`Raw`/`StatusCode`).
+- HTTP/network/non-2xx (without a valid non-zero envelope)/parse failure → `*openapi.TransportError` (contains `StatusCode`/`Raw`/`RequestSign`/`Err`, supports `errors.Unwrap`).
+- Even when a business error is returned, `*Response.Raw` still preserves the raw response body; on transport failure, read the sent `sign` from `TransportError.RequestSign` (for payout precheck recovery after timeout).
 
 Distinguish them with `errors.As`:
 

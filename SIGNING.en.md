@@ -20,7 +20,7 @@ Input: the key-value table `payload` made up of business fields (including commo
    k1=v1&k2=v2&...&kN=vN&secret=<secret>
    ```
 5. **Compute sign**: `HMAC_SHA256(base, key=secret)`, output as a **lowercase hexadecimal** string.
-6. **Key selection**: pay-type endpoints and collection callbacks use `api_secret_pay`; payout-type endpoints and payout callbacks use `api_secret_payout`.
+6. **Key selection**: pay-type endpoints, `issue-ticket/*` endpoints, and collection/refund/ticket callbacks use `api_secret_pay`; payout-type endpoints and payout callbacks use `api_secret_payout`.
    (The HMAC key and the `&secret=` at the end of base use the **same** secret.)
 
 Put the computed `sign` back into the request body and send it together.
@@ -46,7 +46,7 @@ Top-level scalars are converted to strings directly, **without quotes**, and mus
 - `null` → `null`
 - scalars (string/number/boolean) → `JSON.stringify(v)`:
   - string → **with double quotes**, with JSON escaping (see below)
-  - number → numeric literal (`123`, `1.5`), no quotes
+  - number → integer literal (e.g. `123`), no quotes; **all five SDKs reject non-integer floats (such as `1.5`, `NaN`, `Infinity`) in both top-level and nested fields** to prevent cross-language float formatting divergence (such as `1.0` vs `1`, or `1e+20`)
   - boolean → `true` / `false`
 - array → `[` + each element recursively `stableStringify` joined with `,` + `]` (**preserve element order**)
 - object → `{` + after sorting keys in **ascending** order, each pair `JSON.stringify(key) + ":" + stableStringify(value)` joined with `,` + `}` (**compact, no spaces**)
@@ -91,8 +91,8 @@ The service sends a JSON callback to the merchant's `notify_url`, with `sign` an
 
 1. Parse the callback JSON into a key-value table.
 2. **Take all top-level fields in the table except `sign`** (do not hard-code the field list — callback fields may be added or removed in future versions; the rule "all fields except sign participate" remains compatible).
-3. Compute the expected `sign` using the algorithm in this file (use `api_secret_pay` for collection/refund callbacks, `api_secret_payout` for payout callbacks).
-4. Compare with the `sign` in the callback using a **constant-time comparison** (`crypto.timingSafeEqual` / `hmac.compare_digest` / `MessageDigest.isEqual` / `hmac.Equal` / `hash_equals`).
+3. Compute the expected `sign` using the algorithm in this file (use `api_secret_pay` for collection/refund/ticket callbacks, `api_secret_payout` for payout callbacks).
+4. Pre-validate that the callback `sign` is strictly 64 lowercase hexadecimal characters (`/^[0-9a-f]{64}$/`, uniform across all five SDKs; invalid formats fail closed as `false` without throwing), then compare with the expected signature using a **constant-time comparison** (`crypto.timingSafeEqual` / `hmac.compare_digest` / `MessageDigest.isEqual` / `hmac.Equal` / `hash_equals`).
 5. On verification failure → reject processing and do not return a success response; the same order may be sent again.
 
 ### Merchant Response (determines whether callbacks continue)

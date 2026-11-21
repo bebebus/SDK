@@ -4,7 +4,7 @@
 
 [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A zero-dependency PHP 8 SDK covering all 13 signed endpoints of the Merchant Payment OpenAPI + HMAC-SHA256 signing + callback signature verification.
+A zero-dependency PHP 8 SDK covering all 15 signed endpoints of the Merchant Payment OpenAPI + HMAC-SHA256 signing + callback signature verification.
 It uses only the PHP standard library and core extensions (`ext-curl`, `ext-json`), and **does not depend on any composer-installed package** (Guzzle, PHPUnit, etc. are all avoided).
 
 The signing algorithm uses [`SIGNING.md`](../SIGNING.en.md) at the repository root as its single source of truth, and is verified byte-for-byte across languages via the [`test-vectors.json`](../test-vectors.json) signature test vectors.
@@ -84,9 +84,9 @@ try {
     ]);
     echo $data['order_no'], ' ', $data['status'], "\n";
 } catch (ApiException $e) {
-    // Non-zero business error code: $e->apiCode / $e->apiMessage / $e->data
+    // Non-zero business error code (including HTTP 503+300304 / 500+300302): $e->apiCode / $e->apiMessage / $e->data / $e->httpStatus
 } catch (TransportException $e) {
-    // Network/HTTP error: $e->httpStatus / $e->rawBody
+    // Network/HTTP error: $e->httpStatus / $e->rawBody / $e->requestSign
 }
 ```
 
@@ -104,7 +104,7 @@ new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 
 > `PRODUCTION` **has no built-in production address**: obtain the production address from your service provider (in the form `https://api.<service_domain>/api/open/v1`) and pass it explicitly via `baseUrl`. Choosing `PRODUCTION` without passing `baseUrl` throws an `InvalidArgumentException` when constructing `Config`.
 
-## Endpoint Methods (all 13)
+## Endpoint Methods (all 15)
 
 | Method | Endpoint | Secret |
 |------|------|------|
@@ -121,6 +121,8 @@ new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 | `payoutProofQuery($params)` | `/merchant/payout/proof/query` | payout |
 | `payoutReceiptQuery($params)` | `/merchant/payout/receipt/query` | payout |
 | `payoutTestComplete($params)` | `/merchant/payout/test/complete` (test secret only) | payout |
+| `issueTicketCreate($params)` | `/merchant/issue-ticket/create` | pay |
+| `issueTicketQuery($params)` | `/merchant/issue-ticket/query` | pay |
 
 Conventions:
 

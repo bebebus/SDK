@@ -8,7 +8,7 @@
 签名、HTTP、JSON、测试框架全部用官方内建，**无需 `npm install`**。
 
 - 签名算法：HMAC-SHA256 → hex 小写，见仓库根 [`SIGNING.md`](../SIGNING.md)
-- 接口契约：环境/鉴权/13 个签名端点/回调/错误码，见 [`INTERFACES.md`](../INTERFACES.md)
+- 接口契约：环境/鉴权/15 个签名端点/回调/错误码，见 [`INTERFACES.md`](../INTERFACES.md)
 - 标准答案向量：[`test-vectors.json`](../test-vectors.json)
 - 附录配置（可查看 / 下载）：[`appendix/config.example.json`](./appendix/config.example.json) · [`appendix/catalog.json`](./appendix/catalog.json)
 
@@ -81,7 +81,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `Environment.PRODUCTION` | 无内置 URL，请向服务商获取 `https://api.<service_domain>/api/open/v1`，并显式传入 `baseUrl` |
 | `Environment.SANDBOX`    | `http://127.0.0.1:3090/api/open/v1`                                                         |
 
-## 全部 13 个端点
+## 全部 15 个端点
 
 | 方法                         | 端点                             | 密钥                 |
 | ---------------------------- | -------------------------------- | -------------------- |
@@ -98,13 +98,15 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `payoutProofQuery(params)`   | `/merchant/payout/proof/query`   | payout               |
 | `payoutReceiptQuery(params)` | `/merchant/payout/receipt/query` | payout               |
 | `payoutTestComplete(params)` | `/merchant/payout/test/complete` | payout（仅测试密钥） |
+| `issueTicketCreate(params)`  | `/merchant/issue-ticket/create`  | pay                  |
+| `issueTicketQuery(params)`   | `/merchant/issue-ticket/query`   | pay                  |
 
 请求构建说明：
 
 - 自动注入 `merchant_no`、`api_key`、`timestamp`（Unix 秒）与唯一 `nonce`（`crypto.randomUUID`）。
 - 值为 `null` / `undefined` 的字段**不放入请求体也不参与签名**。
 - `payoutReceiptQuery` 的 `inline` 会被转成**整数 `1`/`0`** 发送（避免布尔签名歧义）。
-- 客户端各方法自动选对密钥（pay 类用 `apiSecretPay`，payout 类用 `apiSecretPayout`）。
+- 客户端各方法自动选对密钥（pay 与工单类用 `apiSecretPay`，payout 类用 `apiSecretPayout`）。
 
 ## 错误处理
 
@@ -115,11 +117,11 @@ try {
   await client.payQuery({ out_order_no: 'x' });
 } catch (err) {
   if (err instanceof ApiError) {
-    // 业务失败：code !== 0，携带 code/message/data 与原始信封 raw
-    console.error(err.code, err.message, err.data);
+    // 业务失败：code !== 0（含 HTTP 503+300304 / 500+300302），携带 code/message/data/statusCode 与原始信封 raw
+    console.error(err.code, err.statusCode, err.message, err.data);
   } else if (err instanceof TransportError) {
-    // HTTP/网络层：statusCode、body、cause
-    console.error(err.statusCode, err.body);
+    // HTTP/网络层：statusCode、body、requestSign、cause
+    console.error(err.statusCode, err.body, err.requestSign);
   }
 }
 ```
