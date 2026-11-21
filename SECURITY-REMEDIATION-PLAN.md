@@ -25,7 +25,7 @@
 | Maintained | 0 | 仓库创建未满报告观察窗口，属于时间项。 |
 | Contributors | 0 | 尚无来自多个组织的贡献记录，不应通过虚假活动刷分。 |
 
-2026-08-25 的实时复核结果：`59c4135` 对应的 [CI](https://github.com/bebebus/SDK/actions/runs/32558710542)、[CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548) 和 [Scorecard](https://github.com/bebebus/SDK/actions/runs/32558710541) 均成功；Dependabot 有 0 条 open 安全告警；Code Scanning 有 5 条 OpenSSF Pinned-Dependencies 中危告警。
+2026-08-25 的实时复核结果：`59c4135` 对应的 [CI](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710542)、[CodeQL](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710548) 和 [Scorecard](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710541) 均成功；Dependabot 有 0 条 open 安全告警；Code Scanning 有 5 条 OpenSSF Pinned-Dependencies 中危告警。
 
 ## 3. 剩余工作
 

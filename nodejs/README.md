@@ -13,8 +13,8 @@
 - 附录配置（可查看 / 下载）：[`appendix/config.example.json`](./appendix/config.example.json) · [`appendix/catalog.json`](./appendix/catalog.json)
 
 下载地址：
-- 配置模板：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/config.example.json （[文档站](https://openapi.overseas.cniia.cloud/sdk-config/config.example.json)）
-- 国家/币种附录：https://raw.githubusercontent.com/bebebus/SDK/main/nodejs/appendix/catalog.json （[文档站](https://openapi.overseas.cniia.cloud/appendix/catalog.json)）
+- 配置模板：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/nodejs/appendix/config.example.json （[文档站](https://openapi.overseas.cniia.cloud/sdk-config/config.example.json)）
+- 国家/币种附录：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/nodejs/appendix/catalog.json （[文档站](https://openapi.overseas.cniia.cloud/appendix/catalog.json)）
 
 ## 引入（无需安装依赖）
 

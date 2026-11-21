@@ -36,12 +36,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bebebus/SDK.git",
+    "url": "git+https://github.com/bebebus/payment-openapi-sdk.git",
     "directory": "nodejs"
   },
-  "homepage": "https://github.com/bebebus/SDK/tree/main/nodejs#readme",
+  "homepage": "https://github.com/bebebus/payment-openapi-sdk/tree/main/nodejs#readme",
   "bugs": {
-    "url": "https://github.com/bebebus/SDK/issues"
+    "url": "https://github.com/bebebus/payment-openapi-sdk/issues"
   },
   "publishConfig": {
     "access": "public"

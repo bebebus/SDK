@@ -6,7 +6,7 @@ This page records publicly verifiable third-party security sources for the SDK.
 
 ## OpenSSF Scorecard
 
-The SDK includes an OpenSSF Scorecard workflow for the `bebebus/SDK` repository. Results are published to the Scorecard public service and uploaded to GitHub Code Scanning.
+The SDK includes an OpenSSF Scorecard workflow for the `bebebus/payment-openapi-sdk` repository. Results are published to the Scorecard public service and uploaded to GitHub Code Scanning.
 
 - Latest result: [OpenSSF Scorecard report](https://scorecard.dev/viewer/?uri=github.com/bebebus/SDK)
 - Public result API: [Scorecard API](https://api.scorecard.dev/projects/github.com/bebebus/SDK)
@@ -32,10 +32,10 @@ The SDK declares no runtime dependencies. This source is mainly useful for revie
 | Item | Status |
 | --- | --- |
 | OpenSSF Scorecard workflow | Configured; the 2026-08-22 baseline is 8.7/10 for commit `59c4135` |
-| CI / CodeQL | [CI](https://github.com/bebebus/SDK/actions/runs/32558710542) and [CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548) both passed for `59c4135` |
-| GitHub Code Scanning | [Five alerts were open](https://github.com/bebebus/SDK/security/code-scanning?query=is%3Aopen) on 2026-08-25; all were medium OpenSSF Pinned-Dependencies findings for npm installation commands in workflows |
-| Dependabot security alerts | [Zero alerts were open](https://github.com/bebebus/SDK/security/dependabot?query=is%3Aopen) when verified on 2026-08-25 |
+| CI / CodeQL | [CI](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710542) and [CodeQL](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710548) both passed for `59c4135` |
+| GitHub Code Scanning | [Five alerts were open](https://github.com/bebebus/payment-openapi-sdk/security/code-scanning?query=is%3Aopen) on 2026-08-25; all were medium OpenSSF Pinned-Dependencies findings for npm installation commands in workflows |
+| Dependabot security alerts | [Zero alerts were open](https://github.com/bebebus/payment-openapi-sdk/security/dependabot?query=is%3Aopen) when verified on 2026-08-25 |
 | Dependency supply-chain review | Publicly reviewable through deps.dev |
 | Independent manual code audit / penetration test | Not commissioned; not claimed as completed |
 
-Report security issues through [GitHub Security Advisories](https://github.com/bebebus/SDK/security/advisories). Do not disclose exploitable details in public Issues.
+Report security issues through [GitHub Security Advisories](https://github.com/bebebus/payment-openapi-sdk/security/advisories). Do not disclose exploitable details in public Issues.
