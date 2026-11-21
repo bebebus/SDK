@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 )
@@ -298,6 +299,118 @@ func TestCallSuccessParsesData(t *testing.T) {
 	amt, ok := resp.Data["amount"].(json.Number)
 	if !ok || amt.String() != "1000000000000" {
 		t.Errorf("大整数解析错误: %+v (%T)", resp.Data["amount"], resp.Data["amount"])
+	}
+}
+
+// TestCallMissingOrNullCodeReturnsTransportError 校验缺失 code 或 code:null 不会误判成功。
+func TestCallMissingOrNullCodeReturnsTransportError(t *testing.T) {
+	for _, rawBody := range []string{`{}`, `{"message":"error"}`, `{"code":null,"message":"bad"}`} {
+		t.Run(rawBody, func(t *testing.T) {
+			var captured map[string]any
+			srv := newTestServer(t, &captured, rawBody)
+			defer srv.Close()
+
+			c := NewClient(Config{BaseURL: srv.URL, SecretPay: "s"})
+			resp, err := c.BalanceQuery(context.Background(), nil)
+			if err == nil || resp != nil {
+				t.Fatalf("body=%s 应返回 TransportError，实际 resp=%+v err=%v", rawBody, resp, err)
+			}
+			var tErr *TransportError
+			if !errors.As(err, &tErr) {
+				t.Fatalf("应为 *TransportError，实际 %T: %v", err, err)
+			}
+			if gotSign, _ := captured["sign"].(string); tErr.RequestSign != gotSign || gotSign == "" {
+				t.Errorf("TransportError.RequestSign=%q, want %q", tErr.RequestSign, gotSign)
+			}
+		})
+	}
+}
+
+// TestCallNon2xxBusinessEnvelopeReturnsAPIError 校验 HTTP 503/300304 与 500/300302 解析为 APIError，
+// 且 HTTP 500 + code:0 仍 fail-closed 为 TransportError。
+func TestCallNon2xxBusinessEnvelopeReturnsAPIError(t *testing.T) {
+	t.Run("503_300304", func(t *testing.T) {
+		var gotSign string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var m map[string]any
+			_ = json.NewDecoder(r.Body).Decode(&m)
+			gotSign, _ = m["sign"].(string)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			_, _ = io.WriteString(w, `{"code":300304,"message":"retryable","data":null}`)
+		}))
+		defer srv.Close()
+
+		c := NewClient(Config{BaseURL: srv.URL, SecretPay: "s"})
+		resp, err := c.PayCreate(context.Background(), map[string]any{"out_order_no": "O1", "amount": 10000})
+		var apiErr *APIError
+		if !errors.As(err, &apiErr) {
+			t.Fatalf("应为 *APIError，实际 %T: %v", err, err)
+		}
+		if apiErr.Code != 300304 || apiErr.StatusCode != http.StatusServiceUnavailable {
+			t.Fatalf("got code=%d status=%d", apiErr.Code, apiErr.StatusCode)
+		}
+		if resp == nil || resp.Sign != gotSign {
+			t.Fatalf("resp.Sign=%q want %q", resp.Sign, gotSign)
+		}
+	})
+
+	t.Run("500_zero_code_is_transport_error", func(t *testing.T) {
+		var gotSign string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var m map[string]any
+			_ = json.NewDecoder(r.Body).Decode(&m)
+			gotSign, _ = m["sign"].(string)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = io.WriteString(w, `{"code":0,"message":"ok","data":{}}`)
+		}))
+		defer srv.Close()
+
+		c := NewClient(Config{BaseURL: srv.URL, SecretPay: "s"})
+		_, err := c.BalanceQuery(context.Background(), nil)
+		var tErr *TransportError
+		if !errors.As(err, &tErr) {
+			t.Fatalf("500 + code=0 应为 *TransportError，实际 %T: %v", err, err)
+		}
+		if tErr.StatusCode != http.StatusInternalServerError || tErr.RequestSign != gotSign {
+			t.Fatalf("status=%d requestSign=%q wantSign=%q", tErr.StatusCode, tErr.RequestSign, gotSign)
+		}
+	})
+}
+
+// TestCallMissingSecretAndInvalidParamReturnErrorNoPanic 校验调用期缺密钥/非法参数返回 error 而非 panic。
+func TestCallMissingSecretAndInvalidParamReturnErrorNoPanic(t *testing.T) {
+	c := NewClient(Config{Environment: Sandbox, MerchantNo: "M1", APIKey: "k"})
+	if _, err := c.PayMethodsQuery(context.Background(), nil); !errors.Is(err, ErrSecretRequired) {
+		t.Fatalf("缺 SecretPay 应返回 ErrSecretRequired，实际: %v", err)
+	}
+	cPayOnly := NewClient(Config{Environment: Sandbox, MerchantNo: "M1", APIKey: "k", SecretPay: "sk_pay"})
+	if _, err := cPayOnly.PayoutQuery(context.Background(), map[string]any{"payout_no": "W1"}); !errors.Is(err, ErrSecretRequired) {
+		t.Fatalf("缺 SecretPayout 应返回 ErrSecretRequired，实际: %v", err)
+	}
+	if _, err := cPayOnly.PayCreate(context.Background(), map[string]any{"amount": 1.5}); err == nil {
+		t.Fatalf("非整数浮点入参应返回 error 而非成功或 panic")
+	}
+}
+
+// TestNestedJsonNumberAndUppercaseHexSign 校验嵌套非整数 json.Number 被拒，以及大写 hex sign 被验签拒绝。
+func TestNestedJsonNumberAndUppercaseHexSign(t *testing.T) {
+	for _, bad := range []json.Number{"1.5", "1.0", "1e2"} {
+		t.Run("nested_"+string(bad), func(t *testing.T) {
+			defer func() {
+				if recover() == nil {
+					t.Errorf("嵌套 json.Number(%q) 应 panic", bad)
+				}
+			}()
+			_ = Sign(map[string]any{"extra": map[string]any{"v": bad}}, "sk_test")
+		})
+	}
+	payload := map[string]any{"order_no": "P1"}
+	upper := strings.ToUpper(Sign(payload, "sk_test"))
+	payload["sign"] = upper
+	if VerifyCallback(payload, "sk_test") {
+		t.Fatalf("大写 hex sign 应被拒绝")
 	}
 }
 

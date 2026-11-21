@@ -2,7 +2,10 @@
 
 package cloud.cniia.openapi.sdk;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Locale;
 
 /**
  * 客户端配置。包含商户凭证、基址与超时。
@@ -46,8 +49,8 @@ public final class Config {
         while (resolved.endsWith("/")) {
             resolved = resolved.substring(0, resolved.length() - 1);
         }
-        // 传输安全：非 SANDBOX 且非 localhost/127.0.0.1 的基址必须是 https://（本地联调放行 http）。
-        requireHttpsUnlessLocal(resolved, b.environment);
+        // 传输安全：统一校验最终解析出的 URL，非本地回环一律强制 https://（不因 SANDBOX 放宽自定义 baseUrl）。
+        requireHttpsUnlessLocal(resolved);
         if (b.merchantNo == null || b.merchantNo.isEmpty()) {
             throw new IllegalArgumentException("merchantNo 必填");
         }
@@ -63,51 +66,39 @@ public final class Config {
     }
 
     /**
-     * 传输安全校验：除 SANDBOX 环境与本地回环地址外，基址必须是 https://，否则拒绝构造。
-     *
-     * <p>放行 http 的情形：
-     * <ul>
-     *   <li>{@code environment == SANDBOX}（内置本地联调地址）；</li>
-     *   <li>主机名为 localhost / 127.0.0.1 / ::1（本地联调）。</li>
-     * </ul>
-     * 其余一律要求 https，防止凭证/签名经明文传输被窃取或篡改。
+     * 传输安全校验：仅允许 https://，或指向本地回环（localhost / 127.0.0.1 / ::1）的 http://。
+     * 统一基于 {@link URI} 解析最终基址，防止自定义 baseUrl 借 SANDBOX 或 userinfo（如 localhost:80@evil）绕过。
      */
-    private static void requireHttpsUnlessLocal(String url, Environment environment) {
-        String lower = url.toLowerCase();
-        if (lower.startsWith("https://")) {
-            return; // https 始终放行
+    private static void requireHttpsUnlessLocal(String url) {
+        URI uri;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("baseUrl 不是合法 URI: " + url, e);
         }
-        if (environment == Environment.SANDBOX) {
-            return; // 沙箱内置本地地址放行
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (scheme == null || host == null || host.isEmpty()) {
+            throw new IllegalArgumentException("baseUrl 缺少合法协议或主机名: " + url);
         }
-        if (isLocalHttp(lower)) {
-            return; // 本地回环放行 http，兼容本地联调
+        String lowerScheme = scheme.toLowerCase(Locale.ROOT);
+        if ("https".equals(lowerScheme)) {
+            return;
+        }
+        if ("http".equals(lowerScheme) && isLocalHost(host)) {
+            return;
         }
         throw new IllegalArgumentException(
-                "baseUrl 必须使用 https://（仅 localhost/127.0.0.1 或 SANDBOX 环境允许 http），收到: " + url);
+                "baseUrl 必须使用 https://（仅 localhost/127.0.0.1/::1 允许 http 本地联调），收到: " + url);
     }
 
-    /** 判断是否为本地回环的 http 地址（localhost / 127.0.0.1 / ::1）。 */
-    private static boolean isLocalHttp(String lowerUrl) {
-        if (!lowerUrl.startsWith("http://")) {
-            return false;
+    /** 判断主机名是否为本地回环地址（localhost / 127.0.0.1 / ::1）。 */
+    private static boolean isLocalHost(String host) {
+        String normalized = host.toLowerCase(Locale.ROOT);
+        if (normalized.startsWith("[") && normalized.endsWith("]")) {
+            normalized = normalized.substring(1, normalized.length() - 1);
         }
-        // 取 http:// 之后到下一个 '/'、':'、'?'、'#' 之前的主机部分
-        String rest = lowerUrl.substring("http://".length());
-        int end = rest.length();
-        for (int i = 0; i < rest.length(); i++) {
-            char c = rest.charAt(i);
-            if (c == '/' || c == ':' || c == '?' || c == '#') {
-                end = i;
-                break;
-            }
-        }
-        String host = rest.substring(0, end);
-        // 处理 IPv6 字面量括号 [::1]
-        if (host.startsWith("[") && host.endsWith("]")) {
-            host = host.substring(1, host.length() - 1);
-        }
-        return host.equals("localhost") || host.equals("127.0.0.1") || host.equals("::1");
+        return "localhost".equals(normalized) || "127.0.0.1".equals(normalized) || "::1".equals(normalized);
     }
 
     public String baseUrl() { return baseUrl; }
@@ -115,17 +106,17 @@ public final class Config {
     public String apiKey() { return apiKey; }
     public Duration timeout() { return timeout; }
 
-    /** 取代收/退款密钥（pay 类）。未配置则抛异常。 */
+    /** 取代收/退款密钥（pay 类）。未配置或纯空白则抛异常。 */
     public String requireSecretPay() {
-        if (apiSecretPay == null || apiSecretPay.isEmpty()) {
+        if (!Signer.isUsableSecret(apiSecretPay)) {
             throw new IllegalStateException("未配置 apiSecretPay，无法调用 pay 类接口或验签代收回调");
         }
         return apiSecretPay;
     }
 
-    /** 取代付密钥（payout 类）。未配置则抛异常。 */
+    /** 取代付密钥（payout 类）。未配置或纯空白则抛异常。 */
     public String requireSecretPayout() {
-        if (apiSecretPayout == null || apiSecretPayout.isEmpty()) {
+        if (!Signer.isUsableSecret(apiSecretPayout)) {
             throw new IllegalStateException("未配置 apiSecretPayout，无法调用 payout 类接口或验签代付回调");
         }
         return apiSecretPayout;

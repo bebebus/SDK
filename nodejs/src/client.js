@@ -37,6 +37,31 @@ function dropNullish(obj) {
   return out;
 }
 
+function isUsableSecret(secret) {
+  return typeof secret === 'string' && secret.trim() !== '';
+}
+
+function isValidEnvelope(value) {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    typeof value.code === 'number' &&
+    Number.isInteger(value.code)
+  );
+}
+
+// 将 inline 归一为整数 1/0；正确处理字符串 '0'/'false'（避免 JS Boolean('0')===true 误判为 1）。
+function normalizeInline(value) {
+  if (typeof value === 'boolean') return value ? 1 : 0;
+  if (typeof value === 'number') return value !== 0 ? 1 : 0;
+  if (typeof value === 'string') {
+    const s = value.trim().toLowerCase();
+    return s === '1' || s === 'true' || s === 'yes' ? 1 : 0;
+  }
+  return value ? 1 : 0;
+}
+
 export class Client {
   constructor(config) {
     if (!config) throw new TypeError('Client: config is required');
@@ -49,7 +74,7 @@ export class Client {
   // secret：'pay' | 'payout'，决定用 api_secret_pay 还是 api_secret_payout。
   _buildBody(params, secretKind) {
     const secret = secretKind === 'payout' ? this.config.apiSecretPayout : this.config.apiSecretPay;
-    if (!secret) {
+    if (!isUsableSecret(secret)) {
       throw new TypeError(
         `Client: missing ${secretKind === 'payout' ? 'apiSecretPayout' : 'apiSecretPay'} for this endpoint`,
       );
@@ -69,15 +94,17 @@ export class Client {
   }
 
   // 发起 POST application/json 请求，解析统一信封 {code,message,data}。
-  // 返回 { data, raw }；code !== 0 抛 ApiError；HTTP/网络错误抛 TransportError。
+  // 返回 { data, raw, sign }；code !== 0 抛 ApiError（含非 2xx 携带业务信封如 503/300304）；
+  // 其余 HTTP/网络/信封结构错误抛 TransportError（附带 requestSign）。
   async _post(path, params, secretKind) {
     const base = this.config.baseUrl;
     const body = this._buildBody(params, secretKind);
+    const requestSign = body.sign;
     const payload = JSON.stringify(body);
     const url = new URL(base + path);
     const lib = url.protocol === 'https:' ? https : http;
 
-    const raw = await new Promise((resolve, reject) => {
+    const { status, text } = await new Promise((resolve, reject) => {
       const req = lib.request(
         url,
         {
@@ -95,32 +122,20 @@ export class Client {
         (res) => {
           const chunks = [];
           res.on('data', (c) => chunks.push(c));
+          res.on('error', (e) => {
+            reject(
+              new TransportError(`Response stream error from ${path}: ${e.message}`, {
+                statusCode: res.statusCode || null,
+                cause: e,
+                requestSign,
+              }),
+            );
+          });
           res.on('end', () => {
-            const text = Buffer.concat(chunks).toString('utf8');
-            const status = res.statusCode || 0;
-            if (status < 200 || status >= 300) {
-              reject(
-                new TransportError(`HTTP ${status} from ${path}`, {
-                  statusCode: status,
-                  body: text,
-                }),
-              );
-              return;
-            }
-            let parsed;
-            try {
-              parsed = JSON.parse(text);
-            } catch (e) {
-              reject(
-                new TransportError(`Invalid JSON response from ${path}`, {
-                  statusCode: status,
-                  body: text,
-                  cause: e,
-                }),
-              );
-              return;
-            }
-            resolve(parsed);
+            resolve({
+              status: res.statusCode || 0,
+              text: Buffer.concat(chunks).toString('utf8'),
+            });
           });
         },
       );
@@ -130,22 +145,56 @@ export class Client {
         req.destroy(new Error(`request to ${path} timed out after ${this.config.timeout}ms`));
       });
       req.on('error', (e) => {
-        reject(new TransportError(`Network error calling ${path}: ${e.message}`, { cause: e }));
+        reject(new TransportError(`Network error calling ${path}: ${e.message}`, { cause: e, requestSign }));
       });
 
       req.write(payload);
       req.end();
     });
 
-    if (!raw || typeof raw !== 'object') {
-      throw new TransportError(`Unexpected response shape from ${path}`, { body: String(raw) });
+    let raw;
+    let parseErr = null;
+    try {
+      raw = JSON.parse(text);
+    } catch (e) {
+      parseErr = e;
+    }
+
+    if (status < 200 || status >= 300) {
+      // 非 2xx 若携带合法且 code !== 0 的业务信封（如 HTTP 503 + 300304、HTTP 500 + 300302），
+      // 转为 ApiError 以便调用方精确判断业务码；HTTP 非 2xx 却返回 code===0 或非信封一律仍抛 TransportError。
+      if (!parseErr && isValidEnvelope(raw) && raw.code !== 0) {
+        throw new ApiError(raw.code, raw.message, raw.data, raw, status);
+      }
+      throw new TransportError(`HTTP ${status} from ${path}`, {
+        statusCode: status,
+        body: text,
+        requestSign,
+      });
+    }
+
+    if (parseErr) {
+      throw new TransportError(`Invalid JSON response from ${path}`, {
+        statusCode: status,
+        body: text,
+        cause: parseErr,
+        requestSign,
+      });
+    }
+
+    if (!isValidEnvelope(raw)) {
+      throw new TransportError(`Unexpected response shape from ${path}`, {
+        statusCode: status,
+        body: text,
+        requestSign,
+      });
     }
     if (raw.code !== 0) {
-      throw new ApiError(raw.code, raw.message, raw.data, raw);
+      throw new ApiError(raw.code, raw.message, raw.data, raw, status);
     }
     // 同时暴露原始信封，便于调用方拿 message 等。
     // sign 是本次请求实际发出的签名。代付下单后保存它，供商户反查比对 original_sign。
-    return { data: raw.data ?? null, raw, sign: body.sign };
+    return { data: raw.data ?? null, raw, sign: requestSign };
   }
 
   // ---- 代收（Pay，密钥：api_secret_pay）----
@@ -210,12 +259,12 @@ export class Client {
     return this._post('/merchant/payout/proof/query', params, 'payout');
   }
 
-  // 代付收据。params: { payout_no? | out_payout_no?, lang?('en'|'zh-CN'|'zh-TW'), inline?(bool|0|1) }
+  // 代付收据。params: { payout_no? | out_payout_no?, lang?('en'|'zh-CN'|'zh-TW'), inline?(bool|0|1|'0'|'1') }
   // inline 以整数 1/0 发送（避免布尔签名歧义）。
   payoutReceiptQuery(params) {
     const p = { ...params };
     if ('inline' in p && p.inline !== null && p.inline !== undefined) {
-      p.inline = p.inline ? 1 : 0;
+      p.inline = normalizeInline(p.inline);
     }
     return this._post('/merchant/payout/receipt/query', p, 'payout');
   }
@@ -241,19 +290,19 @@ export class Client {
 
   // 代收/退款回调验签（api_secret_pay）。payload：解析后的回调键值表（含 sign）。
   verifyPayCallback(payload) {
-    if (!this.config.apiSecretPay) throw new TypeError('Client: missing apiSecretPay');
+    if (!isUsableSecret(this.config.apiSecretPay)) throw new TypeError('Client: missing apiSecretPay');
     return verifyCallbackSig(payload, this.config.apiSecretPay);
   }
 
   // 代付回调验签（api_secret_payout）。
   verifyPayoutCallback(payload) {
-    if (!this.config.apiSecretPayout) throw new TypeError('Client: missing apiSecretPayout');
+    if (!isUsableSecret(this.config.apiSecretPayout)) throw new TypeError('Client: missing apiSecretPayout');
     return verifyCallbackSig(payload, this.config.apiSecretPayout);
   }
 
   // 工单回复回调验签（api_secret_pay）。payload：解析后的回调键值表（含 sign）。
   verifyIssueTicketCallback(payload) {
-    if (!this.config.apiSecretPay) throw new TypeError('Client: missing apiSecretPay');
+    if (!isUsableSecret(this.config.apiSecretPay)) throw new TypeError('Client: missing apiSecretPay');
     return verifyCallbackSig(payload, this.config.apiSecretPay);
   }
 }

@@ -122,6 +122,34 @@ public class GuardCheck {
         assertThrows("Config localhost.evil.com http 拒绝", () -> Config.builder()
                 .baseUrl("http://localhost.evil.com/api/open/v1")
                 .merchantNo("M1").apiKey("k").apiSecretPay("p").build());
+        // SANDBOX + 外部明文 http / 非 http(s) scheme 均必须拒绝（不能借 SANDBOX 绕过）
+        assertThrows("Config SANDBOX + 外部 http 拒绝", () -> Config.builder()
+                .environment(Environment.SANDBOX)
+                .baseUrl("http://evil.example.com/api/open/v1")
+                .merchantNo("M1").apiKey("k").apiSecretPay("p").build());
+        assertThrows("Config SANDBOX + file:// 拒绝", () -> Config.builder()
+                .environment(Environment.SANDBOX)
+                .baseUrl("file:///etc/passwd")
+                .merchantNo("M1").apiKey("k").apiSecretPay("p").build());
+        // userinfo 伪装 localhost:80@evil.example.com 必须拒绝
+        assertThrows("Config userinfo 伪装 localhost:80@evil 拒绝", () -> Config.builder()
+                .baseUrl("http://localhost:80@evil.example.com/api/open/v1")
+                .merchantNo("M1").apiKey("k").apiSecretPay("p").build());
+        // 纯空白密钥在 requireSecretPay / requireSecretPayout 必须拒绝
+        Config blankSecretCfg = Config.builder()
+                .environment(Environment.SANDBOX)
+                .merchantNo("M1").apiKey("k").apiSecretPay("   ").apiSecretPayout("  ").build();
+        assertThrows("requireSecretPay 纯空白拒绝", blankSecretCfg::requireSecretPay);
+        assertThrows("requireSecretPayout 纯空白拒绝", blankSecretCfg::requireSecretPayout);
+        // BigDecimal 数值规范化：1.0 -> "1"，1.5 拒绝
+        assertEquals("BigDecimal 1.0 → 1", "v=1&secret=sk",
+                Signer.buildSignBase(num("v", new java.math.BigDecimal("1.0")), "sk"));
+        assertThrows("BigDecimal 1.5 拒绝", () ->
+                Signer.buildSignBase(num("v", new java.math.BigDecimal("1.5")), "sk"));
+        // 大写 hex sign 拒绝（严格 64 位小写 hex）
+        Map<String, Object> upperCb = new LinkedHashMap<>(cb);
+        upperCb.put("sign", okSign.toUpperCase());
+        assertTrue("verifyCallback 大写 hex sign → false", !Signer.verifyCallback(upperCb, realSecret));
 
         System.out.println();
         System.out.println("================ GuardCheck 结果 ================");

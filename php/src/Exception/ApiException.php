@@ -13,16 +13,18 @@ namespace Merchant\Openapi\Exception;
 final class ApiException extends \RuntimeException
 {
     /**
-     * @param int                       $apiCode 业务错误码（非 0）
+     * @param int                       $apiCode    业务错误码（非 0）
      * @param string                    $apiMessage 业务消息
-     * @param array<string,mixed>|null  $data    业务 data（可能含 missing_fields 等）
-     * @param array<string,mixed>|null  $raw     完整原始响应信封
+     * @param array<string,mixed>|null  $data       业务 data（可能含 missing_fields 等）
+     * @param array<string,mixed>|null  $raw        完整原始响应信封
+     * @param int                       $httpStatus HTTP 状态码（默认 200；如 300304 为 503、300302 为 500）
      */
     public function __construct(
         public readonly int $apiCode,
         public readonly string $apiMessage,
         public readonly ?array $data = null,
         public readonly ?array $raw = null,
+        public readonly int $httpStatus = 200,
     ) {
         parent::__construct(
             sprintf('OpenAPI 业务错误 [%d]: %s', $apiCode, $apiMessage),

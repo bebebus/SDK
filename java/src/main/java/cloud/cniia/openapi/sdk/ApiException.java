@@ -15,17 +15,28 @@ public class ApiException extends RuntimeException {
     private final long code;
     private final Object data;
     private final String rawBody;
+    private final int statusCode;
 
     public ApiException(long code, String message, Object data, String rawBody) {
+        this(code, message, data, rawBody, 200);
+    }
+
+    public ApiException(long code, String message, Object data, String rawBody, int statusCode) {
         super("OpenAPI 业务错误 code=" + code + " message=" + message);
         this.code = code;
         this.data = data;
         this.rawBody = rawBody;
+        this.statusCode = statusCode;
     }
 
     /** 业务错误码（非 0）。 */
     public long code() {
         return code;
+    }
+
+    /** HTTP 状态码（通常为 200，503/500 携带业务错误信封时保留原状态码）。 */
+    public int statusCode() {
+        return statusCode;
     }
 
     /** data 字段（可能为 null，或含 missing_fields 等）。 */

@@ -31,8 +31,8 @@ func stableStringify(sb *strings.Builder, v any) {
 	case bool:
 		sb.WriteString(strconv.FormatBool(x))
 	case json.Number:
-		// 原始文本形态：整数不会被转成科学计数法。
-		sb.WriteString(string(x))
+		// 与顶层一致：必须是纯十进制整数文本，拒绝 "1.0"/"1.5"/"1e2" 等非规范文本，避免跨语言分叉。
+		sb.WriteString(jsonNumberToString(x))
 	case int, int8, int16, int32, int64,
 		uint, uint8, uint16, uint32, uint64:
 		sb.WriteString(scalarToString(x))

@@ -16,10 +16,10 @@ final class Config
     public readonly string $baseUrl;
 
     /**
-     * @param string      $merchantNo      商户号
-     * @param string      $apiKey          API Key
-     * @param string      $apiSecretPay    代收类密钥（pay/*、pay-methods、balance、代收/退款回调）
-     * @param string      $apiSecretPayout 代付类密钥（payout/*、代付回调）
+     * @param string      $merchantNo      商户号（非空）
+     * @param string      $apiKey          API Key（非空）
+     * @param string      $apiSecretPay    代收类密钥（pay/*、pay-methods、balance、issue-ticket/*、代收/退款/工单回调；仅用代付时可留空）
+     * @param string      $apiSecretPayout 代付类密钥（payout/*、代付回调；仅用代收时可留空）
      * @param Environment $environment     环境预设基址（baseUrl 为 null 时生效）
      * @param string|null $baseUrl         自定义基址，覆盖 environment（用于服务商地址/本地端口）
      * @param int         $timeoutSeconds  HTTP 超时（秒）
@@ -27,12 +27,19 @@ final class Config
     public function __construct(
         public readonly string $merchantNo,
         public readonly string $apiKey,
-        public readonly string $apiSecretPay,
-        public readonly string $apiSecretPayout,
+        public readonly string $apiSecretPay = '',
+        public readonly string $apiSecretPayout = '',
         Environment $environment = Environment::PRODUCTION,
         ?string $baseUrl = null,
         public readonly int $timeoutSeconds = 30,
     ) {
+        if (trim($merchantNo) === '') {
+            throw new \InvalidArgumentException('merchantNo 不能为空');
+        }
+        if (trim($apiKey) === '') {
+            throw new \InvalidArgumentException('apiKey 不能为空');
+        }
+
         $resolved = $baseUrl !== null ? $baseUrl : $environment->baseUrl();
         $resolved = rtrim($resolved, '/');
         if ($resolved === '') {
@@ -49,6 +56,30 @@ final class Config
 
         // 已去掉末尾斜杠，拼接端点时统一不重复
         $this->baseUrl = $resolved;
+    }
+
+    /**
+     * 获取代收密钥；未配置或全空白时抛出 InvalidArgumentException（允许仅接入单侧密钥的商户）。
+     */
+    public function requireSecretPay(): string
+    {
+        if (trim($this->apiSecretPay) === '') {
+            throw new \InvalidArgumentException('缺少代收密钥 apiSecretPay');
+        }
+
+        return $this->apiSecretPay;
+    }
+
+    /**
+     * 获取代付密钥；未配置或全空白时抛出 InvalidArgumentException（允许仅接入单侧密钥的商户）。
+     */
+    public function requireSecretPayout(): string
+    {
+        if (trim($this->apiSecretPayout) === '') {
+            throw new \InvalidArgumentException('缺少代付密钥 apiSecretPayout');
+        }
+
+        return $this->apiSecretPayout;
     }
 
     /**

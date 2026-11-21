@@ -250,6 +250,58 @@ class TestKeySelectionAndShaping(unittest.TestCase):
         body = self.capture.calls[-1]["body"]
         self.assertIsNone(body["inline"])
 
+    def test_issue_ticket_create_and_query_use_pay_secret(self):
+        client = _make_client()
+        client.issue_ticket_create(
+            order_no="P1",
+            content="用户已付款",
+            image_base64="AAAA",
+            image_mime="image/png",
+            notify_url="https://m.example.com/ticket-cb",
+        )
+        create_call = self.capture.calls[-1]
+        self.assertEqual(create_call["path"], "/merchant/issue-ticket/create")
+        self.assertEqual(create_call["secret"], "sk_pay_secret")
+        self.assertEqual(create_call["body"]["order_no"], "P1")
+        self.assertEqual(create_call["body"]["notify_url"], "https://m.example.com/ticket-cb")
+
+        client.issue_ticket_query(ticket_no="TK1")
+        query_call = self.capture.calls[-1]
+        self.assertEqual(query_call["path"], "/merchant/issue-ticket/query")
+        self.assertEqual(query_call["secret"], "sk_pay_secret")
+        self.assertEqual(query_call["body"]["ticket_no"], "TK1")
+
+    def test_pay_methods_query_rejects_removed_v2_kwargs(self):
+        client = _make_client()
+        with self.assertRaises(TypeError):
+            client.pay_methods_query(biz_type="pay")  # type: ignore[call-arg]
+        with self.assertRaises(TypeError):
+            client.pay_methods_query(currency="PHP")  # type: ignore[call-arg]
+
+    def test_client_callback_verify_methods(self):
+        client = _make_client()
+        pay_cb = {"merchant_no": "M00000001", "order_no": "P1", "status": "success"}
+        pay_cb["sign"] = signer.sign(pay_cb, "sk_pay_secret")
+        self.assertTrue(client.verify_pay_callback(pay_cb))
+        self.assertFalse(client.verify_payout_callback(pay_cb))
+
+        payout_cb = {"merchant_no": "M00000001", "payout_no": "W1", "status": "success"}
+        payout_cb["sign"] = signer.sign(payout_cb, "sk_payout_secret")
+        self.assertTrue(client.verify_payout_callback(payout_cb))
+        self.assertFalse(client.verify_pay_callback(payout_cb))
+
+        ticket_cb = {
+            "merchant_no": "M00000001",
+            "ticket_no": "TK1",
+            "order_no": "W1",
+            "order_type": "payout",
+            "status": "replied",
+            "content": "已核实",
+        }
+        ticket_cb["sign"] = signer.sign(ticket_cb, "sk_pay_secret")
+        self.assertTrue(client.verify_issue_ticket_callback(ticket_cb))
+        self.assertFalse(client.verify_issue_ticket_callback({**ticket_cb, "content": "篡改"}))
+
 
 class TestEnvelopeHandling(unittest.TestCase):
     def test_business_error_raises_api_error(self):
@@ -396,18 +448,25 @@ class TestAllEndpointsCallable(unittest.TestCase):
         "payout_proof_query": "/merchant/payout/proof/query",
         "payout_receipt_query": "/merchant/payout/receipt/query",
         "payout_test_complete": "/merchant/payout/test/complete",
+        "issue_ticket_create": "/merchant/issue-ticket/create",
+        "issue_ticket_query": "/merchant/issue-ticket/query",
     }
 
     def test_methods_exist(self):
         client = _make_client()
-        for name in self.EXPECTED:
+        for name in (
+            *self.EXPECTED,
+            "verify_pay_callback",
+            "verify_payout_callback",
+            "verify_issue_ticket_callback",
+        ):
             self.assertTrue(
                 callable(getattr(client, name, None)),
-                msg=f"缺少端点方法 {name}",
+                msg=f"缺少端点或验签方法 {name}",
             )
 
     def test_endpoint_count(self):
-        self.assertEqual(len(self.EXPECTED), 13)
+        self.assertEqual(len(self.EXPECTED), 15)
 
 
 if __name__ == "__main__":

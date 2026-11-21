@@ -79,10 +79,17 @@ class TestScalarRules(unittest.TestCase):
             build_sign_base({"amount": 1}, " ")
         with self.assertRaises(ValueError):
             sign({"amount": 1.5}, self.SECRET)
-        self.assertFalse(verify_callback({"sign": "aa"}, " "))
+        with self.assertRaises(ValueError):
+            sign({"extra": {"v": 1.0}}, self.SECRET)
+        with self.assertRaises(ValueError):
+            sign({"extra": {"items": [1, 2.5]}}, self.SECRET)
+        self.assertFalse(verify_callback({"sign": "a" * 64}, " "))
         self.assertFalse(verify_callback(None, self.SECRET))
         self.assertFalse(verify_callback({"sign": "不合法"}, self.SECRET))
-        self.assertFalse(verify_callback({"sign": "aa", "amount": 1.5}, self.SECRET))
+        self.assertFalse(verify_callback({"sign": "A" * 64}, self.SECRET))
+        self.assertFalse(verify_callback({"sign": "aa"}, self.SECRET))
+        self.assertFalse(verify_callback({"sign": "a" * 64, "amount": 1.5}, self.SECRET))
+        self.assertFalse(verify_callback({"sign": "a" * 64, "extra": {"v": 1.0}}, self.SECRET))
 
     def test_boolean_lowercase(self):
         base = build_sign_base({"inline": True, "disabled": False}, self.SECRET)

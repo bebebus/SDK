@@ -13,15 +13,18 @@ namespace Merchant\Openapi\Exception;
 final class TransportException extends \RuntimeException
 {
     /**
-     * @param string      $message    错误描述
-     * @param int|null    $httpStatus HTTP 状态码（如有）
-     * @param string|null $rawBody    原始响应体（如有，便于排查）
+     * @param string      $message     错误描述
+     * @param int|null    $httpStatus  HTTP 状态码（如有）
+     * @param string|null $rawBody     原始响应体（如有，便于排查）
+     * @param ?\Throwable $previous    原始异常（如有）
+     * @param string|null $requestSign 本次请求实际发出的 sign（用于代付超时后反查比对）
      */
     public function __construct(
         string $message,
         public readonly ?int $httpStatus = null,
         public readonly ?string $rawBody = null,
         ?\Throwable $previous = null,
+        public readonly ?string $requestSign = null,
     ) {
         parent::__construct($message, 0, $previous);
     }
