@@ -55,7 +55,7 @@ SDK 设计：`Environment.SANDBOX` 内置本地预设基址；`Environment.PRODU
 | `client_ip` | string | 否 | 终端用户 IP |
 | `extra` | object | 否 | 扩展，参与签名；可含 `customer`：`{first_name,last_name,name,email,phone}` |
 
-响应 `data`：`order_no, out_order_no, amount(int), currency, pay_url(可空), qrcode_content(可空), pay_params(可空), expire_at(可空 ISO8601), status(pending|success|failed)`。
+响应 `data`：`order_no, out_order_no, amount(int), currency, pay_url(可空，H5 支付链接，非空时直接打开), qrcode_content(可空，二维码原串，非空时原样生成二维码，勿再包链接), pay_params(可空，App 唤醒链接如 gcash://xxxxxx，非空时直接唤起，勿再编码或交给 SDK), expire_at(可空 ISO8601), status(pending|success|failed)`。同步下单 `code=0` 时三项支付入口至少一项非空，其余为 `null`；唤起/打开不等于已入账，仍以查单或回调 `success` 为准。
 
 ### POST `/merchant/pay/query` — 代收查单（密钥：pay）
 请求：`order_no` 或 `out_order_no`（**二选一，至少一个**）。

@@ -55,7 +55,7 @@ Request (common fields +):
 | `client_ip` | string | No | End-user IP |
 | `extra` | object | No | Extension, participates in signing; may include `customer`: `{first_name,last_name,name,email,phone}` |
 
-Response `data`: `order_no, out_order_no, amount(int), currency, pay_url(nullable), qrcode_content(nullable), pay_params(nullable), expire_at(nullable ISO8601), status(pending|success|failed)`.
+Response `data`: `order_no, out_order_no, amount(int), currency, pay_url(nullable, H5 payment link — open directly when non-empty), qrcode_content(nullable, raw QR payload — render as a QR code as-is without wrapping in another link), pay_params(nullable, App wake link such as gcash://xxxxxx — launch directly without re-encoding or passing to an SDK), expire_at(nullable ISO8601), status(pending|success|failed)`. On synchronous `code=0`, at least one of the three payment entries is non-empty and the others are `null`; opening/launching is not confirmation of credit — rely on order query or callback `success`.
 
 ### POST `/merchant/pay/query` — query a collection order (key: pay)
 Request: `order_no` or `out_order_no` (**either one, at least one**).
