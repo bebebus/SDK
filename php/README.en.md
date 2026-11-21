@@ -12,10 +12,10 @@ The signing algorithm uses [`SIGNING.md`](../SIGNING.en.md) at the repository ro
 Appendix config files (view or download):
 
 - Client config (PHP array): [`appendix/config.example.php`](./appendix/config.example.php)
-  - Download: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/config.example.php
+  - Download: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/config.example.php
   - Docs site: https://openapi.overseas.cniia.cloud/sdk-config/config.example.php
 - Country / currency appendix (PHP array): [`appendix/catalog.php`](./appendix/catalog.php)
-  - Download: https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+  - Download: https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/catalog.php
   - Docs site: https://openapi.overseas.cniia.cloud/appendix/catalog.php
 
 ## Requirements
@@ -195,6 +195,6 @@ php tests/run.php
 
 The multi-language SDK repository that contains this PHP SDK is connected to [OpenSSF Scorecard](https://scorecard.dev/) for continuous automated open-source supply-chain security assessment.
 
-See the main repository's [Third-Party Security Verification](https://github.com/bebebus/SDK/blob/main/SECURITY-AUDIT.en.md) page for the public verification sources. This assessment is not a manual code audit or penetration test by an independent security firm.
+See the main repository's [Third-Party Security Verification](https://github.com/bebebus/payment-openapi-sdk/blob/main/SECURITY-AUDIT.en.md) page for the public verification sources. This assessment is not a manual code audit or penetration test by an independent security firm.
 
 Exit code `0` = all green; non-`0` = there were failures (CI can decide directly from this).

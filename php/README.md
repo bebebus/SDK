@@ -12,10 +12,10 @@
 附录配置文件（可直接查看或下载）：
 
 - 客户端配置（PHP 数组）：[`appendix/config.example.php`](./appendix/config.example.php)
-  - 下载：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/config.example.php
+  - 下载：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/config.example.php
   - 文档站：https://openapi.overseas.cniia.cloud/sdk-config/config.example.php
 - 国家 / 币种附录（PHP 数组）：[`appendix/catalog.php`](./appendix/catalog.php)
-  - 下载：https://raw.githubusercontent.com/bebebus/SDK/main/php/appendix/catalog.php
+  - 下载：https://raw.githubusercontent.com/bebebus/payment-openapi-sdk/main/php/appendix/catalog.php
   - 文档站：https://openapi.overseas.cniia.cloud/appendix/catalog.php
 
 ## 环境要求
@@ -194,6 +194,6 @@ php tests/run.php
 
 本 PHP SDK 所属的多语言 SDK 仓库已接入 [OpenSSF Scorecard](https://scorecard.dev/)，用于持续进行自动化开源供应链安全评估。
 
-公开验证入口见主仓库的 [第三方安全验证说明](https://github.com/bebebus/SDK/blob/main/SECURITY-AUDIT.md)。该评估不等同于独立安全公司的人工代码审计或渗透测试。
+公开验证入口见主仓库的 [第三方安全验证说明](https://github.com/bebebus/payment-openapi-sdk/blob/main/SECURITY-AUDIT.md)。该评估不等同于独立安全公司的人工代码审计或渗透测试。
 
 退出码 `0` = 全绿；非 `0` = 有失败（CI 可直接据此判定）。

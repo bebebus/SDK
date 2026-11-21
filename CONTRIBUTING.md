@@ -68,7 +68,7 @@ go test -fuzz=FuzzVerifyCallbackNeverPanics -fuzztime=30s .
 
 ## 适合新贡献者的小任务
 
-先在 [Issues](https://github.com/bebebus/SDK/issues) 搜索或提出计划，避免重复工作；以下任务适合按单一语言或单一文档分拆，不要求一次完成整个项目：
+先在 [Issues](https://github.com/bebebus/payment-openapi-sdk/issues) 搜索或提出计划，避免重复工作；以下任务适合按单一语言或单一文档分拆，不要求一次完成整个项目：
 
 - 对照一种语言的 README 示例与当前公开方法，修复可复现的示例错误并运行该语言测试。
 - 为某个尚未覆盖的签名边界或网络错误补充回归测试；先确认行为符合 [签名规范](./SIGNING.md)。

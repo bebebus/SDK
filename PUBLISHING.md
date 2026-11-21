@@ -1,6 +1,6 @@
 # 发布到包索引
 
-五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `2.2.0`。
+五套 SDK 在一个 monorepo（`github.com/bebebus/payment-openapi-sdk`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `2.2.0`。
 
 > ⚠️ **发版必须在 `main` 上执行**（release.sh 假定 push origin main）：v1.2.0 曾从 feature 分支打 tag 发布，随后 PR squash 合并导致已发布 tag（v1.2.0 / go/v1.2.0）指向的提交游离于 main 历史之外（仅由 tag 保活，包索引不受影响）。此后规则：先以 merge/squash 合入 main，**在 main 的合并结果上打 tag 再发**；若 PR 采用 squash，绝不可在分支侧提前打 tag。
 
@@ -32,11 +32,11 @@ python3 _tooling/reproducible-source-archives.py --ref v2.2.0 --version 2.2.0 --
 
 ## 验证 GitHub Release 构建证明
 
-从 [GitHub Release](https://github.com/bebebus/SDK/releases) 下载目标文件后，可用已登录的 GitHub CLI 验证该文件的构建证明及仓库来源。例如验证 `v2.2.0` 的 Go 归档：
+从 [GitHub Release](https://github.com/bebebus/payment-openapi-sdk/releases) 下载目标文件后，可用已登录的 GitHub CLI 验证该文件的构建证明及仓库来源。例如验证 `v2.2.0` 的 Go 归档：
 
 ```bash
-gh release download v2.2.0 -R bebebus/SDK -p go-2.2.0.tar.gz
-gh attestation verify go-2.2.0.tar.gz -R bebebus/SDK
+gh release download v2.2.0 -R bebebus/payment-openapi-sdk -p go-2.2.0.tar.gz
+gh attestation verify go-2.2.0.tar.gz -R bebebus/payment-openapi-sdk
 ```
 
 成功只证明指定文件的摘要与通过验证的构建证明匹配；应对每个准备使用的文件分别验证。工作流也将 Sigstore bundle 和 provenance 随 GitHub Release 提供；其他包索引或历史版本是否具备相同证明应分别核验，不应由此推断。GitHub 的 [验证构建证明指南](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations)解释证书和信任根的验证方式。

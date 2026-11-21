@@ -2,7 +2,7 @@
 
 ## 报告安全问题
 
-当前仓库尚未启用 GitHub Security Advisories 的 Private vulnerability reporting 入口，因此暂不接受通过该入口提交的私密报告。请先通过仓库 [Issues](https://github.com/bebebus/SDK/issues) 联系维护者，并只说明需要进行安全沟通，不要在公开 Issue、Pull Request 或讨论区发布可利用细节、密钥、真实商户数据或完整攻击步骤。私密报告入口启用后，本文件会同步更新。
+当前仓库尚未启用 GitHub Security Advisories 的 Private vulnerability reporting 入口，因此暂不接受通过该入口提交的私密报告。请先通过仓库 [Issues](https://github.com/bebebus/payment-openapi-sdk/issues) 联系维护者，并只说明需要进行安全沟通，不要在公开 Issue、Pull Request 或讨论区发布可利用细节、密钥、真实商户数据或完整攻击步骤。私密报告入口启用后，本文件会同步更新。
 
 在维护者提供私下沟通渠道后，报告中请尽量包含：
 

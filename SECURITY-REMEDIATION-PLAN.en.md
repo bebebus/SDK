@@ -25,7 +25,7 @@ Scorecard measures open-source supply-chain security practices. It is not a manu
 | Maintained | 0 | The repository has not yet aged through the report's observation window. |
 | Contributors | 0 | There is not yet contribution evidence from multiple organizations; this must not be gamed. |
 
-The live check on 2026-08-25 found successful [CI](https://github.com/bebebus/SDK/actions/runs/32558710542), [CodeQL](https://github.com/bebebus/SDK/actions/runs/32558710548), and [Scorecard](https://github.com/bebebus/SDK/actions/runs/32558710541) runs for `59c4135`; zero open Dependabot security alerts; and five medium OpenSSF Pinned-Dependencies alerts in Code Scanning.
+The live check on 2026-08-25 found successful [CI](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710542), [CodeQL](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710548), and [Scorecard](https://github.com/bebebus/payment-openapi-sdk/actions/runs/32558710541) runs for `59c4135`; zero open Dependabot security alerts; and five medium OpenSSF Pinned-Dependencies alerts in Code Scanning.
 
 ## 3. Remaining work
 

@@ -12,7 +12,7 @@
 
 ## 沟通与安全
 
-一般问题通过 [Issues](https://github.com/bebebus/SDK/issues) 公开讨论；漏洞报告遵循 [SECURITY.md](./SECURITY.md)，不要在公开讨论中披露敏感细节。参与者应遵守 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)。
+一般问题通过 [Issues](https://github.com/bebebus/payment-openapi-sdk/issues) 公开讨论；漏洞报告遵循 [SECURITY.md](./SECURITY.md)，不要在公开讨论中披露敏感细节。参与者应遵守 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)。
 
 ## 维护接替
 
