@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""商户支付 OpenAPI 客户端：覆盖全部 13 个签名业务端点。
+"""商户支付 OpenAPI 客户端：覆盖代收、代付与工单签名端点。
 
 仅用标准库：urllib.request（HTTP）、json、uuid、time、secrets。
 
@@ -43,6 +43,19 @@ class SignedData(dict):
         self.sign = sign
 
 
+class _Envelope(dict):
+    """内部响应信封，附带 HTTP 状态码（仍完全兼容 dict）。"""
+
+    def __init__(self, data: Mapping[str, Any], status_code: int) -> None:
+        super().__init__(data)
+        self.status_code = status_code
+
+
+def _is_int_code(value: Any) -> bool:
+    """判断 code 是否为真正的整数（排除 bool，避免 Python 中 False == 0 误判成功）。"""
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 # [L20] User-Agent 版本号单一事实源：从包元数据派生（与 __version__ 同源），
 # 不再硬编码；源码直跑（未安装）取不到则兜底（须随发版同步）。
 try:
@@ -52,9 +65,9 @@ try:
     try:
         _SDK_VERSION = _pkg_version("bebebus-merchant-openapi-sdk")
     except PackageNotFoundError:
-        _SDK_VERSION = "2.2.0"
+        _SDK_VERSION = "2.3.0"
 except ImportError:  # pragma: no cover —— Python <3.8 无 importlib.metadata
-    _SDK_VERSION = "2.2.0"
+    _SDK_VERSION = "2.3.0"
 
 _JSON_HEADERS = {
     "Content-Type": "application/json",
@@ -179,8 +192,6 @@ class Client:
     def pay_methods_query(
         self,
         country: Optional[str] = None,
-        biz_type: Optional[str] = None,
-        currency: Optional[str] = None,
     ) -> Dict[str, Any]:
         """POST /merchant/pay-methods/query — 可用支付方式。
 
@@ -189,7 +200,7 @@ class Client:
         """
         return self._call_pay(
             "/merchant/pay-methods/query",
-            {"country": country, "biz_type": biz_type, "currency": currency},
+            {"country": country},
         )
 
     def groups_query(
@@ -355,6 +366,57 @@ class Client:
         )
 
     # =====================================================================
+    # 工单（密钥：api_secret_pay）
+    # =====================================================================
+
+    def issue_ticket_create(
+        self,
+        order_no: str,
+        content: Optional[str] = None,
+        image_base64: Optional[str] = None,
+        image_mime: Optional[str] = None,
+        notify_url: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """POST /merchant/issue-ticket/create — 创建工单。notify_url 为空则不推送回复。"""
+        return self._call_pay(
+            "/merchant/issue-ticket/create",
+            {
+                "order_no": order_no,
+                "content": content,
+                "image_base64": image_base64,
+                "image_mime": image_mime,
+                "notify_url": notify_url,
+            },
+        )
+
+    def issue_ticket_query(
+        self,
+        ticket_no: Optional[str] = None,
+        order_no: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """POST /merchant/issue-ticket/query — 查询工单。ticket_no 与 order_no 至少填一个。"""
+        return self._call_pay(
+            "/merchant/issue-ticket/query",
+            {"ticket_no": ticket_no, "order_no": order_no},
+        )
+
+    # =====================================================================
+    # 回调验签（不发请求）
+    # =====================================================================
+
+    def verify_pay_callback(self, payload: Mapping[str, Any]) -> bool:
+        """代收/退款回调验签（api_secret_pay，时序安全比较）。"""
+        return signer.verify_callback(payload, self._config.require_secret_pay())
+
+    def verify_payout_callback(self, payload: Mapping[str, Any]) -> bool:
+        """代付回调验签（api_secret_payout，时序安全比较）。"""
+        return signer.verify_callback(payload, self._config.require_secret_payout())
+
+    def verify_issue_ticket_callback(self, payload: Mapping[str, Any]) -> bool:
+        """工单回复回调验签（api_secret_pay，时序安全比较）。"""
+        return signer.verify_callback(payload, self._config.require_secret_pay())
+
+    # =====================================================================
     # 内部：请求构建 / 发送 / 解析
     # =====================================================================
 
@@ -380,11 +442,19 @@ class Client:
     def _call(self, path: str, body: Mapping[str, Any], secret: str) -> Dict[str, Any]:
         envelope, request_sign = self._request(path, body, secret)
         code = envelope.get("code")
+        status_code = getattr(envelope, "status_code", 200)
+        if not _is_int_code(code):
+            raise TransportError(
+                f"响应信封 code 非整数: {path}",
+                status_code=status_code,
+                request_sign=request_sign,
+            )
         if code != 0:
             raise ApiError(
-                code=code if isinstance(code, int) else -1,
+                code=code,
                 message=str(envelope.get("message", "")),
                 data=envelope.get("data"),
+                status_code=status_code,
             )
         data = envelope.get("data")
         payload = data if isinstance(data, dict) else {}
@@ -434,18 +504,36 @@ class Client:
             raw_body = None
             with suppress(Exception):
                 raw_body = exc.read().decode("utf-8")
+            # 非 2xx 若携带合法且 code != 0 的业务信封（如 HTTP 503 + 300304、HTTP 500 + 300302），
+            # 返回信封交由 _call 抛 ApiError（或 call_raw 原样返回）；code == 0 或非信封仍抛 TransportError。
+            if raw_body is not None:
+                with suppress(json.JSONDecodeError):
+                    err_env = json.loads(raw_body)
+                    if (
+                        isinstance(err_env, dict)
+                        and _is_int_code(err_env.get("code"))
+                        and err_env["code"] != 0
+                    ):
+                        return _Envelope(err_env, exc.code), request_sign
             raise TransportError(
                 f"HTTP {exc.code} 请求失败: {url}",
                 status_code=exc.code,
                 body=raw_body,
                 cause=exc,
+                request_sign=request_sign,
             ) from exc
         except urllib.error.URLError as exc:  # DNS/连接/超时
             raise TransportError(
-                f"网络请求失败: {url} ({exc.reason})", cause=exc
+                f"网络请求失败: {url} ({exc.reason})",
+                cause=exc,
+                request_sign=request_sign,
             ) from exc
         except Exception as exc:  # noqa: BLE001 - 其余 IO/超时
-            raise TransportError(f"请求异常: {url} ({exc})", cause=exc) from exc
+            raise TransportError(
+                f"请求异常: {url} ({exc})",
+                cause=exc,
+                request_sign=request_sign,
+            ) from exc
 
         try:
             envelope = json.loads(raw)
@@ -455,12 +543,14 @@ class Client:
                 status_code=status,
                 body=raw,
                 cause=exc,
+                request_sign=request_sign,
             ) from exc
 
-        if not isinstance(envelope, dict) or "code" not in envelope:
+        if not isinstance(envelope, dict) or not _is_int_code(envelope.get("code")):
             raise TransportError(
-                f"响应缺少统一信封字段(code): {url}",
+                f"响应缺少合法整数信封字段(code): {url}",
                 status_code=status,
                 body=raw,
+                request_sign=request_sign,
             )
-        return envelope, request_sign
+        return _Envelope(envelope, status), request_sign

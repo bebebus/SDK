@@ -42,6 +42,7 @@ export function handlePayCallback(rawBody) {
   }
 
   // 时序安全验签（验签器只依赖"除 sign 外全部字段参与"，不硬编码字段表）。
+  // 工单回复回调改用 client.verifyIssueTicketCallback，密钥同样是 api_secret_pay。
   if (!client.verifyPayCallback(payload)) {
     return ACK_REJECT;
   }

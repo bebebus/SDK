@@ -23,7 +23,7 @@
    k1=v1&k2=v2&...&kN=vN&secret=<secret>
    ```
 5. **计算 sign**：`HMAC_SHA256(base, key=secret)`，输出**十六进制小写**字符串。
-6. **密钥选择**：pay 类接口与代收回调用 `api_secret_pay`；payout 类接口与代付回调用 `api_secret_payout`。
+6. **密钥选择**：pay 类接口、`issue-ticket/*` 工单接口及代收/退款/工单回调用 `api_secret_pay`；payout 类接口与代付回调用 `api_secret_payout`。
    （HMAC 的 key 与 base 末尾的 `&secret=` 用的是**同一个** secret。）
 
 把算出的 `sign` 放回请求体一起发送。
@@ -51,7 +51,7 @@
 - `null` → `null`
 - 标量（string/number/boolean）→ `JSON.stringify(v)`：
   - string → **带双引号**，并做 JSON 转义（见下）
-  - number → 数字字面量（`123`、`1.5`），无引号
+  - number → 整数字面量（如 `123`），无引号；**五套 SDK 在顶层与嵌套字段中均拒绝非整数浮点（如 `1.5`、`NaN`、`Infinity`）**，以杜绝跨语言浮点格式化分叉（如 `1.0` vs `1`、`1e+20`）
   - boolean → `true` / `false`
 - array → `[` + 各元素递归 `stableStringify` 用 `,` 连接 + `]`（**保持元素顺序**）
 - object → `{` + 键名**升序**后，每对 `JSON.stringify(key) + ":" + stableStringify(value)` 用 `,` 连接 + `}`（**紧凑无空格**）
@@ -96,8 +96,8 @@ sign：
 
 1. 解析回调 JSON 为键值表。
 2. **取出该表里除 `sign` 外的所有顶层字段**（不要硬编码字段清单——回调字段可能新增或减少；只要“除 sign 外全参与”即可保持兼容）。
-3. 用本文算法算出期望 `sign`（代收/退款回调用 `api_secret_pay`，代付回调用 `api_secret_payout`）。
-4. 与回调里的 `sign` **时序安全比较**（`crypto.timingSafeEqual` / `hmac.compare_digest` / `MessageDigest.isEqual` / `hmac.Equal` / `hash_equals`）。
+3. 用本文算法算出期望 `sign`（代收/退款/工单回复回调用 `api_secret_pay`，代付回调用 `api_secret_payout`）。
+4. 预检回调中的 `sign` 必须为 64 位小写十六进制字符（`/^[0-9a-f]{64}$/`，五套 SDK 统一口径，非法格式直接判失败且不抛异常），再与期望值做**时序安全比较**（`crypto.timingSafeEqual` / `hmac.compare_digest` / `MessageDigest.isEqual` / `hmac.Equal` / `hash_equals`）。
 5. 验签失败 → 拒绝处理，不要回成功应答；同一订单可能再次收到回调。
 
 ### 商户应答（决定是否继续收到回调）

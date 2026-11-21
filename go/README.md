@@ -4,7 +4,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/bebebus/SDK/go/v2.svg)](https://pkg.go.dev/github.com/bebebus/SDK/go/v2) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 13 个签名端点（代收 7 + 代付 6），含
+零第三方依赖的 Go SDK，覆盖商户 OpenAPI 全部 15 个签名端点（代收 7 + 代付 6 + 工单 2），含
 HMAC-SHA256 签名、双环境配置、回调时序安全验签。仅用 Go 标准库（`net/http` / `crypto/hmac`
 / `crypto/sha256` / `encoding/json`），**无任何 `require`**。
 
@@ -67,7 +67,7 @@ func main() {
 }
 ```
 
-### 13 个端点方法
+### 15 个端点方法
 
 | 类别 | 方法 | 端点 | 密钥 |
 |------|------|------|------|
@@ -84,6 +84,8 @@ func main() {
 | 代付 | `PayoutProofQuery` | `/merchant/payout/proof/query` | payout |
 | 代付 | `PayoutReceiptQuery` | `/merchant/payout/receipt/query` | payout |
 | 代付 | `PayoutTestComplete` | `/merchant/payout/test/complete` | payout |
+| 工单 | `IssueTicketCreate` | `/merchant/issue-ticket/create` | pay |
+| 工单 | `IssueTicketQuery` | `/merchant/issue-ticket/query` | pay |
 
 每个方法自动注入通用字段（`merchant_no` / `api_key` / `timestamp` / 唯一 `nonce`）与 `sign`，并
 自动选对密钥。**值为 `nil` 的字段不会进入请求体也不参与签名**。`PayoutReceiptQuery` 的 `inline`
@@ -110,7 +112,7 @@ openapi.NewClient(openapi.Config{BaseURL: "https://api.<service_domain>/api/open
 ## 回调验签与应答
 
 回调按「除 `sign` 外所有字段参与签名」通用计算（字段无关，回调字段可能新增或减少），比较使用
-`hmac.Equal` 时序安全。代收/退款回调用 `VerifyPayCallback`，代付回调用 `VerifyPayoutCallback`。
+`hmac.Equal` 时序安全。代收/退款回调用 `VerifyPayCallback`，代付回调用 `VerifyPayoutCallback`。工单回复回调用 `VerifyIssueTicketCallback`，密钥与代收相同，为 `api_secret_pay`。
 
 ```go
 raw, _ := io.ReadAll(r.Body)
@@ -156,9 +158,9 @@ ok := openapi.VerifyCallback(payload, secret)  // 时序安全
 
 ## 错误处理
 
-- 业务失败（信封 `code != 0`）→ `*openapi.APIError`（含 `Code`/`Message`/`Data`/`Raw`）。
-- HTTP/网络/非 2xx/解析失败 → `*openapi.TransportError`（含 `StatusCode`/`Raw`/`Err`，可 `errors.Unwrap`）。
-- 即使返回错误，`*Response.Raw` 仍保留原始响应体，便于排查。
+- 业务失败（信封 `code != 0`，含 HTTP 503+`300304` / 500+`300302` 等非 2xx 业务信封）→ `*openapi.APIError`（含 `Code`/`Message`/`Data`/`Raw`/`StatusCode`）。
+- HTTP/网络/非 2xx（无有效非 0 信封）/解析失败 → `*openapi.TransportError`（含 `StatusCode`/`Raw`/`RequestSign`/`Err`，可 `errors.Unwrap`）。
+- 即使返回业务错误，`*Response.Raw` 仍保留原始响应体；传输失败时可从 `TransportError.RequestSign` 读取本次实际发出的 `sign`（用于代付超时后反查）。
 
 用 `errors.As` 区分：
 

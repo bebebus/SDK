@@ -22,18 +22,25 @@ class OpenApiError(Exception):
 class ApiError(OpenApiError):
     """业务异常：统一响应信封中 ``code != 0``。
 
-    携带原始 ``code``/``message``/``data`` 供调用方判断，不在 SDK 内穷举写死分支。
+    携带原始 ``code``/``message``/``data``/``status_code`` 供调用方判断，不在 SDK 内穷举写死分支。
     """
 
-    def __init__(self, code: int, message: str, data: Any = None) -> None:
+    def __init__(
+        self,
+        code: int,
+        message: str,
+        data: Any = None,
+        status_code: Optional[int] = 200,
+    ) -> None:
         super().__init__(f"[{code}] {message}")
         self.code = code
         self.message = message
         self.data = data
+        self.status_code = status_code
 
 
 class TransportError(OpenApiError):
-    """传输异常：HTTP 非 2xx、网络错误、超时、响应不可解析为 JSON 等。"""
+    """传输异常：HTTP 非 2xx（且非合法业务错误信封）、网络错误、超时、响应不可解析为 JSON 等。"""
 
     def __init__(
         self,
@@ -41,8 +48,10 @@ class TransportError(OpenApiError):
         status_code: Optional[int] = None,
         body: Optional[str] = None,
         cause: Optional[BaseException] = None,
+        request_sign: Optional[str] = None,
     ) -> None:
         super().__init__(message)
         self.status_code = status_code
         self.body = body
         self.cause = cause
+        self.request_sign = request_sign

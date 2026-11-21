@@ -112,8 +112,8 @@ func VerifyCallback(payload Payload, secret string) (ok bool) {
 	return hmac.Equal([]byte(expected), []byte(provided))
 }
 
-// isValidHexSign 判定签名串是否为合法的 HMAC-SHA256 hex（64 位小写/大写十六进制）。
-// 长度异常或含非十六进制字符（攻击者可控）一律判非法。
+// isValidHexSign 判定签名串是否为合法的 HMAC-SHA256 hex（严格 64 位小写十六进制）。
+// 长度异常、含大写或非十六进制字符（攻击者可控）一律判非法，与五语言口径统一。
 func isValidHexSign(sign string) bool {
 	if len(sign) != sha256.Size*2 { // 32 字节 → 64 个 hex 字符。
 		return false
@@ -122,8 +122,7 @@ func isValidHexSign(sign string) bool {
 		c := sign[i]
 		isDigit := c >= '0' && c <= '9'
 		isLowerHex := c >= 'a' && c <= 'f'
-		isUpperHex := c >= 'A' && c <= 'F'
-		if !isDigit && !isLowerHex && !isUpperHex {
+		if !isDigit && !isLowerHex {
 			return false
 		}
 	}

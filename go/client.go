@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 
 // Version 是 SDK 版本号单一事实源：UA 由它派生（不再硬编码）。
 // release.sh 发版打 tag go/vX.Y.Z 时，同步 sed 此常量保持一致。
-const Version = "2.2.0"
+const Version = "2.3.0"
 
 // secretKind 标记某端点该用哪把密钥。
 type secretKind int
@@ -76,7 +77,7 @@ func (c *Client) PayQuery(ctx context.Context, params map[string]any) (*Response
 	return c.call(ctx, "/merchant/pay/query", params, usePay)
 }
 
-// PayMethodsQuery 可用支付方式。params 可含 country / biz_type / currency。返回 methods，
+// PayMethodsQuery 可用支付方式。params 可含 country（可选）。返回 methods，
 // 每项含 name_i18n{zh-CN,en-US}、logo_svg（可空）。
 func (c *Client) PayMethodsQuery(ctx context.Context, params map[string]any) (*Response, error) {
 	return c.call(ctx, "/merchant/pay-methods/query", params, usePay)
@@ -147,6 +148,18 @@ func (c *Client) PayoutTestComplete(ctx context.Context, params map[string]any) 
 	return c.call(ctx, "/merchant/payout/test/complete", params, usePayout)
 }
 
+// ===================== 工单（密钥 api_secret_pay） =====================
+
+// IssueTicketCreate 创建工单。params 须含 order_no，可选 content、image_base64、image_mime、notify_url。
+func (c *Client) IssueTicketCreate(ctx context.Context, params map[string]any) (*Response, error) {
+	return c.call(ctx, "/merchant/issue-ticket/create", params, usePay)
+}
+
+// IssueTicketQuery 查询工单。params 须含 ticket_no 或 order_no 至少一个。
+func (c *Client) IssueTicketQuery(ctx context.Context, params map[string]any) (*Response, error) {
+	return c.call(ctx, "/merchant/issue-ticket/query", params, usePay)
+}
+
 // ===================== 回调验签 =====================
 
 // VerifyPayCallback 校验代收/退款回调（密钥 api_secret_pay，时序安全）。
@@ -159,6 +172,11 @@ func (c *Client) VerifyPayoutCallback(payload map[string]any) bool {
 	return VerifyCallback(payload, c.cfg.SecretPayout)
 }
 
+// VerifyIssueTicketCallback 校验工单回复回调（密钥 api_secret_pay，时序安全）。
+func (c *Client) VerifyIssueTicketCallback(payload map[string]any) bool {
+	return VerifyCallback(payload, c.cfg.SecretPay)
+}
+
 // ===================== 内部：请求构建 / 发送 / 解析 =====================
 
 // secretFor 返回端点对应的密钥。
@@ -169,6 +187,25 @@ func (c *Client) secretFor(kind secretKind) string {
 	return c.cfg.SecretPay
 }
 
+type rawEnvelope struct {
+	Code    *int            `json:"code"`
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data"`
+}
+
+func decodeEnvelope(raw []byte) (*rawEnvelope, error) {
+	var env rawEnvelope
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.UseNumber()
+	if err := dec.Decode(&env); err != nil {
+		return nil, err
+	}
+	if env.Code == nil {
+		return nil, errors.New("missing or null code in response envelope")
+	}
+	return &env, nil
+}
+
 // call 构建请求体（注入通用字段 + nonce + timestamp + sign），POST 并解析统一信封。
 func (c *Client) call(ctx context.Context, path string, params map[string]any, kind secretKind) (*Response, error) {
 	// 基址解析失败（如选 Production 未传 BaseURL）：首个请求即清晰报错。
@@ -176,33 +213,56 @@ func (c *Client) call(ctx context.Context, path string, params map[string]any, k
 		return nil, c.baseURLErr
 	}
 	secret := c.secretFor(kind)
-	body := c.buildBody(params, secret)
-
-	raw, status, err := c.do(ctx, c.baseURL, path, body)
+	if isBlankSecret(secret) {
+		field := "SecretPay"
+		if kind == usePayout {
+			field = "SecretPayout"
+		}
+		return nil, fmt.Errorf("%w: %s", ErrSecretRequired, field)
+	}
+	body, err := c.buildBodySafe(params, secret)
 	if err != nil {
 		return nil, err
 	}
-
-	// 解析统一信封；用 Decoder+UseNumber 避免大整数被 float64 写成科学计数法。
-	var envelope struct {
-		Code    int             `json:"code"`
-		Message string          `json:"message"`
-		Data    json.RawMessage `json:"data"`
-	}
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.UseNumber()
-	if err := dec.Decode(&envelope); err != nil {
-		return nil, &TransportError{Op: "decode", StatusCode: status, Raw: raw, Err: err}
-	}
-
-	data := decodeData(envelope.Data)
 	requestSign, _ := body["sign"].(string)
-	resp := &Response{Code: envelope.Code, Message: envelope.Message, Data: data, Raw: raw, Sign: requestSign}
 
-	if envelope.Code != 0 {
-		return resp, &APIError{Code: envelope.Code, Message: envelope.Message, Data: data, Raw: raw}
+	raw, status, err := c.do(ctx, c.baseURL, path, body)
+	if err != nil {
+		// 非 2xx 若响应体为合法且 code != 0 的业务信封（如 HTTP 503 + 300304、HTTP 500 + 300302），
+		// 转为 APIError 供调用方精确识别业务码；HTTP 非 2xx 但 code == 0 或非信封一律保留 TransportError。
+		if status != 0 && (status < 200 || status >= 300) && len(raw) > 0 {
+			if env, decErr := decodeEnvelope(raw); decErr == nil && *env.Code != 0 {
+				data := decodeData(env.Data)
+				resp := &Response{Code: *env.Code, Message: env.Message, Data: data, Raw: raw, Sign: requestSign}
+				return resp, &APIError{Code: *env.Code, Message: env.Message, Data: data, Raw: raw, StatusCode: status}
+			}
+		}
+		return nil, err
+	}
+
+	env, decErr := decodeEnvelope(raw)
+	if decErr != nil {
+		return nil, &TransportError{Op: "decode", StatusCode: status, Raw: raw, RequestSign: requestSign, Err: decErr}
+	}
+
+	data := decodeData(env.Data)
+	resp := &Response{Code: *env.Code, Message: env.Message, Data: data, Raw: raw, Sign: requestSign}
+
+	if *env.Code != 0 {
+		return resp, &APIError{Code: *env.Code, Message: env.Message, Data: data, Raw: raw, StatusCode: status}
 	}
 	return resp, nil
+}
+
+// buildBodySafe 在客户端调用路径捕获 Sign 对非法参数的 panic 并转为普通 error，避免搞崩调用方进程。
+func (c *Client) buildBodySafe(params map[string]any, secret string) (body map[string]any, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			body = nil
+			err = fmt.Errorf("openapi: build request failed: %v", r)
+		}
+	}()
+	return c.buildBody(params, secret), nil
 }
 
 // buildBody 注入通用字段并签名，返回最终请求体（含 sign）。
@@ -226,15 +286,16 @@ func (c *Client) buildBody(params map[string]any, secret string) map[string]any 
 
 // do 执行 POST application/json，返回原始响应体与状态码。
 func (c *Client) do(ctx context.Context, base, path string, body map[string]any) ([]byte, int, error) {
+	requestSign, _ := body["sign"].(string)
 	payload, err := marshalNoEscape(body)
 	if err != nil {
-		return nil, 0, &TransportError{Op: "marshal", Err: err}
+		return nil, 0, &TransportError{Op: "marshal", RequestSign: requestSign, Err: err}
 	}
 
 	url := base + path
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payload))
 	if err != nil {
-		return nil, 0, &TransportError{Op: "request", Err: err}
+		return nil, 0, &TransportError{Op: "request", RequestSign: requestSign, Err: err}
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
@@ -244,7 +305,7 @@ func (c *Client) do(ctx context.Context, base, path string, body map[string]any)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, 0, &TransportError{Op: "request", Err: err}
+		return nil, 0, &TransportError{Op: "request", RequestSign: requestSign, Err: err}
 	}
 	defer func() {
 		_ = res.Body.Close()
@@ -252,15 +313,16 @@ func (c *Client) do(ctx context.Context, base, path string, body map[string]any)
 
 	raw, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, res.StatusCode, &TransportError{Op: "read", StatusCode: res.StatusCode, Err: err}
+		return nil, res.StatusCode, &TransportError{Op: "read", StatusCode: res.StatusCode, RequestSign: requestSign, Err: err}
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return raw, res.StatusCode, &TransportError{
-			Op:         "http",
-			StatusCode: res.StatusCode,
-			Raw:        raw,
-			Err:        fmt.Errorf("unexpected http status %d", res.StatusCode),
+			Op:          "http",
+			StatusCode:  res.StatusCode,
+			Raw:         raw,
+			RequestSign: requestSign,
+			Err:         fmt.Errorf("unexpected http status %d", res.StatusCode),
 		}
 	}
 	return raw, res.StatusCode, nil

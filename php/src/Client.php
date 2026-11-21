@@ -24,7 +24,7 @@ final class Client
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 composer.json 一致）。
      */
-    public const VERSION = '2.2.0';
+    public const VERSION = '2.3.0';
 
     /** @var callable(string,string,int):array{status:int,body:string} 注入的 HTTP 执行器（默认 cURL） */
     private $httpExecutor;
@@ -80,7 +80,7 @@ final class Client
      * 可用支付方式 POST /merchant/pay-methods/query。返回 methods，
      * 每项含 name_i18n{zh-CN,en-US} 与 logo_svg（内联 SVG 字符串，可为 null）。
      *
-     * @param array{country?:string|null, biz_type?:string|null, currency?:string|null} $params
+     * @param array{country?:string|null} $params
      * @return array<string,mixed>
      */
     public function payMethodsQuery(array $params = []): array
@@ -218,6 +218,30 @@ final class Client
         return $this->callPayout('/merchant/payout/test/complete', $params);
     }
 
+    /**
+     * 创建工单 POST /merchant/issue-ticket/create（密钥 api_secret_pay）。
+     * order_no 必填；content、image_base64、image_mime、notify_url 可选。
+     *
+     * @param array{order_no:string, content?:string|null, image_base64?:string|null, image_mime?:string|null, notify_url?:string|null} $params
+     * @return array<string,mixed> data
+     */
+    public function issueTicketCreate(array $params): array
+    {
+        return $this->callPay('/merchant/issue-ticket/create', $params);
+    }
+
+    /**
+     * 查询工单 POST /merchant/issue-ticket/query（密钥 api_secret_pay）。
+     * ticket_no 或 order_no 至少填一个。
+     *
+     * @param array{ticket_no?:string|null, order_no?:string|null} $params
+     * @return array<string,mixed> data
+     */
+    public function issueTicketQuery(array $params): array
+    {
+        return $this->callPay('/merchant/issue-ticket/query', $params);
+    }
+
     // ====================== 回调验签（便捷转发到 Signer）======================
 
     /**
@@ -227,7 +251,7 @@ final class Client
      */
     public function verifyPayCallback(array $payload): bool
     {
-        return Signer::verifyCallback($payload, $this->config->apiSecretPay);
+        return Signer::verifyCallback($payload, $this->config->requireSecretPay());
     }
 
     /**
@@ -237,7 +261,17 @@ final class Client
      */
     public function verifyPayoutCallback(array $payload): bool
     {
-        return Signer::verifyCallback($payload, $this->config->apiSecretPayout);
+        return Signer::verifyCallback($payload, $this->config->requireSecretPayout());
+    }
+
+    /**
+     * 工单回复回调验签（密钥 api_secret_pay，时序安全比较）。
+     *
+     * @param array<string,mixed> $payload 回调 JSON 解析后的键值表（含 sign）
+     */
+    public function verifyIssueTicketCallback(array $payload): bool
+    {
+        return Signer::verifyCallback($payload, $this->config->requireSecretPay());
     }
 
     /**
@@ -252,7 +286,7 @@ final class Client
 
     /**
      * 最近一次请求实际发出的 sign。代付反查保存的就是 payoutCreate 的这一笔。
-     * 请求是同步的，请在对应调用返回后、下一次 SDK 调用前读取。
+     * 请求是同步的，请在对应调用返回后、下一次 SDK 调用前读取；若发生传输异常也可从 TransportException::$requestSign 读取。
      */
     public function lastRequestSign(): ?string
     {
@@ -269,7 +303,7 @@ final class Client
      */
     private function callPay(string $path, array $params): array
     {
-        return $this->dispatch($path, $params, $this->config->apiSecretPay);
+        return $this->dispatch($path, $params, $this->config->requireSecretPay());
     }
 
     /**
@@ -280,7 +314,7 @@ final class Client
      */
     private function callPayout(string $path, array $params): array
     {
-        return $this->dispatch($path, $params, $this->config->apiSecretPayout);
+        return $this->dispatch($path, $params, $this->config->requireSecretPayout());
     }
 
     /**
@@ -294,15 +328,16 @@ final class Client
         $base = $this->config->baseUrl;
 
         $payload = $this->buildPayload($params);
-        $payload['sign'] = Signer::sign($payload, $secret);
-        $this->lastRequestSign = $payload['sign'];
+        $requestSign = Signer::sign($payload, $secret);
+        $payload['sign'] = $requestSign;
+        $this->lastRequestSign = $requestSign;
 
         $url = $base . $path;
-        $json = $this->encodeBody($payload);
+        $json = $this->encodeBody($payload, $requestSign);
 
-        [$status, $body] = $this->sendRaw($url, $json);
+        [$status, $body] = $this->sendRaw($url, $json, $requestSign);
 
-        return $this->parseEnvelope($status, $body);
+        return $this->parseEnvelope($status, $body, $requestSign);
     }
 
     /**
@@ -343,11 +378,17 @@ final class Client
      *
      * @param array<string,mixed> $payload
      */
-    private function encodeBody(array $payload): string
+    private function encodeBody(array $payload, ?string $requestSign = null): string
     {
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if ($json === false) {
-            throw new TransportException('请求体 JSON 编码失败: ' . json_last_error_msg());
+            throw new TransportException(
+                '请求体 JSON 编码失败: ' . json_last_error_msg(),
+                null,
+                null,
+                null,
+                $requestSign
+            );
         }
 
         return $json;
@@ -358,9 +399,22 @@ final class Client
      *
      * @return array{0:int,1:string}
      */
-    private function sendRaw(string $url, string $json): array
+    private function sendRaw(string $url, string $json, string $requestSign): array
     {
-        $result = ($this->httpExecutor)($url, $json, $this->config->timeoutSeconds);
+        try {
+            $result = ($this->httpExecutor)($url, $json, $this->config->timeoutSeconds);
+        } catch (TransportException $e) {
+            if ($e->requestSign !== null) {
+                throw $e;
+            }
+            throw new TransportException(
+                $e->getMessage(),
+                $e->httpStatus,
+                $e->rawBody,
+                $e,
+                $requestSign
+            );
+        }
 
         return [(int) $result['status'], (string) $result['body']];
     }
@@ -416,17 +470,33 @@ final class Client
     }
 
     /**
-     * 解析统一信封：HTTP 非 2xx 或非合法 JSON → TransportException；code !== 0 → ApiException；否则返回 data。
+     * 解析统一信封：
+     *  - HTTP 非 2xx 若响应体为合法且 code !== 0 的业务信封（如 503 + 300304、500 + 300302），
+     *    抛 ApiException 并保留 httpStatus；若 code === 0 或非合法信封则抛 TransportException。
+     *  - HTTP 2xx 非合法 JSON 信封或 code 非整数 → TransportException；code !== 0 → ApiException；否则返回 data。
      *
      * @return array<string,mixed>
      */
-    private function parseEnvelope(int $status, string $body): array
+    private function parseEnvelope(int $status, string $body, ?string $requestSign = null): array
     {
         if ($status < 200 || $status >= 300) {
+            $decoded = json_decode($body, true);
+            if (is_array($decoded) && array_key_exists('code', $decoded)) {
+                $code = self::parseEnvelopeCode($decoded['code']);
+                if ($code !== null && $code !== 0) {
+                    $this->lastRawResponse = $decoded;
+                    $message = isset($decoded['message']) ? (string) $decoded['message'] : '';
+                    $data = (isset($decoded['data']) && is_array($decoded['data'])) ? $decoded['data'] : null;
+                    throw new ApiException($code, $message, $data, $decoded, $status);
+                }
+            }
+
             throw new TransportException(
                 sprintf('HTTP 状态异常: %d', $status),
                 $status,
-                $body
+                $body,
+                null,
+                $requestSign
             );
         }
 
@@ -435,32 +505,45 @@ final class Client
             throw new TransportException(
                 '响应不是合法 JSON 信封: ' . json_last_error_msg(),
                 $status,
-                $body
+                $body,
+                null,
+                $requestSign
             );
         }
 
         $this->lastRawResponse = $decoded;
 
         if (!array_key_exists('code', $decoded)) {
-            throw new TransportException('响应信封缺少 code 字段', $status, $body);
+            throw new TransportException('响应信封缺少 code 字段', $status, $body, null, $requestSign);
         }
 
-        $rawCode = $decoded['code'];
-        if (is_int($rawCode)) {
-            $code = $rawCode;
-        } elseif (is_string($rawCode)
-            && preg_match('/\A[+-]?(?:0|[1-9][0-9]*)\z/', trim($rawCode)) === 1
-            && filter_var(trim($rawCode), FILTER_VALIDATE_INT) !== false) {
-            $code = (int) trim($rawCode);
-        } else {
-            throw new TransportException('响应 code 必须是范围内的整数', $status, $body);
+        $code = self::parseEnvelopeCode($decoded['code']);
+        if ($code === null) {
+            throw new TransportException('响应 code 必须是范围内的整数', $status, $body, null, $requestSign);
         }
         if ($code !== 0) {
             $message = isset($decoded['message']) ? (string) $decoded['message'] : '';
             $data = (isset($decoded['data']) && is_array($decoded['data'])) ? $decoded['data'] : null;
-            throw new ApiException($code, $message, $data, $decoded);
+            throw new ApiException($code, $message, $data, $decoded, $status);
         }
 
         return (isset($decoded['data']) && is_array($decoded['data'])) ? $decoded['data'] : [];
+    }
+
+    /**
+     * 严格解析信封 code：仅接受整数或合法十进制整数字符串（拒绝 bool/float/null/超范围整数）。
+     */
+    private static function parseEnvelopeCode(mixed $rawCode): ?int
+    {
+        if (is_int($rawCode)) {
+            return $rawCode;
+        }
+        if (is_string($rawCode)
+            && preg_match('/\A[+-]?(?:0|[1-9][0-9]*)\z/', trim($rawCode)) === 1
+            && filter_var(trim($rawCode), FILTER_VALIDATE_INT) !== false) {
+            return (int) trim($rawCode);
+        }
+
+        return null;
     }
 }

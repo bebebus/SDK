@@ -4,7 +4,7 @@
 
 [![Packagist](https://img.shields.io/packagist/v/bebebus/merchant-openapi-sdk?label=Packagist)](https://packagist.org/packages/bebebus/merchant-openapi-sdk) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 13 个签名端点 + HMAC-SHA256 签名 + 回调验签。
+零第三方依赖的 PHP 8 SDK，覆盖商户支付 OpenAPI 全部 15 个签名端点 + HMAC-SHA256 签名 + 回调验签。
 仅使用 PHP 标准库与核心扩展（`ext-curl`、`ext-json`），**不依赖 composer 安装任何包**（如 Guzzle/PHPUnit 等一概不用）。
 
 签名算法以仓库根的 [`SIGNING.md`](../SIGNING.md) 为单一事实源，并通过 [`test-vectors.json`](../test-vectors.json) 跨语言向量逐字节校验。
@@ -84,9 +84,9 @@ try {
     ]);
     echo $data['order_no'], ' ', $data['status'], "\n";
 } catch (ApiException $e) {
-    // 业务错误码非 0：$e->apiCode / $e->apiMessage / $e->data
+    // 业务错误码非 0（含 HTTP 503+300304 / 500+300302）：$e->apiCode / $e->apiMessage / $e->data / $e->httpStatus
 } catch (TransportException $e) {
-    // 网络/HTTP 错误：$e->httpStatus / $e->rawBody
+    // 网络/HTTP 错误：$e->httpStatus / $e->rawBody / $e->requestSign
 }
 ```
 
@@ -104,7 +104,7 @@ new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 
 > `PRODUCTION` **不内置任何正式地址**：正式地址请向服务商获取（形如 `https://api.<service_domain>/api/open/v1`），必须用 `baseUrl` 显式传入。选 `PRODUCTION` 而不传 `baseUrl` 会在构造 `Config` 时抛 `InvalidArgumentException`。
 
-## 端点方法（全 13 个）
+## 端点方法（全 15 个）
 
 | 方法 | 端点 | 密钥 |
 |------|------|------|
@@ -121,6 +121,8 @@ new Config(..., baseUrl: 'https://api.<service_domain>/api/open/v1');
 | `payoutProofQuery($params)` | `/merchant/payout/proof/query` | payout |
 | `payoutReceiptQuery($params)` | `/merchant/payout/receipt/query` | payout |
 | `payoutTestComplete($params)` | `/merchant/payout/test/complete`（仅测试密钥） | payout |
+| `issueTicketCreate($params)` | `/merchant/issue-ticket/create` | pay |
+| `issueTicketQuery($params)` | `/merchant/issue-ticket/query` | pay |
 
 约定：
 
@@ -152,6 +154,7 @@ $ok = Signer::verifyCallbackRaw($rawBody, $secret);
 // 便捷方法（密钥取自 Config）
 $client->verifyPayCallback($payload);    // 代收/退款回调，用 api_secret_pay
 $client->verifyPayoutCallback($payload); // 代付回调，用 api_secret_payout
+$client->verifyIssueTicketCallback($payload); // 工单回复回调，用 api_secret_pay
 ```
 
 回调处理范式（见 `examples/callback_verify.php`）：拿原始 body → 优先用 `verifyCallbackRaw($rawBody, $secret)`

@@ -71,7 +71,7 @@ config = Config(
 )
 ```
 
-## 全部 13 个端点
+## 全部 15 个端点
 
 代收（密钥 `api_secret_pay`，自动选用）：
 
@@ -79,7 +79,7 @@ config = Config(
 |------|------|
 | `pay_create(...)` | `/merchant/pay/create` |
 | `pay_query(order_no=, out_order_no=)` | `/merchant/pay/query` |
-| `pay_methods_query(country=, biz_type=, currency=)` | `/merchant/pay-methods/query` |
+| `pay_methods_query(country=)` | `/merchant/pay-methods/query` |
 | `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query`（兼容别名） |
 | `countries_query()` | `/merchant/countries/query` |
 | `balance_query(currency=)` | `/merchant/balance/query` |
@@ -96,13 +96,20 @@ config = Config(
 | `payout_receipt_query(..., inline=)` | `/merchant/payout/receipt/query` |
 | `payout_test_complete(result=, ...)` | `/merchant/payout/test/complete`（仅测试密钥） |
 
+工单（密钥 `api_secret_pay`，自动选用；对应代付单时也用此密钥）：
+
+| 方法 | 端点 |
+|------|------|
+| `issue_ticket_create(order_no=, ...)` | `/merchant/issue-ticket/create` |
+| `issue_ticket_query(ticket_no=, order_no=)` | `/merchant/issue-ticket/query` |
+
 约定：
 
 - 每请求自动注入 `merchant_no`/`api_key`/`timestamp`(Unix 秒)/唯一 `nonce` 与 `sign`。
 - 值为 `None` 的参数不放入请求体、也不参与签名。
 - `payout_receipt_query` 的 `inline` 以整数 **1/0** 发送（`True`→1 内联 base64 图片；`False`→0 返回带 token 的 URL）。
 - 金额是最小单位整数（`10000 = 1 元`），用 `int` 类型传入。
-- 成功返回 `data`（dict）；`code != 0` 抛 `ApiError`（携带 `code`/`message`/`data`）；HTTP/网络错误抛 `TransportError`。
+- 成功返回 `data`（dict）；`code != 0`（含 HTTP 503+`300304`、HTTP 500+`300302` 等非 2xx 业务信封）抛 `ApiError`（携带 `code`/`message`/`data`/`status_code`）；HTTP/网络错误抛 `TransportError`（附带 `request_sign`）。
 - 需要原始信封时用 `client.call_raw(path, body, secret)`（不因 `code != 0` 抛异常）。
 
 ## 签名工具（可单独使用）
@@ -117,11 +124,11 @@ ok   = verify_callback(callback, secret)  # 时序安全（hmac.compare_digest�
 
 ## 回调验签 + 处理
 
-见 [`examples/callback_verify.py`](examples/callback_verify.py)：解析原始 body → `verify_callback`（时序安全）→ 按 `status` 幂等处理（success/failed）→ 应答 **HTTP 200 + 纯文本 `success`**。代收回调用 `api_secret_pay`、代付回调用 `api_secret_payout`，示例各演示一次。验签失败不回成功；同一订单可能再次收到回调。处理务必幂等（同一订单可能多次回调）。
+见 [`examples/callback_verify.py`](examples/callback_verify.py)：解析原始 body → `client.verify_pay_callback` / `client.verify_payout_callback` / `client.verify_issue_ticket_callback`（或顶层 `verify_callback`，时序安全）→ 按 `status` 幂等处理（success/failed）→ 应答 **HTTP 200 + 纯文本 `success`**。代收/退款/工单回复回调用 `api_secret_pay`、代付回调用 `api_secret_payout`，示例各演示一次。验签失败不回成功；同一订单可能再次收到回调。处理务必幂等（同一订单可能多次回调）。
 
 ## 代付反查
 
-平台审核时向商户自己的 HTTPS 地址 POST JSON。`decide_payout_precheck(body, saved)` 的返回值原样作为 HTTP 200 正文，只能是 `approve` 或 `reject`。`saved["sign"]` 用代付下单返回数据上的 `.sign`。`payout_no` 必须出现，但不与下单请求比较。
+平台审核时向商户自己的 HTTPS 地址 POST JSON。`decide_payout_precheck(body, saved)` 的返回值原样作为 HTTP 200 正文，只能是 `approve` 或 `reject`。`saved["sign"]` 用代付下单返回数据上的 `.sign`（若下单遇传输超时，可从 `TransportError.request_sign` 读取本次实际发出的 `sign`）。`payout_no` 必须出现，但不与下单请求比较。
 
 ```python
 from openapi_sdk import decide_payout_precheck

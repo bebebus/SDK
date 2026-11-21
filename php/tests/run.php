@@ -280,6 +280,8 @@ foreach ([
     ['payMethodsQuery', '/merchant/pay-methods/query', $paySecret],
     ['balanceQuery', '/merchant/balance/query', $paySecret],
     ['payTestComplete', '/merchant/pay/test/complete', $paySecret],
+    ['issueTicketCreate', '/merchant/issue-ticket/create', $paySecret],
+    ['issueTicketQuery', '/merchant/issue-ticket/query', $paySecret],
     ['payoutQuery', '/merchant/payout/query', $payoutSecret],
     ['payoutBanksQuery', '/merchant/payout/banks/query', $payoutSecret],
     ['payoutProofQuery', '/merchant/payout/proof/query', $payoutSecret],
@@ -292,6 +294,25 @@ foreach ([
     unset($payload['sign']);
     check("$method 签名密钥", Signer::sign($payload, $secret), $signature);
 }
+
+// 工单回复回调验签正反例（使用 api_secret_pay）
+$ticketCallback = [
+    'merchant_no' => 'M00000001',
+    'ticket_no' => 'T202609010001',
+    'order_no' => 'P202609010001',
+    'out_order_no' => '202609010001',
+    'status' => 'replied',
+    'reply_content' => '已核实到账',
+    'replied_at' => '2026-09-01T12:00:00+08:00',
+];
+$ticketCallback['sign'] = Signer::sign($ticketCallback, $paySecret);
+checkTrue('callback issue-ticket 正例 client->verifyIssueTicketCallback', $client->verifyIssueTicketCallback($ticketCallback));
+$ticketTampered = $ticketCallback;
+$ticketTampered['reply_content'] = '已篡改';
+checkFalse('callback issue-ticket 反例（篡改内容）', $client->verifyIssueTicketCallback($ticketTampered));
+$ticketWrongKey = $ticketCallback;
+$ticketWrongKey['sign'] = Signer::sign($ticketCallback, $payoutSecret);
+checkFalse('callback issue-ticket 反例（错用 payout 密钥）', $client->verifyIssueTicketCallback($ticketWrongKey));
 
 // nonce 每请求唯一
 $firstNonce = $captured['body']['nonce'];
@@ -364,7 +385,7 @@ check('ApiException code', 100104, $caught?->apiCode);
 check('ApiException message', '签名错误', $caught?->apiMessage);
 check('ApiException data', ['missing_fields' => ['x']], $caught?->data);
 
-// HTTP 非 2xx → TransportException
+// HTTP 非 2xx 且非业务信封 → TransportException（携带 requestSign）
 $httpErrStub = fn (string $u, string $j, int $t): array => ['status' => 502, 'body' => 'Bad Gateway'];
 $httpErrClient = new Client(new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX), $httpErrStub);
 $caughtT = null;
@@ -375,6 +396,100 @@ try {
 }
 checkTrue('HTTP 非2xx 抛 TransportException', $caughtT instanceof TransportException);
 check('TransportException httpStatus', 502, $caughtT?->httpStatus);
+checkTrue('TransportException 附带 requestSign', is_string($caughtT?->requestSign) && strlen($caughtT->requestSign) === 64);
+check('TransportException requestSign 与 lastRequestSign 一致', $httpErrClient->lastRequestSign(), $caughtT?->requestSign);
+
+// HTTP 503 + 合法非 0 业务码（如 300304 渠道暂不可用）→ ApiException（保留 httpStatus=503）
+$http503Client = new Client(
+    new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+    fn (string $u, string $j, int $t): array => [
+        'status' => 503,
+        'body' => json_encode(['code' => 300304, 'message' => '渠道暂时不可用', 'data' => ['retryable' => true]]),
+    ]
+);
+$caught503 = null;
+try {
+    $http503Client->payCreate([
+        'out_order_no' => 'O503',
+        'amount' => 10000,
+        'currency' => 'PHP',
+        'pay_method' => 'gcash',
+        'notify_url' => 'https://m.example.com/cb',
+    ]);
+} catch (ApiException $e) {
+    $caught503 = $e;
+}
+checkTrue('HTTP 503 + 300304 抛 ApiException', $caught503 instanceof ApiException);
+check('HTTP 503 ApiException apiCode', 300304, $caught503?->apiCode);
+check('HTTP 503 ApiException httpStatus', 503, $caught503?->httpStatus);
+check('HTTP 503 ApiException data', ['retryable' => true], $caught503?->data);
+
+// HTTP 500 + 合法非 0 业务码（300302）→ ApiException（保留 httpStatus=500）
+$http500ApiClient = new Client(
+    new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+    fn (string $u, string $j, int $t): array => [
+        'status' => 500,
+        'body' => json_encode(['code' => 300302, 'message' => '系统异常', 'data' => null]),
+    ]
+);
+$caught500Api = null;
+try {
+    $http500ApiClient->payQuery(['out_order_no' => 'x']);
+} catch (ApiException $e) {
+    $caught500Api = $e;
+}
+checkTrue('HTTP 500 + 300302 抛 ApiException', $caught500Api instanceof ApiException);
+check('HTTP 500 ApiException apiCode', 300302, $caught500Api?->apiCode);
+check('HTTP 500 ApiException httpStatus', 500, $caught500Api?->httpStatus);
+
+// HTTP 500 + {"code":0} → 绝不当成成功，必须抛 TransportException 且保留 requestSign
+$http500ZeroClient = new Client(
+    new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+    fn (string $u, string $j, int $t): array => [
+        'status' => 500,
+        'body' => json_encode(['code' => 0, 'message' => 'ok', 'data' => ['ok' => true]]),
+    ]
+);
+$caught500Zero = null;
+try {
+    $http500ZeroClient->payoutCreate([
+        'out_payout_no' => 'WD500',
+        'amount' => 10000,
+        'currency' => 'PHP',
+        'pay_method' => 'bank',
+        'notify_url' => 'https://m.example.com/cb',
+        'account_no' => '123',
+    ]);
+} catch (TransportException $e) {
+    $caught500Zero = $e;
+}
+checkTrue('HTTP 500 + code=0 必须抛 TransportException', $caught500Zero instanceof TransportException);
+check('HTTP 500 + code=0 httpStatus', 500, $caught500Zero?->httpStatus);
+check('HTTP 500 + code=0 附带 requestSign', $http500ZeroClient->lastRequestSign(), $caught500Zero?->requestSign);
+
+// 底层传输超时抛 TransportException → 自动补挂 requestSign 供代付反查使用
+$timeoutClient = new Client(
+    new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+    function (string $u, string $j, int $t): array {
+        throw new TransportException('cURL timeout');
+    }
+);
+$caughtTimeout = null;
+try {
+    $timeoutClient->payoutCreate([
+        'out_payout_no' => 'WD_TO',
+        'amount' => 10000,
+        'currency' => 'PHP',
+        'pay_method' => 'bank',
+        'notify_url' => 'https://m.example.com/cb',
+        'account_no' => '123',
+    ]);
+} catch (TransportException $e) {
+    $caughtTimeout = $e;
+}
+checkTrue('底层超时抛 TransportException', $caughtTimeout instanceof TransportException);
+checkTrue('底层超时 TransportException 附带 64 位 requestSign', is_string($caughtTimeout?->requestSign) && strlen($caughtTimeout->requestSign) === 64);
+check('底层超时 TransportException requestSign 等于 lastRequestSign', $timeoutClient->lastRequestSign(), $caughtTimeout?->requestSign);
 
 // 非法 JSON 信封 → TransportException
 $badJsonStub = fn (string $u, string $j, int $t): array => ['status' => 200, 'body' => 'not json'];
@@ -554,7 +669,57 @@ check('[D] http localhost 放行', 'http://localhost:3090/api/open/v1', $cfgLoca
 $cfgLoop = new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'http://127.0.0.1:3090/api/open/v1');
 check('[D] http 127.0.0.1 放行', 'http://127.0.0.1:3090/api/open/v1', $cfgLoop->baseUrl);
 
+// [D+] userinfo 伪装 localhost 拒绝
+$userinfoThrew = false;
+try {
+    new Config('M', 'k', 'p', 'q', Environment::PRODUCTION, 'http://localhost:80@evil.example.com/api/open/v1');
+} catch (\InvalidArgumentException $e) {
+    $userinfoThrew = true;
+}
+checkTrue('[D] userinfo 伪装 localhost 拒绝', $userinfoThrew);
+
+// [E] Config 必填校验与单侧密钥支持
+foreach ([['', 'k'], ['   ', 'k'], ['M', ''], ['M', " \t "]] as [$m, $k]) {
+    $credThrew = false;
+    try {
+        new Config($m, $k, $paySecret, $payoutSecret, Environment::SANDBOX);
+    } catch (\InvalidArgumentException $e) {
+        $credThrew = true;
+    }
+    checkTrue('[E] 空/空白 merchantNo 或 apiKey 拒绝', $credThrew);
+}
+
+$payOnlyClient = new Client(
+    new Config('M', 'k', apiSecretPay: $paySecret, environment: Environment::SANDBOX),
+    $stub
+);
+$payOnlyClient->payQuery(['out_order_no' => 'x']);
+checkTrue('[E] 仅配 paySecret 可调代收接口', true);
+checkTrue('[E] 仅配 paySecret 可验代收回调', $payOnlyClient->verifyPayCallback($payCallback));
+$missingPayoutThrew = false;
+try {
+    $payOnlyClient->payoutQuery(['out_payout_no' => 'x']);
+} catch (\InvalidArgumentException $e) {
+    $missingPayoutThrew = true;
+}
+checkTrue('[E] 仅配 paySecret 调代付抛 InvalidArgumentException', $missingPayoutThrew);
+$missingPayoutVerifyThrew = false;
+try {
+    $payOnlyClient->verifyPayoutCallback($payoutCallback);
+} catch (\InvalidArgumentException $e) {
+    $missingPayoutVerifyThrew = true;
+}
+checkTrue('[E] 仅配 paySecret 验代付回调抛 InvalidArgumentException', $missingPayoutVerifyThrew);
+
 /* ---------------------------- 附录配置文件 ---------------------------- */
+
+$errorCodesAppendix = require __DIR__ . '/../appendix/error-codes.php';
+checkTrue('[appendix] error-codes.php 返回数组含 errors', is_array($errorCodesAppendix) && isset($errorCodesAppendix['errors']) && is_array($errorCodesAppendix['errors']));
+check('[appendix] error-codes.php 共 30 个错误码', 30, count($errorCodesAppendix['errors']));
+$errorCodeSet = array_column($errorCodesAppendix['errors'], 'code');
+foreach (['100108', '300302', '300304', '300308', '300309'] as $expectedCode) {
+    checkTrue("[appendix] error-codes 含 {$expectedCode}", in_array($expectedCode, $errorCodeSet, true));
+}
 
 $cfgAppendix = require __DIR__ . '/../appendix/config.example.php';
 checkTrue('[appendix] config.example.php 返回数组', is_array($cfgAppendix));

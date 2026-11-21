@@ -17,18 +17,29 @@ public final class ApiResponse {
     private final Object data;
     private final String rawBody;
     private final String requestSign;
+    private final int statusCode;
 
     ApiResponse(long code, String message, Object data, String rawBody, String requestSign) {
+        this(code, message, data, rawBody, requestSign, 200);
+    }
+
+    ApiResponse(long code, String message, Object data, String rawBody, String requestSign, int statusCode) {
         this.code = code;
         this.message = message;
         this.data = data;
         this.rawBody = rawBody;
         this.requestSign = requestSign;
+        this.statusCode = statusCode;
     }
 
     /** 业务码（0=成功）。 */
     public long code() {
         return code;
+    }
+
+    /** HTTP 状态码（通常为 200；503/500 携带业务错误信封时保留原状态码）。 */
+    public int statusCode() {
+        return statusCode;
     }
 
     public String message() {

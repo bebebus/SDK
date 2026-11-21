@@ -357,6 +357,9 @@ test('全部签名业务端点方法均存在', () => {
     'payoutProofQuery',
     'payoutReceiptQuery',
     'payoutTestComplete',
+    'issueTicketCreate',
+    'issueTicketQuery',
+    'verifyIssueTicketCallback',
   ];
   for (const m of methods) {
     assert.equal(typeof client[m], 'function', `missing method ${m}`);
@@ -367,5 +370,170 @@ test('调用 pay 类端点但未配 apiSecretPay 抛 TypeError', async () => {
   const client = new Client(
     new Config({ merchantNo: 'M', apiKey: 'k', apiSecretPayout: SECRET_PAYOUT, baseUrl: 'http://127.0.0.1:1/x' }),
   );
+  await assert.rejects(() => client.payCreate({ out_order_no: 'x', amount: 1 }), TypeError);
+});
+
+test('issueTicketCreate / issueTicketQuery：命中工单路径、用 pay 密钥、回复回调验签', async () => {
+  const seen = [];
+  const { server, baseUrl } = await startStub((url, body) => {
+    seen.push({ url, body });
+    if (url.endsWith('/create')) {
+      return { code: 0, message: 'ok', data: { ticket_no: 'TK1', order_no: 'P1', order_type: 'pay' } };
+    }
+    return { code: 0, message: 'ok', data: { ticket_no: 'TK1', status: 'replied', replies: [] } };
+  });
+  try {
+    const client = makeClient(baseUrl);
+    const created = await client.issueTicketCreate({
+      order_no: 'P1',
+      content: '用户已付款',
+      notify_url: 'https://m.example.com/ticket-cb',
+    });
+    assert.equal(seen[0].url, '/api/open/v1/merchant/issue-ticket/create');
+    const { sign: createSign, ...createRest } = seen[0].body;
+    assert.equal(createSign, sign(createRest, SECRET_PAY));
+    assert.equal(created.data.ticket_no, 'TK1');
+
+    const queried = await client.issueTicketQuery({ ticket_no: 'TK1' });
+    assert.equal(seen[1].url, '/api/open/v1/merchant/issue-ticket/query');
+    const { sign: querySign, ...queryRest } = seen[1].body;
+    assert.equal(querySign, sign(queryRest, SECRET_PAY));
+    assert.equal(queried.data.status, 'replied');
+
+    const cb = {
+      merchant_no: 'M00000001',
+      ticket_no: 'TK1',
+      order_no: 'P1',
+      order_type: 'payout',
+      status: 'replied',
+      content: '渠道已核实',
+    };
+    cb.sign = sign(cb, SECRET_PAY);
+    assert.equal(client.verifyIssueTicketCallback(cb), true);
+    assert.equal(client.verifyIssueTicketCallback({ ...cb, sign: sign(cb, SECRET_PAYOUT) }), false);
+    assert.equal(client.verifyIssueTicketCallback({ ...cb, content: '被篡改' }), false);
+  } finally {
+    server.close();
+  }
+});
+
+test('payoutReceiptQuery：inline 字符串 "0"/"false" 归一为 0，"1"/"true" 归一为 1', async () => {
+  const bodies = [];
+  const { server, baseUrl } = await startStub((url, body) => {
+    bodies.push(body);
+    return { code: 0, message: 'ok', data: {} };
+  });
+  try {
+    const client = makeClient(baseUrl);
+    await client.payoutReceiptQuery({ payout_no: 'W1', inline: '0' });
+    await client.payoutReceiptQuery({ payout_no: 'W1', inline: 'false' });
+    await client.payoutReceiptQuery({ payout_no: 'W1', inline: '1' });
+    await client.payoutReceiptQuery({ payout_no: 'W1', inline: 'true' });
+    assert.equal(bodies[0].inline, 0);
+    assert.equal(bodies[1].inline, 0);
+    assert.equal(bodies[2].inline, 1);
+    assert.equal(bodies[3].inline, 1);
+  } finally {
+    server.close();
+  }
+});
+
+test('HTTP 503/500 携带业务错误信封（300304/300302）抛 ApiError 并保留 statusCode', async () => {
+  const { server, baseUrl } = await startStub((url, body, res) => {
+    if (body.out_order_no === 'retry-503') {
+      res.writeHead(503, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ code: 300304, message: 'temporarily unavailable', data: null }));
+      return;
+    }
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ code: 300302, message: 'order data unavailable', data: null }));
+  });
+  try {
+    const client = makeClient(baseUrl);
+    await assert.rejects(
+      () =>
+        client.payCreate({
+          out_order_no: 'retry-503',
+          amount: 10000,
+          currency: 'PHP',
+          pay_method: 'gcash',
+          notify_url: 'https://m.example.com/cb',
+        }),
+      (err) => {
+        assert.ok(err instanceof ApiError);
+        assert.equal(err.code, 300304);
+        assert.equal(err.statusCode, 503);
+        return true;
+      },
+    );
+    await assert.rejects(
+      () =>
+        client.payCreate({
+          out_order_no: 'err-500',
+          amount: 10000,
+          currency: 'PHP',
+          pay_method: 'gcash',
+          notify_url: 'https://m.example.com/cb',
+        }),
+      (err) => {
+        assert.ok(err instanceof ApiError);
+        assert.equal(err.code, 300302);
+        assert.equal(err.statusCode, 500);
+        return true;
+      },
+    );
+  } finally {
+    server.close();
+  }
+});
+
+test('畸形信封（{} / [] / code=null / HTTP 500+code=0）抛 TransportError 且携带 requestSign', async () => {
+  let lastSign = null;
+  let mode = 'emptyObj';
+  const { server, baseUrl } = await startStub((url, body, res) => {
+    lastSign = body.sign;
+    if (mode === 'emptyObj') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end('{}');
+    } else if (mode === 'array') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end('[]');
+    } else if (mode === 'nullCode') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end('{"code":null,"message":"bad"}');
+    } else if (mode === 'http500ZeroCode') {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end('{"code":0,"message":"ok","data":{}}');
+    }
+  });
+  try {
+    const client = makeClient(baseUrl);
+    for (const m of ['emptyObj', 'array', 'nullCode', 'http500ZeroCode']) {
+      mode = m;
+      await assert.rejects(
+        () => client.balanceQuery({}),
+        (err) => {
+          assert.ok(err instanceof TransportError, `mode=${m} should throw TransportError`);
+          assert.equal(err.requestSign, lastSign);
+          return true;
+        },
+      );
+    }
+  } finally {
+    server.close();
+  }
+});
+
+test('纯空白密钥调用 verifyPayCallback / payCreate 抛 TypeError', async () => {
+  const client = new Client(
+    new Config({
+      merchantNo: 'M',
+      apiKey: 'k',
+      apiSecretPay: '   ',
+      apiSecretPayout: SECRET_PAYOUT,
+      baseUrl: 'http://127.0.0.1:1/x',
+    }),
+  );
+  assert.throws(() => client.verifyPayCallback({ sign: 'a'.repeat(64) }), TypeError);
   await assert.rejects(() => client.payCreate({ out_order_no: 'x', amount: 1 }), TypeError);
 });

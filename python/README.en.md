@@ -71,7 +71,7 @@ config = Config(
 )
 ```
 
-## All 13 endpoints
+## All 15 endpoints
 
 Collection (secret `api_secret_pay`, selected automatically):
 
@@ -79,7 +79,7 @@ Collection (secret `api_secret_pay`, selected automatically):
 |------|------|
 | `pay_create(...)` | `/merchant/pay/create` |
 | `pay_query(order_no=, out_order_no=)` | `/merchant/pay/query` |
-| `pay_methods_query(country=, biz_type=, currency=)` | `/merchant/pay-methods/query` |
+| `pay_methods_query(country=)` | `/merchant/pay-methods/query` |
 | `groups_query(biz_type=, currency=, country=)` | `/merchant/groups/query` (compatibility alias) |
 | `countries_query()` | `/merchant/countries/query` |
 | `balance_query(currency=)` | `/merchant/balance/query` |
@@ -96,13 +96,20 @@ Payout (secret `api_secret_payout`, selected automatically):
 | `payout_receipt_query(..., inline=)` | `/merchant/payout/receipt/query` |
 | `payout_test_complete(result=, ...)` | `/merchant/payout/test/complete` (test secret only) |
 
+Ticket (secret `api_secret_pay`, selected automatically — also used for payout orders):
+
+| Method | Endpoint |
+|------|------|
+| `issue_ticket_create(order_no=, ...)` | `/merchant/issue-ticket/create` |
+| `issue_ticket_query(ticket_no=, order_no=)` | `/merchant/issue-ticket/query` |
+
 Conventions:
 
 - Each request automatically injects `merchant_no`/`api_key`/`timestamp` (Unix seconds)/a unique `nonce` and `sign`.
 - Parameters whose value is `None` are neither placed in the request body nor included in the signature.
 - The `inline` field of `payout_receipt_query` is sent as the integer **1/0** (`True`→1 inlines a base64 image; `False`→0 returns a token-bearing URL).
 - The amount is an integer in the smallest unit (`10000 = 1 unit of currency`), passed as `int`.
-- On success, returns `data` (a dict); `code != 0` raises `ApiError` (carrying `code`/`message`/`data`); HTTP/network errors raise `TransportError`.
+- On success, returns `data` (a dict); `code != 0` (including non-2xx business envelopes like HTTP 503+`300304` or HTTP 500+`300302`) raises `ApiError` (carrying `code`/`message`/`data`/`status_code`); HTTP/network errors raise `TransportError` (carrying `request_sign`).
 - When you need the raw envelope, use `client.call_raw(path, body, secret)` (which does not throw on `code != 0`).
 
 ## Signing utilities (usable standalone)
@@ -117,11 +124,11 @@ ok   = verify_callback(callback, secret)  # timing-safe (hmac.compare_digest), f
 
 ## Callback signature verification + processing
 
-See [`examples/callback_verify.py`](examples/callback_verify.py): parse the raw body → `verify_callback` (timing-safe) → process idempotently by `status` (success/failed) → acknowledge with **HTTP 200 + plain text `success`**. Collection callbacks use `api_secret_pay` and payout callbacks use `api_secret_payout`; the example demonstrates each once. On signature verification failure, do not return success; the same order may be sent again. The processing must be idempotent (the same order may be called back multiple times).
+See [`examples/callback_verify.py`](examples/callback_verify.py): parse the raw body → `client.verify_pay_callback` / `client.verify_payout_callback` / `client.verify_issue_ticket_callback` (or top-level `verify_callback`, timing-safe) → process idempotently by `status` (success/failed) → acknowledge with **HTTP 200 + plain text `success`**. Collection, refund, and ticket-reply callbacks use `api_secret_pay`, and payout callbacks use `api_secret_payout`; the example demonstrates collection and payout. On signature verification failure, do not return success; the same order may be sent again. The processing must be idempotent (the same order may be called back multiple times).
 
 ## Payout precheck
 
-During review the platform POSTs JSON to the merchant's own HTTPS URL. Use the return value of `decide_payout_precheck(body, saved)` as the entire HTTP 200 body. It is only `approve` or `reject`. Use `.sign` on the payout create result as `saved["sign"]`. `payout_no` must be present and is not compared with the create request.
+During review the platform POSTs JSON to the merchant's own HTTPS URL. Use the return value of `decide_payout_precheck(body, saved)` as the entire HTTP 200 body. It is only `approve` or `reject`. Use `.sign` on the payout create result as `saved["sign"]` (if create fails with a transport timeout, read the sent `sign` from `TransportError.request_sign`). `payout_no` must be present and is not compared with the create request.
 
 ```python
 from openapi_sdk import decide_payout_precheck

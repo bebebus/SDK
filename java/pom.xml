@@ -12,11 +12,11 @@
 
     <groupId>cloud.cniia.openapi</groupId>
     <artifactId>merchant-openapi-sdk</artifactId>
-    <version>2.2.0</version>
+    <version>2.3.0</version>
     <packaging>jar</packaging>
 
     <name>Merchant OpenAPI SDK</name>
-    <description>零依赖 Java SDK：商户支付 OpenAPI 客户端（HMAC-SHA256 签名 + 回调验签 + 全 13 端点）</description>
+    <description>零依赖 Java SDK：商户支付 OpenAPI 客户端（HMAC-SHA256 签名 + 回调验签 + 全 15 端点）</description>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>

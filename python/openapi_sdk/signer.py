@@ -18,14 +18,28 @@ from typing import Any, Mapping
 
 __all__ = ["build_sign_base", "sign", "verify_callback"]
 
-# 合法 sign 必须是非空的十六进制串（HMAC-SHA256 输出 64 位小写 hex）。
-# 预校验拦截攻击者构造的非 hex/非 ASCII sign，避免 compare_digest 对非 ASCII 抛 TypeError。
-_HEX_RE = re.compile(r"[0-9a-fA-F]+")
+# 合法 sign 必须是 64 位小写十六进制串（HMAC-SHA256 hex）。
+# 预校验拦截攻击者构造的非 hex/非 ASCII/长度或大小写异常的 sign，与其余语言 SDK 口径统一。
+_HEX_RE = re.compile(r"[0-9a-f]{64}")
 
 
 def _secret_is_blank(secret: Any) -> bool:
     """密钥是否为空（fail-closed 判定）：非字符串、空串、纯空白一律视为空。"""
     return not isinstance(secret, str) or secret.strip() == ""
+
+
+def _reject_nested_floats(value: Any) -> None:
+    """递归校验嵌套容器不得含 float（防 ``1.0`` 序列化为 ``1.0`` 与服务端 JS ``1`` 分叉）。"""
+    if isinstance(value, float):
+        raise ValueError(
+            f"签名字段不接受浮点数（值={value!r}）：金额等请用整数最小单位（int）"
+        )
+    if isinstance(value, Mapping):
+        for v in value.values():
+            _reject_nested_floats(v)
+    elif isinstance(value, list):
+        for item in value:
+            _reject_nested_floats(item)
 
 
 def _stable_stringify(value: Any) -> str:
@@ -38,8 +52,10 @@ def _stable_stringify(value: Any) -> str:
     Python ``json.dumps`` 不转义 ``/`` 与 ``<>&``，与 JS 默认行为一致；
     会转义 ``"`` ``\\`` 及控制字符（``\\b\\f\\n\\r\\t`` 与其余 ``\\u00XX``），亦与 JS 一致。
 
-    ``allow_nan=False``：NaN/Infinity 在 JSON 里非法，且与 JS 序列化分叉，一律拒绝（抛 ``ValueError``）。
+    ``allow_nan=False`` 结合递归浮点校验：任何浮点（含 ``1.0``、``1.5``、``NaN``、``Infinity``）
+    一律拒绝（抛 ``ValueError``），确保嵌套数值与顶层及跨语言 SDK 口径一致。
     """
+    _reject_nested_floats(value)
     return json.dumps(
         value,
         ensure_ascii=False,

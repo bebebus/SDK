@@ -33,7 +33,7 @@ public final class Client {
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 pom.xml &lt;version&gt; 一致）。
      */
-    public static final String VERSION = "2.2.0";
+    public static final String VERSION = "2.3.0";
 
     private final Config config;
     private final HttpClient http;
@@ -163,6 +163,20 @@ public final class Client {
     }
 
     // ============================================================
+    // 工单（密钥：api_secret_pay）
+    // ============================================================
+
+    /** 创建工单 POST /merchant/issue-ticket/create。params: order_no 必填，notify_url 可选。 */
+    public ApiResponse issueTicketCreate(Map<String, Object> params) {
+        return call("/merchant/issue-ticket/create", params, Secret.PAY);
+    }
+
+    /** 查询工单 POST /merchant/issue-ticket/query。params: ticket_no 或 order_no 至少填一个。 */
+    public ApiResponse issueTicketQuery(Map<String, Object> params) {
+        return call("/merchant/issue-ticket/query", params, Secret.PAY);
+    }
+
+    // ============================================================
     // 回调验签（不发请求）
     // ============================================================
 
@@ -176,6 +190,11 @@ public final class Client {
         return Signer.verifyCallback(payload, config.requireSecretPayout());
     }
 
+    /** 验证工单回复回调（密钥：api_secret_pay）。 */
+    public boolean verifyIssueTicketCallback(Map<String, Object> payload) {
+        return Signer.verifyCallback(payload, config.requireSecretPay());
+    }
+
     // ============================================================
     // 内部：请求构建 + 发送 + 信封解析
     // ============================================================
@@ -184,7 +203,7 @@ public final class Client {
     private ApiResponse call(String path, Map<String, Object> params, Secret which) {
         ApiResponse resp = callRaw(path, params, which);
         if (!resp.isSuccess()) {
-            throw new ApiException(resp.code(), resp.message(), resp.data(), resp.rawBody());
+            throw new ApiException(resp.code(), resp.message(), resp.data(), resp.rawBody(), resp.statusCode());
         }
         return resp;
     }
@@ -229,20 +248,30 @@ public final class Client {
         try {
             response = http.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new TransportException("HTTP 请求失败: " + url + " — " + e.getMessage(), e);
+            throw new TransportException("HTTP 请求失败: " + url + " — " + e.getMessage(), e, sign);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new TransportException("HTTP 请求被中断: " + url, e);
+            throw new TransportException("HTTP 请求被中断: " + url, e, sign);
         }
 
         int status = response.statusCode();
         String raw = response.body();
         if (status < 200 || status >= 300) {
-            throw new TransportException("HTTP 非 2xx 状态 " + status + " for " + url, status, raw);
+            // 非 2xx 若携带合法且 code != 0 的业务信封（如 HTTP 503 + 300304、HTTP 500 + 300302），
+            // 返回信封供上层抛 ApiException 或自行判码；非信封或 code == 0 一律抛 TransportException。
+            try {
+                ApiResponse errResp = parseEnvelope(raw, sign, status);
+                if (!errResp.isSuccess()) {
+                    return errResp;
+                }
+            } catch (TransportException ignored) {
+                // 非合法信封，继续按 HTTP 非 2xx 抛 TransportException
+            }
+            throw new TransportException("HTTP 非 2xx 状态 " + status + " for " + url, status, raw, sign);
         }
 
         // 5) 解析统一信封
-        return parseEnvelope(raw, sign);
+        return parseEnvelope(raw, sign, status);
     }
 
     /** 注入通用字段、过滤 null，返回 key 升序的有序 payload（不含 sign）。 */
@@ -267,15 +296,15 @@ public final class Client {
         return merged;
     }
 
-    private ApiResponse parseEnvelope(String raw, String requestSign) {
+    private ApiResponse parseEnvelope(String raw, String requestSign, int httpStatus) {
         Object parsed;
         try {
             parsed = Json.parse(raw);
         } catch (RuntimeException e) {
-            throw new TransportException("响应体非合法 JSON: " + truncate(raw), -1, raw);
+            throw new TransportException("响应体非合法 JSON: " + truncate(raw), httpStatus, raw, requestSign);
         }
         if (!(parsed instanceof Map)) {
-            throw new TransportException("响应信封不是 JSON object: " + truncate(raw), -1, raw);
+            throw new TransportException("响应信封不是 JSON object: " + truncate(raw), httpStatus, raw, requestSign);
         }
         @SuppressWarnings("unchecked")
         Map<String, Object> env = (Map<String, Object>) parsed;
@@ -283,38 +312,50 @@ public final class Client {
         long code;
         if (codeObj == null) {
             // 缺 code 视为传输异常
-            throw new TransportException("响应缺少 code 字段: " + truncate(raw), -1, raw);
+            throw new TransportException("响应缺少 code 字段: " + truncate(raw), httpStatus, raw, requestSign);
         } else if (codeObj instanceof Number) {
-            // code 仅接受整数：有小数部分按非法信封 fail-closed，杜绝 0.5→0 截断误判成功。
+            // code 仅接受整数：有小数部分或溢出 long 均按非法信封 fail-closed，杜绝 0.5→0 或 ArithmeticException 泄漏。
             Number n = (Number) codeObj;
             if (n instanceof BigDecimal) {
                 BigDecimal bd = (BigDecimal) n;
                 if (bd.stripTrailingZeros().scale() > 0) {
-                    throw new TransportException("响应 code 非整数: " + codeObj, -1, raw);
+                    throw new TransportException("响应 code 非整数: " + codeObj, httpStatus, raw, requestSign);
                 }
-                code = bd.longValueExact();
+                try {
+                    code = bd.longValueExact();
+                } catch (ArithmeticException ae) {
+                    throw new TransportException("响应 code 超出整数范围: " + codeObj, httpStatus, raw, requestSign);
+                }
             } else if (n instanceof Double || n instanceof Float) {
                 double d = n.doubleValue();
                 if (d != Math.rint(d) || Double.isNaN(d) || Double.isInfinite(d)) {
-                    throw new TransportException("响应 code 非整数: " + codeObj, -1, raw);
+                    throw new TransportException("响应 code 非整数: " + codeObj, httpStatus, raw, requestSign);
                 }
                 code = (long) d;
             } else {
-                // Long / Integer / BigInteger 等整数类型直接取整数值
-                code = n.longValue();
+                // Long / Integer / BigInteger 等整数类型校验范围
+                if (n instanceof java.math.BigInteger) {
+                    try {
+                        code = ((java.math.BigInteger) n).longValueExact();
+                    } catch (ArithmeticException ae) {
+                        throw new TransportException("响应 code 超出整数范围: " + codeObj, httpStatus, raw, requestSign);
+                    }
+                } else {
+                    code = n.longValue();
+                }
             }
         } else {
             // 字符串等其他形态：必须是合法整数文本，否则非法信封。
             try {
                 code = Long.parseLong(codeObj.toString().trim());
             } catch (NumberFormatException nfe) {
-                throw new TransportException("响应 code 非整数: " + codeObj, -1, raw);
+                throw new TransportException("响应 code 非整数: " + codeObj, httpStatus, raw, requestSign);
             }
         }
         Object msgObj = env.get("message");
         String message = msgObj == null ? null : msgObj.toString();
         Object data = env.get("data");
-        return new ApiResponse(code, message, data, raw, requestSign);
+        return new ApiResponse(code, message, data, raw, requestSign, httpStatus);
     }
 
     // ============================================================

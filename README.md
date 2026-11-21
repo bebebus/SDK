@@ -9,7 +9,7 @@
 为商户支付开放接口（代收 / 代付 / 回调）提供 **PHP / Python / Java / Go / Node.js** 五套 SDK。
 
 设计原则：**零第三方依赖**（仅用各语言标准库/官方内建：HTTP、JSON、HMAC、测试框架），
-**全部 13 个签名业务端点**（均只存在于 v1 Base；另有 `/version` 等非签名端点；服务端 HTTP 路由共 14 个），
+**全部 15 个签名业务端点**（代收 7 + 代付 6 + 工单 2，均只存在于 v1 Base；另有 `/version`、回单下载、落地页只读等非签名端点），
 **测试 + 正式双环境**，**跨语言签名逐字节一致**（同一份标准答案向量五套都绿）。
 
 ## 目录结构
@@ -18,7 +18,7 @@
 SDK/
 ├── README.md            # 本文件
 ├── SIGNING.md           # 签名算法权威说明 + 逐语言序列化坑（实现/排错必读）
-├── INTERFACES.md        # 13 个签名业务端点字段级请求/响应、回调字段、错误码
+├── INTERFACES.md        # 15 个签名业务端点字段级请求/响应、回调字段、错误码
 ├── ARCHITECTURE.md      # 组件、信任边界、威胁及验证限制
 ├── ASSURANCE.md         # 安全目标、威胁、证据和剩余风险
 ├── CONTRIBUTING.md      # 分支、Pull Request、测试和发布前贡献要求
@@ -49,7 +49,7 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`；`import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`；`from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`；命名空间 `Merchant\Openapi` | cURL 扩展 | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go/v2@v2.2.0`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go/v2"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go get github.com/bebebus/SDK/go/v2@v2.3.0`（最低 Go 1.21）；`import openapi "github.com/bebebus/SDK/go/v2"` | `net/http` | `cd go && go test -count=1 ./...` |
 | Java | **源码引入（不发 Maven）**；`import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > Go 测试读取外部 `test-vectors.json`，`go test` 的缓存不追踪该文件，**改向量后用 `-count=1`** 强制重跑。
@@ -58,7 +58,8 @@ npm / PyPI / Packagist / Go 四套上架对应包索引（scoped 到 `bebebus`�
 
 **代收**：`payCreate`（下单，`pay_method` 必填）、`payQuery`（查单）、`payMethodsQuery`（可用支付方式）、`groupsQuery`（兼容别名）、`countriesQuery`（可用国家）、`balanceQuery`（余额）、`payTestComplete`（测试单完成，仅测试密钥）
 **代付**：`payoutCreate`（`pay_method` 必填，不收 `channel_code`）、`payoutQuery`、`payoutBanksQuery`（可用银行）、`payoutProofQuery`（凭证）、`payoutReceiptQuery`（收据）、`payoutTestComplete`（测试单完成，仅测试密钥）
-**回调**：`verifyPayCallback` / `verifyPayoutCallback`（验签，时序安全比较）
+**工单**：`issueTicketCreate`、`issueTicketQuery`（代收密钥；`notify_url` 可选）
+**回调**：`verifyPayCallback` / `verifyPayoutCallback` / `verifyIssueTicketCallback`（验签，时序安全比较；工单回复与代收共用 `api_secret_pay`）
 **代付反查**：`decidePayoutPrecheck`（商户自己的接口里比对账号、商户单号和下单 `sign`，响应正文精确为 `approve` 或 `reject`）
 
 各方法的请求/响应字段见 [`INTERFACES.md`](./INTERFACES.md)。方法名按各语言习惯（Java/JS/PHP 驼峰、Python 蛇形 `pay_create`、Go 导出驼峰），语义一一对应。

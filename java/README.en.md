@@ -2,7 +2,7 @@
 
 # Merchant Payment OpenAPI — Java SDK
 
-A Java client with zero third-party dependencies, covering all **13 signed endpoints** of the merchant payment OpenAPI, implementing HMAC-SHA256 request signing and callback signature verification.
+A Java client with zero third-party dependencies, covering all **15 signed endpoints** of the merchant payment OpenAPI, implementing HMAC-SHA256 request signing and callback signature verification.
 
 - **JDK**: 17+ (uses `java.net.http.HttpClient`, `javax.crypto.Mac`, `MessageDigest.isEqual`, all from the standard library).
 - **Dependencies**: none. HTTP, JSON, HMAC, and tests all use JDK built-ins, **without pulling in any library through a package manager** (no Jackson/Gson/OkHttp/JUnit).
@@ -62,7 +62,7 @@ ApiResponse resp = client.payCreate(params);       // automatically injects time
 System.out.println(resp.dataAsMap().get("order_no"));
 ```
 
-### All 13 endpoints (client methods)
+### All 15 endpoints (client methods)
 
 | Business | Method | Endpoint | Secret |
 |------|------|------|------|
@@ -79,6 +79,8 @@ System.out.println(resp.dataAsMap().get("order_no"));
 | Payout proof | `payoutProofQuery` | `/merchant/payout/proof/query` | payout |
 | Payout receipt | `payoutReceiptQuery` | `/merchant/payout/receipt/query` | payout |
 | Complete payout test | `payoutTestComplete` | `/merchant/payout/test/complete` | payout (test secret only) |
+| Create ticket | `issueTicketCreate` | `/merchant/issue-ticket/create` | pay |
+| Query ticket | `issueTicketQuery` | `/merchant/issue-ticket/query` | pay |
 
 Each method accepts a `Map<String, Object>` of business fields:
 
@@ -90,9 +92,9 @@ Each method accepts a `Map<String, Object>` of business fields:
 
 ### Error handling
 
-- `code != 0` → throws `ApiException` (carrying `code()` / `message` / `data()` / `rawBody()`).
-- HTTP/network errors, non-2xx responses, non-JSON response bodies → throws `TransportException` (carrying `statusCode()` / `rawBody()`).
-- To inspect the code yourself without throwing a business exception: use `client.callRaw(path, params, isPayout)` to obtain an `ApiResponse` (containing `code()` / `data()` / `rawBody()`).
+- `code != 0` (including non-2xx business envelopes like HTTP 503+`300304` / 500+`300302`) → throws `ApiException` (carrying `code()` / `message` / `data()` / `rawBody()` / `statusCode()`).
+- HTTP/network errors, non-2xx responses (without a valid non-zero envelope), non-JSON response bodies → throws `TransportException` (carrying `statusCode()` / `rawBody()` / `requestSign()`).
+- To inspect the code yourself without throwing a business exception: use `client.callRaw(path, params, isPayout)` to obtain an `ApiResponse` (containing `code()` / `data()` / `rawBody()` / `statusCode()`).
 
 ### Dual environments (sandbox/production) and custom base URL
 
@@ -136,7 +138,7 @@ if ("success".equals(status)) {
 return "success"; // HTTP 200 + plain text success
 ```
 
-Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` instead. The verifier **relies only on the general rule that "all fields except sign participate"**, does not hardcode a field table, and remains compatible when callback fields are added or removed. For a complete runnable example, see [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java) (demonstrates collection + payout once each, including a tampering counter-example).
+Payout callbacks work the same way; use `client.verifyPayoutCallback(payload)` instead. Ticket-reply callbacks use `client.verifyIssueTicketCallback(payload)` with `api_secret_pay`, the same secret as collection. The verifier **relies only on the general rule that "all fields except sign participate"**, does not hardcode a field table, and remains compatible when callback fields are added or removed. For a complete runnable example, see [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java) (demonstrates collection + payout once each, including a tampering counter-example).
 
 ## Payout precheck
 

@@ -69,12 +69,29 @@ class TestTransport(unittest.TestCase):
         self.assertIs(raised.exception.cause, error)
 
     def test_invalid_json_or_missing_envelope_is_transport_error(self):
-        for body in (b"not-json", b'{}', b'[]'):
+        for body in (b"not-json", b'{}', b'[]', b'{"code":false,"data":{"ok":1}}', b'{"code":null}'):
             with self.subTest(body=body), patch.object(self.client._opener, "open", return_value=_Response(body)):
                 with self.assertRaises(TransportError) as raised:
                     self.client.pay_query(out_order_no="x")
                 self.assertEqual(raised.exception.body, body.decode())
                 self.assertEqual(raised.exception.status_code, 200)
+                self.assertTrue(raised.exception.request_sign)
+
+    def test_non_2xx_business_envelope_raises_api_error_with_status(self):
+        body = b'{"code":300304,"message":"retryable","data":null}'
+        error = urllib.error.HTTPError("https://example.test", 503, "unavailable", {}, io.BytesIO(body))
+        with patch.object(self.client._opener, "open", side_effect=error), self.assertRaises(ApiError) as raised:
+            self.client.pay_query(out_order_no="x")
+        self.assertEqual(raised.exception.code, 300304)
+        self.assertEqual(raised.exception.status_code, 503)
+
+    def test_non_2xx_zero_code_remains_transport_error_with_request_sign(self):
+        body = b'{"code":0,"message":"ok","data":{}}'
+        error = urllib.error.HTTPError("https://example.test", 500, "err", {}, io.BytesIO(body))
+        with patch.object(self.client._opener, "open", side_effect=error), self.assertRaises(TransportError) as raised:
+            self.client.pay_query(out_order_no="x")
+        self.assertEqual(raised.exception.status_code, 500)
+        self.assertEqual(len(raised.exception.request_sign or ""), 64)
 
     def test_business_error_and_raw_envelope(self):
         body = b'{"code":123,"message":"declined","data":{"reason":"x"}}'

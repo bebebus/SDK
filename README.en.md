@@ -8,7 +8,7 @@
 
 Provides five SDKs in **PHP / Python / Java / Go / Node.js** for the merchant payment open API (collection / payout / callback).
 
-Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 13 signed business endpoints** (all of which exist only on the v1 base; plus non-signed endpoints such as `/version`; 14 HTTP routes total on the server), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
+Design principles: **zero third-party dependencies** (only each language's standard library / official built-ins: HTTP, JSON, HMAC, test framework), **all 15 signed business endpoints** (7 collection + 6 payout + 2 ticket, all on the v1 base; plus non-signed endpoints such as `/version`, receipt download, and landing-page read endpoints), **dual environments (sandbox/production)**, **byte-for-byte identical signing across languages** (the same signature test vectors pass green in all five).
 
 ## Directory Structure
 
@@ -16,7 +16,7 @@ Design principles: **zero third-party dependencies** (only each language's stand
 SDK/
 ├── README.md            # This file
 ├── SIGNING.md           # Authoritative signing algorithm description + per-language serialization pitfalls (required reading for implementation/debugging)
-├── INTERFACES.md        # Field-level request/response for the 13 signed business endpoints, callback fields, error codes
+├── INTERFACES.md        # Field-level request/response for the 15 signed business endpoints, callback fields, error codes
 ├── CONTRIBUTING.md      # Branch, pull request, testing, and release contribution requirements
 ├── RELEASE_NOTES.md     # Human-readable summaries for each user-facing release
 ├── test-vectors.json    # Cross-language signing test vectors (11 entries; asserted by all five test suites)
@@ -40,7 +40,7 @@ npm / PyPI / Packagist / Go are published to their respective package indexes (s
 | Node.js | `npm i @bebebus/merchant-openapi-sdk`; `import { Client } from '@bebebus/merchant-openapi-sdk'` | `node:https` / `node:http` | `cd nodejs && node --test` |
 | Python | `pip install bebebus-merchant-openapi-sdk`; `from openapi_sdk import Client` | `urllib.request` | `cd python && python3 -m unittest discover -s tests` |
 | PHP | `composer require bebebus/merchant-openapi-sdk`; namespace `Merchant\Openapi` | cURL extension | `cd php && php tests/run.php` |
-| Go | `go get github.com/bebebus/SDK/go/v2@v2.2.0` (min Go 1.21); `import openapi "github.com/bebebus/SDK/go/v2"` | `net/http` | `cd go && go test -count=1 ./...` |
+| Go | `go get github.com/bebebus/SDK/go/v2@v2.3.0` (min Go 1.21); `import openapi "github.com/bebebus/SDK/go/v2"` | `net/http` | `cd go && go test -count=1 ./...` |
 | Java | **Source import (NOT published to Maven)**; `import cloud.cniia.openapi.sdk.Client` | `java.net.http.HttpClient` | `cd java && bash run-tests.sh` |
 
 > The Go tests read the external `test-vectors.json`, and `go test`'s cache does not track that file, so **after changing the vectors use `-count=1`** to force a re-run.
@@ -49,7 +49,8 @@ npm / PyPI / Packagist / Go are published to their respective package indexes (s
 
 **Collection**: `payCreate` (create order, `pay_method` required), `payQuery` (query order), `payMethodsQuery` (available pay methods), `groupsQuery` (compatibility alias), `countriesQuery` (available countries), `balanceQuery` (balance), `payTestComplete` (complete test order, test key only)
 **Payout**: `payoutCreate` (`pay_method` required, `channel_code` not accepted), `payoutQuery`, `payoutBanksQuery` (available banks), `payoutProofQuery` (proof), `payoutReceiptQuery` (receipt), `payoutTestComplete` (complete test order, test key only)
-**Callback**: `verifyPayCallback` / `verifyPayoutCallback` (callback signature verification, constant-time comparison)
+**Ticket**: `issueTicketCreate`, `issueTicketQuery` (collection secret; `notify_url` optional)
+**Callback**: `verifyPayCallback` / `verifyPayoutCallback` / `verifyIssueTicketCallback` (callback signature verification, constant-time comparison; ticket replies use `api_secret_pay`, the same secret as collection)
 **Payout precheck**: `decidePayoutPrecheck` (inside the merchant's own endpoint, compare the account, merchant payout number, and create `sign`; the response body is exactly `approve` or `reject`)
 
 The request/response fields for each method are in [`INTERFACES.md`](./INTERFACES.en.md). Method names follow each language's conventions (Java/JS/PHP camelCase, Python snake_case `pay_create`, Go exported camelCase), with a one-to-one semantic correspondence.

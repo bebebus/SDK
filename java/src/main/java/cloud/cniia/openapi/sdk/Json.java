@@ -38,22 +38,24 @@ public final class Json {
 
     /**
      * 稳定 JSON 序列化：object key 递归升序、紧凑无空格、转义对齐 JS JSON.stringify。
-     * 用于把 payload 中的 object/array 字段转成签名取值字符串。
+     * 用于把 payload 中的 object/array 字段转成签名取值字符串（按整数规范校验 BigDecimal）。
      */
     public static String stableStringify(Object value) {
         StringBuilder sb = new StringBuilder();
-        writeStable(sb, value);
+        writeStable(sb, value, true);
         return sb.toString();
     }
 
     /**
-     * 普通序列化：用于发送请求体。请求体本 SDK 已用有序 Map 构造，故此处与 stableStringify 行为一致。
+     * 普通序列化：用于发送请求体（与 stableStringify 同样按 key 升序紧凑输出，保留 BigDecimal 原样字面量）。
      */
     public static String serialize(Object value) {
-        return stableStringify(value);
+        StringBuilder sb = new StringBuilder();
+        writeStable(sb, value, false);
+        return sb.toString();
     }
 
-    private static void writeStable(StringBuilder sb, Object value) {
+    private static void writeStable(StringBuilder sb, Object value, boolean forSign) {
         if (value == null) {
             sb.append("null");
         } else if (value instanceof String) {
@@ -61,18 +63,19 @@ public final class Json {
         } else if (value instanceof Boolean) {
             sb.append(((Boolean) value) ? "true" : "false");
         } else if (value instanceof Map) {
-            writeObject(sb, (Map<?, ?>) value);
+            writeObject(sb, (Map<?, ?>) value, forSign);
         } else if (value instanceof Iterable) {
-            writeArray(sb, (Iterable<?>) value);
+            writeArray(sb, (Iterable<?>) value, forSign);
         } else if (value instanceof Object[]) {
-            writeArray(sb, java.util.Arrays.asList((Object[]) value));
+            writeArray(sb, java.util.Arrays.asList((Object[]) value), forSign);
         } else if (value instanceof Long || value instanceof Integer
                 || value instanceof Short || value instanceof Byte
                 || value instanceof BigInteger) {
             // 整数：原始十进制文本，无小数点
             sb.append(value.toString());
         } else if (value instanceof BigDecimal) {
-            sb.append(((BigDecimal) value).toPlainString());
+            BigDecimal bd = (BigDecimal) value;
+            sb.append(forSign ? Signer.bigDecimalForSign(bd) : bd.toPlainString());
         } else if (value instanceof Double || value instanceof Float) {
             // 数字字面量（API 不用浮点金额，但为完整性保留）。
             // 与签名器共用同一套数值规范：NaN/Infinity、非整数、超 2^53 一律拒绝（fail-fast），-0 归一为 "0"。
@@ -83,7 +86,7 @@ public final class Json {
         }
     }
 
-    private static void writeObject(StringBuilder sb, Map<?, ?> map) {
+    private static void writeObject(StringBuilder sb, Map<?, ?> map, boolean forSign) {
         // key 升序（按 String 自然序，等价 String.compareTo / 码点升序）
         TreeMap<String, Object> sorted = new TreeMap<>();
         for (Map.Entry<?, ?> e : map.entrySet()) {
@@ -98,12 +101,12 @@ public final class Json {
             first = false;
             writeJsonString(sb, e.getKey());
             sb.append(':');
-            writeStable(sb, e.getValue());
+            writeStable(sb, e.getValue(), forSign);
         }
         sb.append('}');
     }
 
-    private static void writeArray(StringBuilder sb, Iterable<?> arr) {
+    private static void writeArray(StringBuilder sb, Iterable<?> arr, boolean forSign) {
         sb.append('[');
         boolean first = true;
         for (Object item : arr) {
@@ -111,7 +114,7 @@ public final class Json {
                 sb.append(',');
             }
             first = false;
-            writeStable(sb, item);
+            writeStable(sb, item, forSign);
         }
         sb.append(']');
     }

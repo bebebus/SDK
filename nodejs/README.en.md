@@ -8,7 +8,7 @@ Zero dependencies: uses only the Node standard library (`node:http` / `node:http
 Signing, HTTP, JSON, and the test framework all rely on official built-ins, so **no `npm install` is required**.
 
 - Signing algorithm: HMAC-SHA256 → lowercase hex, see [`SIGNING.md`](../SIGNING.en.md) at the repo root
-- Interface contract: environments / authentication / 13 signed endpoints / callbacks / error codes, see [`INTERFACES.md`](../INTERFACES.en.md)
+- Interface contract: environments / authentication / 15 signed endpoints / callbacks / error codes, see [`INTERFACES.md`](../INTERFACES.en.md)
 - Reference vectors: [`test-vectors.json`](../test-vectors.json)
 - Appendix config (view / download): [`appendix/config.example.json`](./appendix/config.example.json) · [`appendix/catalog.json`](./appendix/catalog.json)
 
@@ -81,7 +81,7 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `Environment.PRODUCTION` | No built-in URL; obtain `https://api.<service_domain>/api/open/v1` from your service provider and pass it as `baseUrl` |
 | `Environment.SANDBOX`    | `http://127.0.0.1:3090/api/open/v1`                                                                                    |
 
-## All 13 endpoints
+## All 15 endpoints
 
 | Method                       | Endpoint                         | Secret                    |
 | ---------------------------- | -------------------------------- | ------------------------- |
@@ -98,13 +98,15 @@ new Config({ /* ... */ baseUrl: 'https://api.<service_domain>/api/open/v1' });
 | `payoutProofQuery(params)`   | `/merchant/payout/proof/query`   | payout                    |
 | `payoutReceiptQuery(params)` | `/merchant/payout/receipt/query` | payout                    |
 | `payoutTestComplete(params)` | `/merchant/payout/test/complete` | payout (test secret only) |
+| `issueTicketCreate(params)`  | `/merchant/issue-ticket/create`  | pay                       |
+| `issueTicketQuery(params)`   | `/merchant/issue-ticket/query`   | pay                       |
 
 Request-building notes:
 
 - Automatically injects `merchant_no`, `api_key`, `timestamp` (Unix seconds), and a unique `nonce` (`crypto.randomUUID`).
 - Fields whose value is `null` / `undefined` are **neither placed in the request body nor included in the signature**.
 - The `inline` field of `payoutReceiptQuery` is converted to the **integer `1`/`0`** before sending (to avoid boolean signing ambiguity).
-- Each client method automatically picks the right secret (pay endpoints use `apiSecretPay`, payout endpoints use `apiSecretPayout`).
+- Each client method automatically picks the right secret (pay and ticket endpoints use `apiSecretPay`, payout endpoints use `apiSecretPayout`).
 
 ## Error handling
 
@@ -115,18 +117,18 @@ try {
   await client.payQuery({ out_order_no: 'x' });
 } catch (err) {
   if (err instanceof ApiError) {
-    // Business failure: code !== 0, carries code/message/data and the original envelope raw
-    console.error(err.code, err.message, err.data);
+    // Business failure: code !== 0 (including HTTP 503+300304 / 500+300302), carries code/message/data/statusCode and raw
+    console.error(err.code, err.statusCode, err.message, err.data);
   } else if (err instanceof TransportError) {
-    // HTTP/network layer: statusCode, body, cause
-    console.error(err.statusCode, err.body);
+    // HTTP/network layer: statusCode, body, requestSign, cause
+    console.error(err.statusCode, err.body, err.requestSign);
   }
 }
 ```
 
 ## Callback signature verification (timing-safe)
 
-`verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` compute generically over "all fields except `sign`" (without hardcoding a field table) and use `crypto.timingSafeEqual` for a timing-safe comparison.
+`verifyCallback` / `client.verifyPayCallback` / `client.verifyPayoutCallback` / `client.verifyIssueTicketCallback` compute generically over "all fields except `sign`" (without hardcoding a field table) and use `crypto.timingSafeEqual` for a timing-safe comparison. Ticket-reply callbacks use `api_secret_pay`, the same secret as collection.
 
 Collection/refund callbacks use `apiSecretPay`, payout callbacks use `apiSecretPayout`. On signature verification failure, **do not return a success acknowledgement**; the same order may be sent again. After successful processing, return **HTTP 200 + plain text `success`**, and the processing must be **idempotent**.
 

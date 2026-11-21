@@ -132,20 +132,16 @@ public final class Signer {
     }
 
     /**
-     * 粗判提供的 sign 是否像一个 HMAC-SHA256 hex（小写 64 位）。
-     * 仅用于尽早拒绝明显畸形/非字符串的 sign；不放宽合法签名（时序安全比较仍是最终裁决）。
-     * 这里只做长度与字符集的保守校验：长度异常或含非 hex 字符即判非法。
+     * 校验提供的 sign 是否为严格 64 位小写 HMAC-SHA256 hex（与五语言 SDK 口径统一）。
      */
     private static boolean isPlausibleSign(String sign) {
-        int len = sign.length();
-        // 标准 HMAC-SHA256 hex 为 64 字符；放宽到 [1,128] 仅防超长/空串攻击，最终比较仍按字节。
-        if (len == 0 || len > 128) {
+        if (sign.length() != 64) {
             return false;
         }
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < 64; i++) {
             char c = sign.charAt(i);
-            boolean isHex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
-            if (!isHex) {
+            boolean isLowerHex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
+            if (!isLowerHex) {
                 return false;
             }
         }
@@ -171,7 +167,7 @@ public final class Signer {
             return v.toString(); // 整数十进制文本
         }
         if (v instanceof BigDecimal) {
-            return ((BigDecimal) v).toPlainString();
+            return bigDecimalForSign((BigDecimal) v);
         }
         if (v instanceof Double || v instanceof Float) {
             return doubleForSign(((Number) v).doubleValue());
@@ -181,6 +177,24 @@ public final class Signer {
         }
         // 兜底
         return v.toString();
+    }
+
+    /**
+     * BigDecimal 参与签名的规范化：拒绝非整数，整数形态归一为十进制整数文本（如 1.0 → "1"、-0.0 → "0"），
+     * 与服务端 JS {@code String(1.0) === "1"} 及跨语言整数口径对齐。
+     */
+    static String bigDecimalForSign(BigDecimal bd) {
+        if (bd == null) {
+            throw new IllegalArgumentException("数值字段不能为 null");
+        }
+        BigDecimal normalized = bd.stripTrailingZeros();
+        if (normalized.scale() > 0) {
+            throw new IllegalArgumentException("数值字段必须是整数（请用整数最小单位），收到非整数: " + bd);
+        }
+        if (normalized.signum() == 0) {
+            return "0";
+        }
+        return normalized.toBigIntegerExact().toString();
     }
 
     /**

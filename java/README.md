@@ -2,7 +2,7 @@
 
 # 商户支付 OpenAPI — Java SDK
 
-零第三方依赖的 Java 客户端，覆盖商户支付 OpenAPI 全部 **13 个签名端点**，实现 HMAC-SHA256 请求签名与回调验签。
+零第三方依赖的 Java 客户端，覆盖商户支付 OpenAPI 全部 **15 个签名端点**，实现 HMAC-SHA256 请求签名与回调验签。
 
 - **JDK**：17+（用 `java.net.http.HttpClient`、`javax.crypto.Mac`、`MessageDigest.isEqual`，全为标准库）。
 - **依赖**：无。HTTP、JSON、HMAC、测试全部用 JDK 内建，**不引入任何包管理器拉取的库**（无 Jackson/Gson/OkHttp/JUnit）。
@@ -62,7 +62,7 @@ ApiResponse resp = client.payCreate(params);       // 自动注入 timestamp/non
 System.out.println(resp.dataAsMap().get("order_no"));
 ```
 
-### 全部 13 个端点（客户端方法）
+### 全部 15 个端点（客户端方法）
 
 | 业务 | 方法 | 端点 | 密钥 |
 |------|------|------|------|
@@ -79,6 +79,8 @@ System.out.println(resp.dataAsMap().get("order_no"));
 | 代付凭证 | `payoutProofQuery` | `/merchant/payout/proof/query` | payout |
 | 代付收据 | `payoutReceiptQuery` | `/merchant/payout/receipt/query` | payout |
 | 代付测试完成 | `payoutTestComplete` | `/merchant/payout/test/complete` | payout（仅测试密钥）|
+| 创建工单 | `issueTicketCreate` | `/merchant/issue-ticket/create` | pay |
+| 查询工单 | `issueTicketQuery` | `/merchant/issue-ticket/query` | pay |
 
 每个方法都接受 `Map<String, Object>` 业务字段：
 
@@ -90,9 +92,9 @@ System.out.println(resp.dataAsMap().get("order_no"));
 
 ### 错误处理
 
-- `code != 0` → 抛 `ApiException`（携带 `code()` / `message` / `data()` / `rawBody()`）。
-- HTTP/网络错误、非 2xx、响应体非 JSON → 抛 `TransportException`（携带 `statusCode()` / `rawBody()`）。
-- 想自行判码不抛业务异常：用 `client.callRaw(path, params, isPayout)` 拿 `ApiResponse`（含 `code()` / `data()` / `rawBody()`）。
+- `code != 0`（含 HTTP 503+`300304` / 500+`300302` 等非 2xx 业务信封）→ 抛 `ApiException`（携带 `code()` / `message` / `data()` / `rawBody()` / `statusCode()`）。
+- HTTP/网络错误、非 2xx（无有效非 0 信封）、响应体非 JSON → 抛 `TransportException`（携带 `statusCode()` / `rawBody()` / `requestSign()`）。
+- 想自行判码不抛业务异常：用 `client.callRaw(path, params, isPayout)` 拿 `ApiResponse`（含 `code()` / `data()` / `rawBody()` / `statusCode()`）。
 
 ### 双环境与自定义基址
 
@@ -136,7 +138,7 @@ if ("success".equals(status)) {
 return "success"; // HTTP 200 + 纯文本 success
 ```
 
-代付回调同理，改用 `client.verifyPayoutCallback(payload)`。验签器**只依赖"除 sign 外所有字段参与"通用规则**，不硬编码字段表，回调字段新增或减少也兼容。完整可运行示例见 [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java)（代收 + 代付各演示一次，含篡改反例）。
+代付回调同理，改用 `client.verifyPayoutCallback(payload)`。工单回复回调用 `client.verifyIssueTicketCallback(payload)`，密钥与代收相同，为 `api_secret_pay`。验签器**只依赖"除 sign 外所有字段参与"通用规则**，不硬编码字段表，回调字段新增或减少也兼容。完整可运行示例见 [`examples/CallbackVerifyExample.java`](./examples/CallbackVerifyExample.java)（代收 + 代付各演示一次，含篡改反例）。
 
 ## 代付反查
 

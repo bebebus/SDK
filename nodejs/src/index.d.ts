@@ -45,9 +45,9 @@ export class Config {
   readonly timeout: number;
 }
 
-/** 业务错误：服务端返回 code !== 0 时抛出，携带原始信封。 */
+/** 业务错误：服务端返回 code !== 0 时抛出，携带原始信封（含非 2xx 带业务信封如 503/300304）。 */
 export class ApiError extends Error {
-  constructor(code: number, message?: string, data?: unknown, raw?: unknown);
+  constructor(code: number, message?: string, data?: unknown, raw?: unknown, statusCode?: number | null);
   readonly name: 'ApiError';
   /** 业务错误码（见 INTERFACES.md 错误码表）。 */
   readonly code: number;
@@ -55,16 +55,23 @@ export class ApiError extends Error {
   readonly data: unknown | null;
   /** 原始统一信封 { code, message, data }。 */
   readonly raw: unknown | null;
+  /** HTTP 状态码（通常为 200，也可能为 503/500 等）。 */
+  readonly statusCode: number | null;
 }
 
-/** 传输层错误：HTTP 非 2xx、连接失败、超时、响应非合法 JSON 等。 */
+/** 传输层错误：HTTP 非 2xx（且非合法业务错误信封）、连接失败、超时、响应非合法 JSON 等。 */
 export class TransportError extends Error {
-  constructor(message: string, options?: { statusCode?: number | null; body?: string | null; cause?: unknown });
+  constructor(
+    message: string,
+    options?: { statusCode?: number | null; body?: string | null; cause?: unknown; requestSign?: string | null },
+  );
   readonly name: 'TransportError';
   /** HTTP 状态码（若有）。 */
   readonly statusCode: number | null;
   /** 原始响应文本（若有）。 */
   readonly body: string | null;
+  /** 本次请求实际发出的 sign（若有，供代付下单超时后核对反查）。 */
+  readonly requestSign: string | null;
   /** 底层错误（若有）。 */
   readonly cause?: unknown;
 }
@@ -125,9 +132,16 @@ export class Client {
   /** 代付凭证查询 POST /merchant/payout/proof/query（仅 status=success）。 */
   payoutProofQuery(params: Params): Promise<ApiResult>;
   /** 代付收据 POST /merchant/payout/receipt/query（inline 以整数 1/0 发送）。 */
-  payoutReceiptQuery(params: Params & { inline?: boolean | 0 | 1 }): Promise<ApiResult>;
+  payoutReceiptQuery(params: Params & { inline?: boolean | 0 | 1 | '0' | '1' }): Promise<ApiResult>;
   /** 代付测试单完成 POST /merchant/payout/test/complete（仅测试密钥）。 */
   payoutTestComplete(params: Params): Promise<ApiResult>;
+
+  // ---- 工单（密钥 api_secret_pay）----
+
+  /** 创建工单 POST /merchant/issue-ticket/create。order_no 必填，notify_url 可选。 */
+  issueTicketCreate(params: Params): Promise<ApiResult>;
+  /** 查询工单 POST /merchant/issue-ticket/query（ticket_no 或 order_no 至少填一个）。 */
+  issueTicketQuery(params: Params): Promise<ApiResult>;
 
   // ---- 回调验签 ----
 
@@ -135,6 +149,8 @@ export class Client {
   verifyPayCallback(payload: CallbackPayload): boolean;
   /** 代付回调验签（api_secret_payout，时序安全比较）。 */
   verifyPayoutCallback(payload: CallbackPayload): boolean;
+  /** 工单回复回调验签（api_secret_pay，时序安全比较）。 */
+  verifyIssueTicketCallback(payload: CallbackPayload): boolean;
 }
 
 // ---- 签名器（底层，按需直接使用）----

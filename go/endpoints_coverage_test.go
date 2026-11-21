@@ -40,6 +40,8 @@ func TestAllEndpointRoutesAndSecrets(t *testing.T) {
 		{"/merchant/payout/banks/query", "payout", c.PayoutBanksQuery},
 		{"/merchant/payout/proof/query", "payout", c.PayoutProofQuery},
 		{"/merchant/payout/test/complete", "payout", c.PayoutTestComplete},
+		{"/merchant/issue-ticket/create", "pay", c.IssueTicketCreate},
+		{"/merchant/issue-ticket/query", "pay", c.IssueTicketQuery},
 	}
 	for _, tc := range cases {
 		t.Run(tc.path, func(t *testing.T) {
@@ -59,7 +61,10 @@ func TestAllEndpointRoutesAndSecrets(t *testing.T) {
 	pay["sign"] = Sign(pay, "pay")
 	payout := map[string]any{"payout_no": "test"}
 	payout["sign"] = Sign(payout, "payout")
-	if !c.VerifyPayCallback(pay) || !c.VerifyPayoutCallback(payout) || c.VerifyPayCallback(payout) {
+	ticket := map[string]any{"ticket_no": "TK1", "order_no": "W1", "order_type": "payout", "status": "replied", "content": "ok"}
+	ticket["sign"] = Sign(ticket, "pay")
+	if !c.VerifyPayCallback(pay) || !c.VerifyPayoutCallback(payout) || c.VerifyPayCallback(payout) ||
+		!c.VerifyIssueTicketCallback(ticket) || c.VerifyPayoutCallback(ticket) {
 		t.Fatal("回调密钥选择错误")
 	}
 }
