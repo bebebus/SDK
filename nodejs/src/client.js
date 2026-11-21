@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 商户支付 OpenAPI 客户端：实现全部签名业务端点。
 // HTTP 仅用 node:http / node:https；签名用 node:crypto（经 signer.js）。
 import http from 'node:http';
@@ -21,7 +23,7 @@ const SDK_VERSION = (() => {
   } catch {
     // ignore：读不到就走兜底版本号。
   }
-  return '2.1.0';
+  return '2.2.0';
 })();
 const USER_AGENT = `openapi-sdk-nodejs/${SDK_VERSION}`;
 
@@ -142,7 +144,8 @@ export class Client {
       throw new ApiError(raw.code, raw.message, raw.data, raw);
     }
     // 同时暴露原始信封，便于调用方拿 message 等。
-    return { data: raw.data ?? null, raw };
+    // sign 是本次请求实际发出的签名。代付下单后保存它，供商户反查比对 original_sign。
+    return { data: raw.data ?? null, raw, sign: body.sign };
   }
 
   // ---- 代收（Pay，密钥：api_secret_pay）----

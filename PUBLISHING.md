@@ -1,6 +1,6 @@
 # 发布到包索引
 
-五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `2.1.0`。
+五套 SDK 在一个 monorepo（`github.com/bebebus/SDK`，分支 `main`）。包名统一 scoped 到 `bebebus`，许可证 MIT，当前版本 `2.2.0`。
 
 > ⚠️ **发版必须在 `main` 上执行**（release.sh 假定 push origin main）：v1.2.0 曾从 feature 分支打 tag 发布，随后 PR squash 合并导致已发布 tag（v1.2.0 / go/v1.2.0）指向的提交游离于 main 历史之外（仅由 tag 保活，包索引不受影响）。此后规则：先以 merge/squash 合入 main，**在 main 的合并结果上打 tag 再发**；若 PR 采用 squash，绝不可在分支侧提前打 tag。
 
@@ -11,7 +11,7 @@
 | npm | `@bebebus/merchant-openapi-sdk` | `npm i @bebebus/merchant-openapi-sdk` |
 | PyPI | `bebebus-merchant-openapi-sdk`（import 名仍 `openapi_sdk`） | `pip install bebebus-merchant-openapi-sdk` |
 | Packagist | `bebebus/merchant-openapi-sdk` | `composer require bebebus/merchant-openapi-sdk` |
-| Go (pkg.go.dev) | `github.com/bebebus/SDK/go/v2`（2.0.0 起，SIV） | `go get github.com/bebebus/SDK/go/v2@v2.1.0` |
+| Go (pkg.go.dev) | `github.com/bebebus/SDK/go/v2`（2.0.0 起，SIV） | `go get github.com/bebebus/SDK/go/v2@v2.2.0` |
 | Java | —（不发 Maven） | 源码引入：把 `java/src/main/java` 加入工程，或 `cd java && mvn package` 自行打 jar |
 
 > ⚠️ 发布到公共索引**不可撤销**（版本号永久占用）。令牌只用于发布、勿入库。每次发版先 bump 版本号。
@@ -21,6 +21,25 @@
 仓库提供 Tag 自动触发、也支持手动触发的 [`release.yml`](./.github/workflows/release.yml)。它会先验证已存在的版本 Tag、运行五语言测试、生成发布文件、构建 provenance 并创建 GitHub Release。手动触发必须输入 `RELEASE` 确认。
 
 默认只构建和创建 GitHub Release；只有在手动输入 `publish_registries=true` 且已配置 `release` 环境和 `PHP_MIRROR_TOKEN` 时，才会发布 npm、PyPI，并同步 PHP 镜像仓。npm/PyPI 使用 Trusted Publishing/OIDC，不在仓库中保存长期令牌。Java 仍然只发布源码归档，不发布 Maven 包。
+
+PHP、Java 和 Go 的 GitHub Release 源码归档由 [`_tooling/reproducible-source-archives.py`](./_tooling/reproducible-source-archives.py) 从签出提交的已跟踪文件生成，固定顺序、所有者、时间戳和 gzip 元数据。CI 在当前运行环境中两次构建并逐文件核对 Git 内容；构建命令示例：
+
+```bash
+python3 _tooling/reproducible-source-archives.py --ref v2.2.0 --version 2.2.0 --output /tmp/sdk-archives
+```
+
+此检查不证明不同 Python/zlib 版本下的字节一致，也不涵盖 npm、PyPI 包、GitHub 自动生成的源码包或 PHP 镜像；项目整体可复现构建仍需分别验证。
+
+## 验证 GitHub Release 构建证明
+
+从 [GitHub Release](https://github.com/bebebus/SDK/releases) 下载目标文件后，可用已登录的 GitHub CLI 验证该文件的构建证明及仓库来源。例如验证 `v2.2.0` 的 Go 归档：
+
+```bash
+gh release download v2.2.0 -R bebebus/SDK -p go-2.2.0.tar.gz
+gh attestation verify go-2.2.0.tar.gz -R bebebus/SDK
+```
+
+成功只证明指定文件的摘要与通过验证的构建证明匹配；应对每个准备使用的文件分别验证。工作流也将 Sigstore bundle 和 provenance 随 GitHub Release 提供；其他包索引或历史版本是否具备相同证明应分别核验，不应由此推断。GitHub 的 [验证构建证明指南](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations)解释证书和信任根的验证方式。
 
 ## 一键发版（推荐）：`release.sh`
 

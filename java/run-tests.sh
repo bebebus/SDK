@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 #
 # 编译并运行 Java SDK 单元测试（无 Maven/JUnit，纯 JDK）。
 #
@@ -32,5 +33,17 @@ javac --release 17 -encoding UTF-8 -d "$OUT_DIR" $SOURCES
 echo "==> 运行测试 (VectorTest)"
 # -Dfile.encoding=UTF-8 保证非 ASCII 向量正确读取与比较
 java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" VectorTest
+
+echo "==> 运行测试 (GuardCheck)"
+java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" GuardCheck
+
+echo "==> 运行测试 (PayoutPrecheckTest)"
+java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" PayoutPrecheckTest
+
+echo "==> 运行测试 (TransportTest)"
+java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" TransportTest
+
+echo "==> 运行测试 (JsonEdgeTest)"
+java -Dfile.encoding=UTF-8 -cp "$OUT_DIR" JsonEdgeTest
 
 echo "==> 测试通过"

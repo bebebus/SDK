@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """附录配置与国家/币种数据文件。"""
 
 from __future__ import annotations

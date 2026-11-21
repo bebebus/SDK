@@ -1,4 +1,5 @@
 <?php
+// SPDX-License-Identifier: MIT
 
 declare(strict_types=1);
 
@@ -23,13 +24,16 @@ final class Client
      * [L19] SDK 版本号单一事实源：UA 由此常量派生（不再硬编码）。
      * release.sh 发版时按此常量 sed 同步（与 composer.json 一致）。
      */
-    public const VERSION = '2.1.0';
+    public const VERSION = '2.2.0';
 
     /** @var callable(string,string,int):array{status:int,body:string} 注入的 HTTP 执行器（默认 cURL） */
     private $httpExecutor;
 
     /** @var array<string,mixed>|null 最近一次原始响应信封（保留拿原始响应的途径） */
     private ?array $lastRawResponse = null;
+
+    /** @var string|null 最近一次请求实际发出的 sign。PHP 请求是同步的，请在该次调用返回后立刻读取。 */
+    private ?string $lastRequestSign = null;
 
     /**
      * @param Config                                                 $config
@@ -280,6 +284,15 @@ final class Client
         return $this->lastRawResponse;
     }
 
+    /**
+     * 最近一次请求实际发出的 sign。代付反查保存的就是 payoutCreate 的这一笔。
+     * 请求是同步的，请在对应调用返回后、下一次 SDK 调用前读取。
+     */
+    public function lastRequestSign(): ?string
+    {
+        return $this->lastRequestSign;
+    }
+
     // ====================== 内部：请求构建与发送 ======================
 
     /**
@@ -316,6 +329,7 @@ final class Client
 
         $payload = $this->buildPayload($params);
         $payload['sign'] = Signer::sign($payload, $secret);
+        $this->lastRequestSign = $payload['sign'];
 
         $url = $base . $path;
         $json = $this->encodeBody($payload);
@@ -465,7 +479,16 @@ final class Client
             throw new TransportException('响应信封缺少 code 字段', $status, $body);
         }
 
-        $code = (int) $decoded['code'];
+        $rawCode = $decoded['code'];
+        if (is_int($rawCode)) {
+            $code = $rawCode;
+        } elseif (is_string($rawCode)
+            && preg_match('/\A[+-]?(?:0|[1-9][0-9]*)\z/', trim($rawCode)) === 1
+            && filter_var(trim($rawCode), FILTER_VALIDATE_INT) !== false) {
+            $code = (int) trim($rawCode);
+        } else {
+            throw new TransportException('响应 code 必须是范围内的整数', $status, $body);
+        }
         if ($code !== 0) {
             $message = isset($decoded['message']) ? (string) $decoded['message'] : '';
             $data = (isset($decoded['data']) && is_array($decoded['data'])) ? $decoded['data'] : null;

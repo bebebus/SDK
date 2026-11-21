@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 签名器：HMAC-SHA256 -> hex 小写。
 // 算法与 SIGNING.md / test-vectors.json 逐字节一致。
 // 关键点：

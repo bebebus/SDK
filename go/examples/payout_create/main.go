@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 示例：代付下单（payout/create）+ 查单 + 凭证查询。
 //
 // 运行：go run ./examples/payout_create

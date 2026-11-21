@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # 商户 OpenAPI Python SDK 配置模板。
 # 复制为工程内 config.py 后替换占位符。正式环境必须 https；勿提交真实密钥。
 #

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 示例：代收下单 + 查单。
 // 运行：node examples/pay_create.js
 // 需在环境变量提供凭证（或直接改下面常量）：

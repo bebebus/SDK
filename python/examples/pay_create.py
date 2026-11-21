@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """示例：代收下单 + 查单。
 
 运行（无需安装依赖，直接用源码）::

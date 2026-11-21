@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 package appendix
 
 // ErrorCode 是错误码总表项。业务错误一律 HTTP 200 + 信封 {code, message, data}。

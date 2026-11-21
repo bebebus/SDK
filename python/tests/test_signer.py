@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """签名器单元测试（标准库 unittest）。
 
 (a) 读取 ../../test-vectors.json，对每个向量断言 build_sign_base == base 且 sign == sign。
@@ -71,6 +73,16 @@ class TestScalarRules(unittest.TestCase):
     """顶层标量强转与过滤规则。"""
 
     SECRET = "sk_test_0123456789abcdef0123456789abcdef"
+
+    def test_invalid_callback_and_signing_inputs_fail_closed(self):
+        with self.assertRaises(ValueError):
+            build_sign_base({"amount": 1}, " ")
+        with self.assertRaises(ValueError):
+            sign({"amount": 1.5}, self.SECRET)
+        self.assertFalse(verify_callback({"sign": "aa"}, " "))
+        self.assertFalse(verify_callback(None, self.SECRET))
+        self.assertFalse(verify_callback({"sign": "不合法"}, self.SECRET))
+        self.assertFalse(verify_callback({"sign": "aa", "amount": 1.5}, self.SECRET))
 
     def test_boolean_lowercase(self):
         base = build_sign_base({"inline": True, "disabled": False}, self.SECRET)

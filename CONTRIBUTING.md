@@ -17,9 +17,23 @@
 4. Pull Request 必须通过 Node.js、Python、PHP、Java、Go 五套 CI 和 CodeQL 检查，并至少获得一名维护者审批。
 5. 根据审查意见更新分支；合并前确保新增提交仍然通过全部必需检查，合并使用仓库允许的线性历史方式。
 
+## 代码审查
+
+审查者应阅读 PR 的变更和验证结果，确认需求与兼容性影响；涉及接口或签名时核对五语言行为和测试向量，涉及凭证、网络或发布时检查信任边界、密钥暴露与依赖来源。审查者应检查错误处理、回归测试和文档是否覆盖变更，并通过 PR 审查提出问题；未解决的缺陷或失败的必需检查不能作为可接受的合并结果。批准须来自作者以外的维护者；有新提交时以分支保护要求为准。
+
+各语言的自动检查配置在 [CI 工作流](./.github/workflows/ci.yml)：Node.js 使用 Biome，Python 使用 Ruff，PHP 使用 PHPStan，Java 使用 Checkstyle，Go 使用 golangci-lint。贡献应符合这些配置，例外须在 PR 中说明并经审查。
+
 ## 本地验证
 
-SDK 不需要安装运行时第三方依赖。提交 Pull Request 前至少运行：
+SDK 不需要安装运行时第三方依赖。完整开发环境需要 Git、Node.js 22/npm、Python 3.12/pip、PHP 8.2（含 cURL 和 JSON）/Composer、JDK 17/Maven 以及 Go 1.21 和 golangci-lint；CI 使用的工具版本和安装方式见 [CI 工作流](./.github/workflows/ci.yml)。在仓库根目录克隆后，依次安装检查工具：
+
+```bash
+cd nodejs && npm ci && cd ..
+python3 -m pip install --require-hashes -r python/requirements-ci.txt
+cd php && composer install && cd ..
+```
+
+Java、Go 和基础测试不需额外运行时库；Maven 与 golangci-lint 可能在首次执行时下载构建或检查依赖。提交 Pull Request 前至少运行：
 
 ```bash
 cd nodejs && node --test && cd ..
@@ -47,6 +61,22 @@ go test -fuzz=FuzzVerifyCallbackNeverPanics -fuzztime=30s .
 ```
 
 工作流 Action 必须固定到完整提交 SHA；修改 `.github/workflows/` 后建议使用 `actionlint` 检查语法和表达式。
+
+覆盖率测量范围、CI 阈值和不同工具的口径见 [COVERAGE.md](./COVERAGE.md)。新增程序源码应包含 `SPDX-License-Identifier: MIT`；修改参考表生成器时也要保留生成文件的标识。
+
+项目获得新的公开成就时，维护者应在 48 小时内将名称及链接加入仓库首页；现有徽章见 [README](./README.md)。
+
+## 适合新贡献者的小任务
+
+先在 [Issues](https://github.com/bebebus/SDK/issues) 搜索或提出计划，避免重复工作；以下任务适合按单一语言或单一文档分拆，不要求一次完成整个项目：
+
+- 对照一种语言的 README 示例与当前公开方法，修复可复现的示例错误并运行该语言测试。
+- 为某个尚未覆盖的签名边界或网络错误补充回归测试；先确认行为符合 [签名规范](./SIGNING.md)。
+- 改进一种语言的安装、卸载或升级说明，并在干净环境验证相关命令。
+
+目前可独立领取的具体小任务：为 [`go/examples/query/main.go`](./go/examples/query/main.go) 的 `printResult` 添加表驱动测试，覆盖成功响应、业务错误和传输错误；测试只构造本地响应对象，不连接支付接口。提交前运行 `cd go && go test ./examples/query`。如果已有 PR 正在处理，请先选择其他任务。
+
+需要接口变更或安全漏洞细节的工作先联系维护者；私密内容遵循 [安全策略](./SECURITY.md)。
 
 ## 参考代码表维护
 

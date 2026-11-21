@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 示例：代收下单（pay/create）。
 //
 // 运行：go run ./examples/pay_create

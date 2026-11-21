@@ -1,4 +1,5 @@
 <?php
+// SPDX-License-Identifier: MIT
 // PHP SDK × dev 环境联调。凭据从环境变量读取（PP_MNO/PP_KEY/PP_PAY/PP_POUT/PP_BASE）。
 // 序列与 dev_smoke.mjs 完全一致，便于跨语言对比。
 declare(strict_types=1);

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 跨语言签名「标准答案」向量生成器（自包含，零外部依赖）。
 //
 // 产出一组确定的 (payload, base, sign) 向量，作为 PHP / Python / Java / Go / Node 五套

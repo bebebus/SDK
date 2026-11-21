@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """SDK 异常类型。
 
 - ``ApiError``：业务失败（统一信封 ``code != 0``），携带 code/message/data。

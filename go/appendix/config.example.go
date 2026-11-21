@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 package appendix
 
 // ExampleConfig 是客户端配置模板。复制后替换占位符。

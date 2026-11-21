@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 环境预设与客户端配置。
 import { URL } from 'node:url';
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """客户端请求构建单元测试（标准库 unittest，不发真实网络请求）。
 
 校验：通用字段注入、None 过滤、签名密钥选择（pay vs payout）、
@@ -51,10 +53,26 @@ class _Capture:
 
     def __call__(self, path, body, secret):
         self.calls.append({"path": path, "body": dict(body), "secret": secret})
-        return self.envelope
+        return self.envelope, "request-sign"
 
 
 class TestEnvironmentAndConfig(unittest.TestCase):
+    def test_rejects_missing_identifiers_and_insecure_urls(self):
+        base = {"merchant_no": "M1", "api_key": "key", "base_url": "https://api.example.com"}
+        for field in ("merchant_no", "api_key"):
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                Config(**{**base, field: ""})
+        for url in ("file:///etc/passwd", "http://api.example.com/v1"):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                Config(**{**base, "base_url": url})
+
+    def test_missing_business_secrets_fail_closed(self):
+        config = Config(merchant_no="M1", api_key="key", environment=Environment.SANDBOX)
+        with self.assertRaises(ValueError):
+            config.require_secret_pay()
+        with self.assertRaises(ValueError):
+            config.require_secret_payout()
+
     def test_presets(self):
         # PRODUCTION 无内置基址（按上级代理域名派生，需显式传 base_url）。
         self.assertEqual(Environment.PRODUCTION.base_url, "")
@@ -257,6 +275,7 @@ class TestEnvelopeHandling(unittest.TestCase):
         try:
             data = client.pay_query(out_order_no="ORD1")
             self.assertEqual(data, {"status": "pending"})
+            self.assertEqual(data.sign, "request-sign")
         finally:
             Client._request = orig  # type: ignore[assignment]
 

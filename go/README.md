@@ -138,6 +138,10 @@ io.WriteString(w, "success") // 正确应答：HTTP 200 + 纯文本 success
 
 完整可运行示例见 `examples/callback_verify`（代收 + 代付各演示一次）。
 
+## 代付反查
+
+平台审核时向商户自己的 HTTPS 地址 POST JSON。`DecidePayoutPrecheck(body, saved)` 的返回值原样作为 HTTP 200 正文，只能是 `approve` 或 `reject`。`saved` 里的 `sign` 用下单结果 `Response.Sign`。`payout_no` 必须出现，但不与下单请求比较。`body` 和 `saved` 可以是 `map[string]string` 或 `map[string]any`。
+
 ## 签名（可单独取用）
 
 ```go

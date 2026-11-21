@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 示例：代付下单（银行类）+ 查单 + 查可用银行。
 // 运行：node examples/payout_create.js
 // 需提供：PP_MERCHANT_NO, PP_API_KEY, PP_API_SECRET_PAYOUT, [PP_BASE_URL]

@@ -1,4 +1,5 @@
 <?php
+// SPDX-License-Identifier: MIT
 
 declare(strict_types=1);
 
@@ -21,6 +22,7 @@ use Merchant\Openapi\Config;
 use Merchant\Openapi\Environment;
 use Merchant\Openapi\Exception\ApiException;
 use Merchant\Openapi\Exception\TransportException;
+use Merchant\Openapi\PayoutPrecheck;
 use Merchant\Openapi\Signer;
 
 /* ---------------------------- 轻量断言框架 ---------------------------- */
@@ -273,6 +275,24 @@ $ctKeys = array_keys($captured['body']);
 sort($ctKeys);
 check('countriesQuery 仅公共字段', ['api_key', 'merchant_no', 'nonce', 'sign', 'timestamp'], $ctKeys);
 
+// 其余接口逐一验证目标路径及密钥类型，避免跨语言端点映射或密钥选择回归。
+foreach ([
+    ['payMethodsQuery', '/merchant/pay-methods/query', $paySecret],
+    ['balanceQuery', '/merchant/balance/query', $paySecret],
+    ['payTestComplete', '/merchant/pay/test/complete', $paySecret],
+    ['payoutQuery', '/merchant/payout/query', $payoutSecret],
+    ['payoutBanksQuery', '/merchant/payout/banks/query', $payoutSecret],
+    ['payoutProofQuery', '/merchant/payout/proof/query', $payoutSecret],
+    ['payoutTestComplete', '/merchant/payout/test/complete', $payoutSecret],
+] as [$method, $path, $secret]) {
+    $stubClient->$method(['sample' => 'value']);
+    check("$method 路径", 'http://127.0.0.1:3090/api/open/v1' . $path, $captured['url']);
+    $payload = $captured['body'];
+    $signature = $payload['sign'];
+    unset($payload['sign']);
+    check("$method 签名密钥", Signer::sign($payload, $secret), $signature);
+}
+
 // nonce 每请求唯一
 $firstNonce = $captured['body']['nonce'];
 $stubClient->payQuery(['out_order_no' => '202501010001']);
@@ -295,6 +315,7 @@ $pbody = $captured['body'];
 $psign = $pbody['sign'];
 unset($pbody['sign']);
 check('stub payoutCreate sign 用 payout 密钥', Signer::sign($pbody, $payoutSecret), $psign);
+check('payoutCreate lastRequestSign 等于请求 sign', $psign, $stubClient->lastRequestSign());
 
 // receipt inline 归一为整数 1/0
 $stubClient->payoutReceiptQuery(['out_payout_no' => 'WD1', 'inline' => true]);
@@ -366,8 +387,80 @@ try {
 }
 checkTrue('非法 JSON 抛 TransportException', $caughtJ instanceof TransportException);
 
+foreach (['{}', '[]', '{"message":"missing code"}', '{"code":"invalid"}', '{"code":0.5}',
+          '{"code":true}', '{"code":null}', '{"code":[]}', '{"code":"999999999999999999999999"}'] as $invalidEnvelope) {
+    $invalidClient = new Client(
+        new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+        fn (string $u, string $j, int $t): array => ['status' => 200, 'body' => $invalidEnvelope]
+    );
+    $rejected = false;
+    try {
+        $invalidClient->payQuery(['out_order_no' => 'x']);
+    } catch (TransportException $e) {
+        $rejected = true;
+        check('无效信封状态码', 200, $e->httpStatus);
+    }
+    checkTrue('无效信封必须拒绝', $rejected);
+}
+
+$stringCodeClient = new Client(
+    new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX),
+    fn (string $u, string $j, int $t): array => ['status' => 200, 'body' => '{"code":"0","data":{"ok":true}}']
+);
+check('字符串整数业务码可用', ['ok' => true], $stringCodeClient->payQuery(['out_order_no' => 'x']));
+
 // 原始响应保留途径
 checkTrue('lastRawResponse 可取', is_array($stubClient->lastRawResponse()));
+
+// 在本机回环启动短生命周期 HTTP 服务，验证默认 cURL 传输与重定向策略。
+$listener = stream_socket_server('tcp://127.0.0.1:0', $socketError, $socketMessage);
+if ($listener === false) {
+    throw new RuntimeException("测试监听端口分配失败: $socketMessage");
+}
+$address = stream_socket_get_name($listener, false);
+$port = (int) substr(strrchr($address, ':'), 1);
+fclose($listener);
+$nullDevice = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
+$process = proc_open(
+    [PHP_BINARY, '-S', "127.0.0.1:$port", __DIR__ . '/http-fixture.php'],
+    [0 => ['pipe', 'r'], 1 => ['file', $nullDevice, 'w'], 2 => ['file', $nullDevice, 'w']],
+    $pipes
+);
+if (!is_resource($process)) {
+    throw new RuntimeException('无法启动本地 HTTP 测试服务');
+}
+try {
+    $ready = false;
+    for ($attempt = 0; $attempt < 50; $attempt++) {
+        $probe = @stream_socket_client("tcp://127.0.0.1:$port", $socketError, $socketMessage, 0.1);
+        if ($probe !== false) {
+            fclose($probe);
+            $ready = true;
+            break;
+        }
+        usleep(20000);
+    }
+    if (!$ready) {
+        throw new RuntimeException('本地 HTTP 测试服务未能启动');
+    }
+    $networkClient = new Client(new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX, "http://127.0.0.1:$port"));
+    $networkData = $networkClient->payQuery(['out_order_no' => 'test-order']);
+    check('真实传输路径', '/merchant/pay/query', $networkData['path']);
+    check('真实传输业务字段', 'test-order', $networkData['request']['out_order_no']);
+    check('真实传输签名', Signer::sign($networkData['request'], $paySecret), $networkData['request']['sign']);
+    $redirectClient = new Client(new Config('M', 'k', $paySecret, $payoutSecret, Environment::SANDBOX, "http://127.0.0.1:$port/redirect"));
+    $redirectStatus = null;
+    try {
+        $redirectClient->payQuery(['out_order_no' => 'test-order']);
+    } catch (TransportException $e) {
+        $redirectStatus = $e->httpStatus;
+    }
+    check('真实传输不跟随重定向', 302, $redirectStatus);
+} finally {
+    fclose($pipes[0]);
+    proc_terminate($process);
+    proc_close($process);
+}
 
 /* ---------------------------- (d) fail-closed 守卫 ---------------------------- */
 
@@ -482,6 +575,61 @@ foreach ($catalogAppendix['countries'] as $row) {
     }
 }
 checkTrue('[appendix] catalog 含 PH', is_array($ph) && in_array('PHP', $ph['currencies'] ?? [], true));
+
+/* ---------------------------- 代付反查 ---------------------------- */
+
+$precheckSaved = [
+    'out_payout_no' => 'merchant-order-no',
+    'account_no' => 'account',
+    'sign' => 'abc123',
+];
+$precheckBody = [
+    'out_payout_no' => 'merchant-order-no',
+    'payout_no' => 'W100',
+    'account_no' => 'account',
+    'original_sign' => 'abc123',
+];
+check('precheck 一致', PayoutPrecheck::APPROVE, PayoutPrecheck::decide($precheckBody, $precheckSaved));
+$precheckBody['payout_no'] = 'W-other';
+check('precheck 不比较 payout_no', PayoutPrecheck::APPROVE, PayoutPrecheck::decide($precheckBody, $precheckSaved));
+$utfSaved = $precheckSaved;
+$utfSaved['sign'] = '商户签';
+$utfBody = $precheckBody;
+$utfBody['original_sign'] = '商户签';
+$utfBody['payout_no'] = 'W100';
+check('precheck UTF-8 一致', PayoutPrecheck::APPROVE, PayoutPrecheck::decide($utfBody, $utfSaved));
+$utfBody['original_sign'] = '商户钱';
+check('precheck UTF-8 不一致', PayoutPrecheck::REJECT, PayoutPrecheck::decide($utfBody, $utfSaved));
+$badSign = $precheckBody;
+$badSign['original_sign'] = 'abc124';
+$badSign['payout_no'] = 'W100';
+check('precheck 错误签名', PayoutPrecheck::REJECT, PayoutPrecheck::decide($badSign, $precheckSaved));
+$extra = $precheckBody;
+$extra['extra'] = 'x';
+check('precheck 多字段', PayoutPrecheck::REJECT, PayoutPrecheck::decide($extra, $precheckSaved));
+check('precheck 非数组', PayoutPrecheck::REJECT, PayoutPrecheck::decide(null, $precheckSaved));
+check('precheck 列表', PayoutPrecheck::REJECT, PayoutPrecheck::decide(['a', 'b', 'c', 'd'], $precheckSaved));
+check('precheck 保存信息非数组', PayoutPrecheck::REJECT, PayoutPrecheck::decide($precheckBody, null));
+foreach (['account_no', 'out_payout_no', 'original_sign', 'payout_no'] as $key) {
+    $missing = $precheckBody;
+    unset($missing[$key]);
+    check("precheck 缺少 $key", PayoutPrecheck::REJECT, PayoutPrecheck::decide($missing, $precheckSaved));
+    foreach (['', 123, null] as $invalid) {
+        $bad = $precheckBody;
+        $bad[$key] = $invalid;
+        check("precheck 非法 $key", PayoutPrecheck::REJECT, PayoutPrecheck::decide($bad, $precheckSaved));
+    }
+}
+foreach (['account_no', 'out_payout_no', 'sign'] as $key) {
+    $badSaved = $precheckSaved;
+    $badSaved[$key] = '';
+    check("precheck 保存的 $key 为空", PayoutPrecheck::REJECT, PayoutPrecheck::decide($precheckBody, $badSaved));
+}
+foreach (['account_no', 'out_payout_no', 'original_sign'] as $key) {
+    $different = $precheckBody;
+    $different[$key] .= '-different';
+    check("precheck 不匹配 $key", PayoutPrecheck::REJECT, PayoutPrecheck::decide($different, $precheckSaved));
+}
 
 /* ---------------------------- 汇总 ---------------------------- */
 

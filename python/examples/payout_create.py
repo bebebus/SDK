@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """示例：代付下单（银行类）+ 查单 + 查银行列表。
 
 运行::
